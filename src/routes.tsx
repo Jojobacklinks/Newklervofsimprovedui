@@ -37,6 +37,16 @@ function NotFoundPage() {
   );
 }
 
+// Determine the correct basename for React Router
+const getBasename = () => {
+  if (typeof window === 'undefined') return '';
+  // Use the basename if on GitHub Pages
+  if (window.location.hostname.includes('github.io')) {
+    return '/Newklervofsimprovedui/';
+  }
+  return '/';
+};
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -106,4 +116,4 @@ export const router = createBrowserRouter([
       { path: "*", Component: NotFoundPage },
     ],
   },
-]);
+], { basename: getBasename() });
