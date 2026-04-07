@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, DollarSign, Clock, CheckCircle, AlertCircle, XCirc
 import { PlanDetailsModal } from '../components/PlanDetailsModal';
 import { NewJobModal } from '../components/NewJobModal';
 import { useJobs } from '../contexts/JobsContext';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { DateRangePicker } from '../components/DateRangePicker';
 
 // Mock client database for autocomplete
@@ -94,6 +94,7 @@ export function ServicePlansPage() {
   // Hooks
   const { jobs, addJob } = useJobs();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Payment method popups
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
@@ -226,7 +227,7 @@ export function ServicePlansPage() {
   });
 
   // Sample data for Service Plans (Stripe subscriptions)
-  const [servicePlans, setServicePlans] = useState<ServicePlan[]>([
+  const allServicePlans: ServicePlan[] = [
     {
       id: 'S-101',
       customerId: 'C-101',
@@ -366,7 +367,12 @@ export function ServicePlansPage() {
       totalVisits: 2,
       visitsUsed: 0,
     },
-  ]);
+  ];
+
+  // Filter service plans based on user role - Staff only see their own plans
+  const servicePlans = location.pathname.startsWith('/staff') 
+    ? allServicePlans.filter(plan => plan.upsoldBy?.name === 'Mike Bailey')
+    : allServicePlans;
 
   // Mock services list (future inventory integration)
   const mockServices = [
@@ -732,6 +738,18 @@ export function ServicePlansPage() {
           <p className="text-2xl font-bold text-[#051046]">{canceledSubscriptions}</p>
         </div>
       </div>
+
+      {/* Staff Role Notice */}
+      {location.pathname.startsWith('/staff') && (
+        <div className="bg-blue-50 border border-blue-200 rounded-[15px] p-4 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <p className="text-sm text-blue-800">
+              <strong>Staff View:</strong> You are viewing only the service plans you have created. This list shows your personal service plan portfolio.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Filter Section */}
       <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6 mb-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>

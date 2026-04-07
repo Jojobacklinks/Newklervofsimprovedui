@@ -29,6 +29,7 @@ const adminMenuItems = [
 const staffMenuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/staff' },
   { icon: Calendar, label: 'Schedule', path: '/staff/schedule' },
+  { icon: BadgeCheck, label: 'Service Plans', path: '/staff/service-plans' },
   { 
     icon: Briefcase, 
     label: 'Jobs', 
