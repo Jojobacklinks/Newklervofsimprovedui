@@ -6,7 +6,7 @@
 
   export default defineConfig({
     plugins: [react(), tailwindcss()],
-    base: '/Newklervofsimprovedui/',
+    base: process.env.NODE_ENV === 'production' ? '/Newklervofsimprovedui/' : '/',
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
