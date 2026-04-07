@@ -1,0 +1,83 @@
+              <button onClick={() => {
+                // Calculate next billing date
+                const startDate = new Date(planForm.startDate);
+                const nextBilling = new Date(startDate);
+                const intervalCount = parseInt(planForm.intervalCount);
+                
+                switch(planForm.billingInterval) {
+                  case 'day':
+                    nextBilling.setDate(nextBilling.getDate() + intervalCount);
+                    break;
+                  case 'week':
+                    nextBilling.setDate(nextBilling.getDate() + (intervalCount * 7));
+                    break;
+                  case 'month':
+                    nextBilling.setMonth(nextBilling.getMonth() + intervalCount);
+                    break;
+                  case 'year':
+                    nextBilling.setFullYear(nextBilling.getFullYear() + intervalCount);
+                    break;
+                }
+
+                // Calculate discount
+                const price = parseFloat(planForm.price || '0');
+                let discount = 0;
+                if (planForm.discountType === 'percentage') {
+                  discount = parseFloat(planForm.discountValue || '0');
+                } else {
+                  discount = parseFloat(planForm.discountValue || '0');
+                }
+
+                // Create new service plan
+                const newPlan: ServicePlan = {
+                  id: `sub_${Date.now()}`,
+                  customerId: `cus_${Date.now()}`,
+                  clientName: planForm.clientName,
+                  clientEmail: planForm.clientEmail,
+                  propertyAddress: planForm.propertyAddress,
+                  phone: planForm.phone,
+                  serviceName: planForm.serviceName,
+                  serviceDescription: planForm.serviceDescription,
+                  price: price,
+                  currency: planForm.currency,
+                  billingInterval: planForm.billingInterval,
+                  intervalCount: parseInt(planForm.intervalCount),
+                  startDate: new Date(planForm.startDate).toLocaleDateString(),
+                  trialDays: parseInt(planForm.trialDays),
+                  cancelAt: planForm.cancelAt || null,
+                  autoRenew: planForm.autoRenew,
+                  collectionMethod: planForm.collectionMethod === 'collect_in_person' ? 'charge_automatically' : 'send_invoice',
+                  paymentMethod: planForm.collectionMethod === 'collect_in_person' ? 'Card' : 'Payment Link',
+                  discount: discount,
+                  status: 'incomplete',
+                  nextBillingDate: nextBilling.toLocaleDateString(),
+                  createdAt: new Date().toLocaleDateString(),
+                };
+
+                // Add to service plans list
+                setServicePlans([newPlan, ...servicePlans]);
+
+                setIsSendConfirmOpen(false);
+                setIsAddPlanModalOpen(false);
+                alert('Payment link sent successfully! 📧\n\nThe customer will receive an email with a secure link to complete payment through Stripe Checkout in their customer dashboard.');
+                setPlanForm({
+                  clientName: '',
+                  clientEmail: '',
+                  propertyAddress: '',
+                  phone: '',
+                  serviceName: '',
+                  serviceDescription: '',
+                  customNotes: '',
+                  price: '',
+                  currency: 'USD',
+                  billingInterval: 'month',
+                  intervalCount: '1',
+                  startDate: new Date().toISOString().split('T')[0],
+                  trialDays: '0',
+                  cancelAt: '',
+                  autoRenew: true,
+                  collectionMethod: 'send_payment_link',
+                  discountType: 'percentage',
+                  discountValue: '0',
+                });
+              }} className="px-6 py-2 bg-[#8b5cf6] text-white rounded-[15px] hover:bg-[#7c3aed] transition-colors">Send Link</button>
