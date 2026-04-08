@@ -188,8 +188,8 @@ export function RootLayout() {
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-[#051046] hover:bg-gray-50 transition-colors text-left"
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      // Handle logout logic here
-                      console.log('Logging out...');
+                      // Redirect to the public GitHub Pages URL on logout
+                      window.location.href = 'https://jojobacklinks.github.io/Newklervofsimprovedui/';
                     }}
                   >
                     <LogOut className="w-5 h-5" />
