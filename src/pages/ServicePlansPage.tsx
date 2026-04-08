@@ -95,6 +95,7 @@ export function ServicePlansPage() {
   const { jobs, addJob } = useJobs();
   const navigate = useNavigate();
   const location = useLocation();
+  const isStaffView = location.pathname.startsWith('/staff');
   
   // Payment method popups
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
@@ -976,19 +977,23 @@ export function ServicePlansPage() {
                   </td>
                   <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEditClick(plan)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Edit service plan"
-                      >
-                        <Edit2 className="w-4 h-4 text-[#8b5cf6]" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(plan.id)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
+                          {!isStaffView && (
+                        <>
+                          <button
+                            onClick={() => handleEditClick(plan)}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Edit service plan"
+                          >
+                            <Edit2 className="w-4 h-4 text-[#8b5cf6]" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(plan.id)}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </button>
+                        </>
+                      )}
                       {plan.status === 'approved' && (
                         <button
                           onClick={() => {
