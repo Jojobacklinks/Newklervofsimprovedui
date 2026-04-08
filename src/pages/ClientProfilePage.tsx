@@ -2149,7 +2149,7 @@ export function ClientProfilePage() {
               <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
                 <Mail className="w-6 h-6 text-[#8b5cf6]" />
               </div>
-              <h3 className="text-lg font-semibold text-[#051046]">Send Payment Link</h3>
+              <h3 className="text-lg font-semibold text-[#051046]">Send Now</h3>
             </div>
             <p className="text-[#051046] mb-6">This will create the subscription and send a secure payment link to the customer's email address. The customer can complete payment at their convenience through their customer dashboard.</p>
             <div className="bg-purple-50 border border-purple-200 rounded-[15px] p-4 mb-6">
