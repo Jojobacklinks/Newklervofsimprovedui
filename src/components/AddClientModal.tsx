@@ -295,10 +295,11 @@ export function AddClientModal({ isOpen, onClose, onAddClient, onSave }: AddClie
             </div>
             <button
               type="button"
-              className="mt-1 text-xs text-[#8b5cf6] hover:underline"
+              className="mt-1 text-xs hover:underline"
+              style={{ color: '#9473ff' }}
               onClick={() => setIsCustomValueModalOpen(true)}
             >
-              + Add new
+              + Add Tag
             </button>
           </div>
 

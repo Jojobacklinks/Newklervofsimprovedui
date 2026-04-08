@@ -10,9 +10,13 @@ interface JobsContextType {
 
 const JobsContext = createContext<JobsContextType | undefined>(undefined);
 
+const sanitizeJobs = (jobs: Job[]): Job[] => {
+  return jobs.filter((job) => !job.id.startsWith('#L'));
+};
+
 // Helper to get initial jobs safely
 const getInitialJobs = (): Job[] => {
-  if (typeof window === 'undefined') return mockJobs;
+  if (typeof window === 'undefined') return sanitizeJobs(mockJobs);
   try {
     // Clear localStorage to ensure we always use the latest mockJobs
     // This prevents old cached job data from persisting
@@ -20,10 +24,10 @@ const getInitialJobs = (): Job[] => {
     
     const storedJobs = localStorage.getItem('customJobs');
     const customJobs = storedJobs ? JSON.parse(storedJobs) : [];
-    return [...mockJobs, ...customJobs];
+    return sanitizeJobs([...mockJobs, ...customJobs]);
   } catch (error) {
     console.error('Error loading jobs from localStorage:', error);
-    return mockJobs;
+    return sanitizeJobs(mockJobs);
   }
 };
 
@@ -41,7 +45,7 @@ export function JobsProvider({ children }: { children: ReactNode }) {
     // Use a longer debounce to reduce iframe communication issues
     const timeoutId = setTimeout(() => {
       try {
-        const customJobs = jobs.filter(job => !mockJobIds.has(job.id));
+        const customJobs = sanitizeJobs(jobs.filter(job => !mockJobIds.has(job.id)));
         localStorage.setItem('customJobs', JSON.stringify(customJobs));
       } catch (error) {
         console.error('Error saving jobs to localStorage:', error);
@@ -50,6 +54,10 @@ export function JobsProvider({ children }: { children: ReactNode }) {
 
     return () => clearTimeout(timeoutId);
   }, [jobs, mockJobIds]);
+
+  useEffect(() => {
+    setJobs((prevJobs) => sanitizeJobs(prevJobs));
+  }, []);
 
   const addJob = useCallback((job: Job) => {
     setJobs(prev => [...prev, job]);

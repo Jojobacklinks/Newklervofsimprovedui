@@ -123,6 +123,34 @@ export function AllJobsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const formatScheduledDate = (value: string) => {
+    const parsedDate = new Date(value);
+
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return parsedDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }
+
+    const [datePart] = value.split(' ');
+    const [month, day, year] = datePart.split('/');
+
+    if (!month || !day || !year) return datePart;
+
+    const normalizedYear = year.length === 2 ? `20${year}` : year;
+    const fallbackDate = new Date(`${normalizedYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
+
+    return Number.isNaN(fallbackDate.getTime())
+      ? datePart
+      : fallbackDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+  };
+
   // Close date picker when clicking outside
   useEffect(() => {
     if (!isDatePickerOpen) return; // Only add listener when picker is open
@@ -477,7 +505,7 @@ export function AllJobsPage() {
         </div>
 
         {/* Add Job Button */}
-        <div>
+        <div className="ml-auto">
           <button
             onClick={() => setIsAddJobModalOpen(true)}
             className="w-[160px] bg-[#9473ff] hover:bg-[#7f5fd9] text-white rounded-[32px] flex items-center justify-center gap-2 text-[16px] px-[24px] py-[10px] transition-colors"
@@ -498,10 +526,10 @@ export function AllJobsPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">JOB ID</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
                   <div className="flex items-center gap-1">
-                    Tags
+                    TAGS
                     <div className="group relative inline-block">
                       <Info className="w-3 h-3 text-gray-400 cursor-help" />
-                      <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                      <div className="invisible group-hover:visible fixed bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-[100] ml-8 -translate-y-1/2 normal-case">
                         Tags are created by users, not preset
                       </div>
                     </div>
@@ -604,7 +632,7 @@ export function AllJobsPage() {
                       {(() => {
                         // Split scheduled into date and time (format: "02/18/26 11:00 am")
                         const parts = job.scheduled.split(' ');
-                        const date = parts[0]; // "02/18/26"
+                        const date = formatScheduledDate(job.scheduled);
                         const time = parts.slice(1).join(' '); // "11:00 am"
                         return (
                           <>

@@ -136,6 +136,25 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
 
   if (!isOpen) return null;
 
+  const formatEstimatedValueInput = (value: string) => {
+    const numericValue = value.replace(/[^\d.]/g, '');
+
+    if (!numericValue) return '';
+
+    const [wholePart, decimalPart] = numericValue.split('.');
+    const formattedWholePart = Number(wholePart || '0').toLocaleString('en-US');
+
+    if (decimalPart !== undefined) {
+      return `$${formattedWholePart}.${decimalPart.slice(0, 2)}`;
+    }
+
+    return `$${formattedWholePart}`;
+  };
+
+  const parseEstimatedValue = (value: string) => {
+    return parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const timestamp = new Date().toISOString();
@@ -144,7 +163,7 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
     onAddLead({
       ...formData,
       leadSource: finalLeadSource,
-      estimatedValue: parseFloat(formData.estimatedValue) || 0,
+      estimatedValue: parseEstimatedValue(formData.estimatedValue),
       activityTimeline: [
         { id: '1', type: 'note', description: 'Lead created manually', timestamp, user: 'System' }
       ],
@@ -303,7 +322,7 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                 onClick={() => setIsAddClientModalOpen(true)}
                 className="mt-1 text-xs text-[#8b5cf6] hover:underline"
               >
-                + Add new
+                + Add Client
               </button>
             </div>
 
@@ -385,10 +404,10 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                 type="button"
                 onClick={() => setCustomValueModal({ isOpen: true, type: 'jobType', title: 'Add New Job Type' })}
                 className="mt-2 flex items-center gap-1 text-xs hover:opacity-80 transition-opacity"
-                style={{ color: '#9810fa' }}
+                style={{ color: '#8b5cf6' }}
               >
                 <Plus className="w-3 h-3" />
-                Add new
+                Add Job Type
               </button>
             </div>
 
@@ -399,9 +418,9 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                   Estimated Value
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   value={formData.estimatedValue}
-                  onChange={(e) => setFormData({ ...formData, estimatedValue: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, estimatedValue: formatEstimatedValueInput(e.target.value) })}
                   className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                   placeholder="$5,000"
                 />
@@ -463,10 +482,10 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                   type="button"
                   onClick={() => setCustomValueModal({ isOpen: true, type: 'leadSource', title: 'Add New Lead Source' })}
                   className="mt-2 flex items-center gap-1 text-xs hover:opacity-80 transition-opacity"
-                  style={{ color: '#9810fa' }}
+                  style={{ color: '#8b5cf6' }}
                 >
                   <Plus className="w-3 h-3" />
-                  Add new
+                  Add Lead Source
                 </button>
               )}
             </div>
@@ -510,7 +529,7 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                 type="button"
                 onClick={() => setSchedulingEnabled(!schedulingEnabled)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  schedulingEnabled ? 'bg-purple-600' : 'bg-gray-300'
+                  schedulingEnabled ? 'bg-[#9473ff]' : 'bg-gray-300'
                 }`}
               >
                 <span

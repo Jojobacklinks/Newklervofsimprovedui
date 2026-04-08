@@ -151,6 +151,20 @@ export function Reports() {
     }
   };
 
+  const getPaymentStatusColor = (status: string) => {
+    const normalizedStatus = status.toLowerCase();
+
+    if (normalizedStatus === 'completed') {
+      return 'bg-[#b9df10]';
+    }
+
+    if (normalizedStatus === 'failed') {
+      return 'bg-[#f16a6a]';
+    }
+
+    return 'bg-gray-400';
+  };
+
   const reportData = getReportData();
 
   // Pagination logic
@@ -1107,15 +1121,10 @@ export function Reports() {
                   <td className="py-3 px-4 text-sm text-[#051046]">{payment.dateTime}</td>
                   <td className="py-3 px-4 text-sm text-[#051046] font-medium">{payment.amount}</td>
                   <td className="py-3 px-4">
-                    <span 
-                      className="text-xs font-medium px-3 py-1 rounded-full"
-                      style={{ 
-                        backgroundColor: payment.status === 'Completed' ? '#E2F685' : '#fee2e2',
-                        color: payment.status === 'Completed' ? '#051046' : '#f16a6a' 
-                      }}
-                    >
-                      {payment.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${getPaymentStatusColor(payment.status)}`}></div>
+                      <span className="text-sm text-[#051046]">{payment.status}</span>
+                    </div>
                   </td>
                 </tr>
               ))}

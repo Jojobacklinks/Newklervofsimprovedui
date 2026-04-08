@@ -1,4 +1,4 @@
-import { X, Phone, Mail, DollarSign, Calendar, MessageSquare, FileText, Bell, Clock, Edit, CheckCircle, CreditCard, ArrowRightCircle } from 'lucide-react';
+import { X, Phone, Mail, DollarSign, Calendar, MessageSquare, FileText, Bell, Clock, Edit, CheckCircle, CreditCard, ArrowRightCircle, MapPin } from 'lucide-react';
 import { Lead } from './LeadCard';
 import { useState } from 'react';
 import { DeveloperNotesPopup } from './DeveloperNotesPopup';
@@ -16,7 +16,7 @@ interface LeadDetailModalProps {
 export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdateLead }: LeadDetailModalProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addJob } = useJobs();
+  const { jobs, addJob } = useJobs();
   const [showAddNote, setShowAddNote] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [showCallNote, setShowCallNote] = useState(false);
@@ -51,6 +51,21 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
     const date = new Date(isoString);
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const leadSummaryItems = [
+    { label: 'Name', value: lead.clientName },
+    { label: 'Phone', value: lead.phone },
+    { label: 'Job Type', value: lead.serviceType },
+    { label: 'Estimated Value', value: formatCurrency(lead.estimatedValue) },
+  ];
 
   const getActivityIcon = (type?: string) => {
     switch (type) {
@@ -337,9 +352,15 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
   };
 
   const handleConvertToJob = () => {
-    // Generate unique job ID
-    const timestamp = Date.now();
-    const jobId = `#L${lead.id.replace('#', '')}-${timestamp}`;
+    const existingJobNumbers = jobs
+      .map((job) => {
+        const match = job.id.match(/^J-(\d+)$/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter((num) => num > 0);
+
+    const maxJobNumber = existingJobNumbers.length > 0 ? Math.max(...existingJobNumbers) : 100;
+    const jobId = `J-${maxJobNumber + 1}`;
     
     // Create new job from lead data
     const newJob = {
@@ -658,6 +679,12 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
                         Email
                       </button>
                     </div>
+                    {lead.address && (
+                      <div className="flex items-center gap-3">
+                        <MapPin className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-[#051046]">{lead.address}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -677,11 +704,13 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Created Date</p>
-                      <span className="text-sm text-[#051046]">{lead.createdDate}</span>
+                      <span className="text-sm text-[#051046]">{formatDate(lead.createdDate)}</span>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Days in Stage</p>
-                      <span className="text-sm text-[#051046]">{lead.daysInStage} days</span>
+                      <span className="text-sm text-[#051046]">
+                        {lead.daysInStage} {lead.daysInStage === 1 ? 'day' : 'days'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -776,6 +805,17 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
                 <div className="bg-gray-50 rounded-[20px] p-4">
                   <h3 className="text-sm font-semibold text-[#051046] mb-3">Quick Actions</h3>
                   <div className="space-y-2">
+                    {/* Convert to Job Button - Show when NOT Lost and NOT Won and NOT already converted */}
+                    {lead.stage !== 'Lost' && lead.stage !== 'Won' && (
+                      <button
+                        onClick={handleConvertToJobClick}
+                        className="w-full px-4 py-2 text-white rounded-[32px] hover:bg-[#7f5fd9] transition-colors text-sm font-medium"
+                        style={{ backgroundColor: '#9473ff' }}
+                      >
+                        Convert to Job
+                      </button>
+                    )}
+
                     {/* Edit Lead Button - Always visible */}
                     <button 
                       onClick={handleEditLead}
@@ -827,18 +867,7 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
                         )}
                       </>
                     )}
-                    
-                    {/* Convert to Job Button - Show when NOT Lost and NOT Won and NOT already converted */}
-                    {lead.stage !== 'Lost' && lead.stage !== 'Won' && (
-                      <button
-                        onClick={handleConvertToJobClick}
-                        className="w-full px-4 py-2 text-white rounded-[32px] hover:bg-[#7f5fd9] transition-colors text-sm font-medium"
-                        style={{ backgroundColor: '#9473ff' }}
-                      >
-                        Convert to Job
-                      </button>
-                    )}
-                    
+
                     {/* Reopen Lead Button - Only show when Lost (Admin only) */}
                     {lead.stage === 'Lost' && (
                       <button
@@ -925,6 +954,17 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
             <p className="text-sm text-gray-600 mb-6">
               Are you sure you want to convert this lead to a job? This action cannot be undone.
             </p>
+            <div className="bg-gray-50 rounded-[20px] border border-[#e8e8e8] p-4 mb-6">
+              <h3 className="text-sm font-semibold text-[#051046] mb-3">Lead Summary</h3>
+              <div className="grid grid-cols-1 gap-3">
+                {leadSummaryItems.map((item) => (
+                  <div key={item.label}>
+                    <p className="text-xs text-gray-500 mb-1">{item.label}</p>
+                    <p className="text-sm text-[#051046]">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="flex gap-3">
               <button
                 onClick={handleConfirmConversion}

@@ -983,11 +983,9 @@ export function LeadsPage() {
           <span className="text-gray-400">→</span>
           <span className="font-medium text-[#f0a041]">Follow-Up</span>
           <span className="text-gray-400">→</span>
-          <span className="font-medium text-gray-400">[</span>
           <span className="text-[#b9df10] font-semibold">Won</span>
-          <span className="text-gray-400">|</span>
+          <span className="text-gray-400">→</span>
           <span className="font-semibold text-[#f16a6a]">Lost</span>
-          <span className="font-medium text-gray-400">]</span>
         </div>
       </div>
 

@@ -1531,9 +1531,10 @@ export function SchedulePage() {
                   <button 
                     type="button"
                     onClick={() => setIsAddClientModalOpen(true)}
-                    className="mt-1 text-xs text-[#8b5cf6] hover:underline"
+                    className="mt-1 text-xs hover:underline"
+                    style={{ color: '#9473ff' }}
                   >
-                    + Add new
+                    + Add Client
                   </button>
                 </div>
 
@@ -1571,9 +1572,10 @@ export function SchedulePage() {
                       <button 
                         type="button"
                         onClick={() => setCustomValueModal({ isOpen: true, type: 'jobType', title: 'Add New Job Type' })}
-                        className="mt-1 text-xs text-[#8b5cf6] hover:underline"
+                        className="mt-1 text-xs hover:underline"
+                        style={{ color: '#9473ff' }}
                       >
-                        + Add new
+                        + Add Job Type
                       </button>
                     </div>
                     <div>
@@ -1591,9 +1593,10 @@ export function SchedulePage() {
                       <button 
                         type="button"
                         onClick={() => setCustomValueModal({ isOpen: true, type: 'jobSource', title: 'Add New Job Source' })}
-                        className="mt-1 text-xs text-[#8b5cf6] hover:underline"
+                        className="mt-1 text-xs hover:underline"
+                        style={{ color: '#9473ff' }}
                       >
-                        + Add new
+                        + Add Job Source
                       </button>
                     </div>
                     <div>
@@ -1768,9 +1771,10 @@ export function SchedulePage() {
                   <button 
                     type="button"
                     onClick={() => setIsAddInventoryModalOpen(true)}
-                    className="mt-1 text-xs text-[#8b5cf6] hover:underline"
+                    className="mt-1 text-xs hover:underline"
+                    style={{ color: '#9473ff' }}
                   >
-                    + Add new
+                    + Add Service or Product
                   </button>
                   
                   {/* Selected Items Table */}
@@ -2108,9 +2112,10 @@ export function SchedulePage() {
                   <button 
                     type="button"
                     onClick={() => setCustomValueModal({ isOpen: true, type: 'tags', title: 'Add New Tag' })}
-                    className="mt-1 text-xs text-[#8b5cf6] hover:underline"
+                    className="mt-1 text-xs hover:underline"
+                    style={{ color: '#9473ff' }}
                   >
-                    + Add new
+                    + Add Tag
                   </button>
                 </div>
 
