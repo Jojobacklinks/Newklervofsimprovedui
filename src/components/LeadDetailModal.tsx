@@ -705,13 +705,13 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
                       ></textarea>
                       <div className="flex gap-2 mt-2">
                         <button
-                          className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                          className="flex-1 px-4 py-2 bg-[#9473ff] text-white rounded-[32px] hover:bg-[#8663f2] transition-colors text-sm font-medium"
                           onClick={handleAddNote}
                         >
                           Save Note
                         </button>
                         <button
-                          className="flex-1 px-4 py-2 border border-[#e8e8e8] bg-white text-[#051046] rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                          className="flex-1 px-4 py-2 border border-[#e8e8e8] bg-white text-[#051046] rounded-[32px] hover:bg-gray-50 transition-colors text-sm font-medium"
                           onClick={() => {
                             setNoteText('');
                             setShowAddNote(false);
