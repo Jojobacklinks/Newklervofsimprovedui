@@ -33,6 +33,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Add 404.html for SPA routing
+        run: cp build/index.html build/404.html
+
+      - name: Add .nojekyll to bypass Jekyll
+        run: touch build/.nojekyll
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
