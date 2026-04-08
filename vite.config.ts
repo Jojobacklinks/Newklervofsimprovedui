@@ -4,9 +4,10 @@
   import tailwindcss from '@tailwindcss/vite';
   import path from 'path';
 
-  export default defineConfig({
+  // `base` must follow `vite build`, not NODE_ENV (dev can be set during CI builds).
+  export default defineConfig(({ command }) => ({
     plugins: [react(), tailwindcss()],
-    base: process.env.NODE_ENV === 'production' ? '/Newklervofsimprovedui/' : '/',
+    base: command === 'build' ? '/Newklervofsimprovedui/' : '/',
     build: {
       sourcemap: false,
       target: 'esnext',
@@ -69,4 +70,4 @@
       port: 3000,
       open: true,
     },
-  });
+  }));
