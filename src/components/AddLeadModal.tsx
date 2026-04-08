@@ -5,6 +5,20 @@ import { DeveloperNotesPopup } from './DeveloperNotesPopup';
 import { AddCustomValueModal } from './AddCustomValueModal';
 import { AddClientModal } from './AddClientModal';
 
+const teamMemberBusyStatus: { [key: string]: string } = {
+  'Mike Bailey': '#b9df10',
+  'John Tom': '#f0a041',
+  'Sarah Wilson': '#f16a6a',
+  'David Chen': '#f16a6a',
+};
+
+const teamMemberAvailability: { [key: string]: string } = {
+  'Mike Bailey': '5 min away',
+  'John Tom': '24 min away',
+  'Sarah Wilson': '12 min away',
+  'David Chen': 'Double Booked',
+};
+
 // Mock client database for autocomplete
 const mockClientDatabase = [
   { id: '1', name: 'John Smith', email: 'john.smith@email.com', phone: '(555) 123-4567', address: '123 Main Street, Springfield, IL 62701' },
@@ -65,6 +79,7 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [filteredClients, setFilteredClients] = useState<typeof mockClientDatabase>([]);
   const clientInputRef = useRef<HTMLDivElement>(null);
+  const [isTeamMemberDropdownOpen, setIsTeamMemberDropdownOpen] = useState(false);
 
   // Add Client Modal state
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
@@ -183,6 +198,7 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
       activityTimeline: [],
     });
     setSchedulingEnabled(false);
+    setIsTeamMemberDropdownOpen(false);
     setSchedulingData({
       startDate: '',
       startTime: '',
@@ -689,13 +705,9 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                     Assign Team Members
                   </label>
                   <div className="relative">
-                    {/* Custom Multi-Select Field */}
                     <div 
-                      className="w-full min-h-[42px] px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus-within:ring-2 focus-within:ring-purple-600 cursor-pointer flex flex-wrap items-center gap-2"
-                      onClick={() => {
-                        const select = document.getElementById('teamMemberSelect') as HTMLSelectElement;
-                        if (select) select.focus();
-                      }}
+                      onClick={() => setIsTeamMemberDropdownOpen(!isTeamMemberDropdownOpen)}
+                      className="w-full min-h-[40px] px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm cursor-pointer bg-white flex flex-wrap gap-2 items-center hover:border-[#9473ff] transition-colors"
                     >
                       {/* Selected Team Members as Chips */}
                       {schedulingData.assignedTeamMembers.map((member) => (
@@ -720,6 +732,10 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                         </div>
                       ))}
                       
+                      {schedulingData.assignedTeamMembers.length === 0 && (
+                        <span className="text-gray-400">Choose team options...</span>
+                      )}
+                      
                       {/* Hidden Select for Adding Members */}
                       <select
                         id="teamMemberSelect"
@@ -732,7 +748,7 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                             });
                           }
                         }}
-                        className="flex-1 min-w-[120px] border-none outline-none bg-transparent text-sm text-[#051046]"
+                        className="hidden"
                       >
                         <option value="">Select...</option>
                         <option value="Michael Johnson">Michael Johnson</option>
@@ -740,6 +756,42 @@ export function AddLeadModal({ isOpen, onClose, onAddLead }: AddLeadModalProps) 
                         <option value="David Anderson">David Anderson</option>
                       </select>
                     </div>
+                    {isTeamMemberDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setIsTeamMemberDropdownOpen(false)}
+                        />
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e8e8e8] rounded-[15px] shadow-lg z-20 max-h-60 overflow-y-auto">
+                          {['Mike Bailey', 'John Tom', 'Sarah Wilson', 'David Chen']
+                            .filter((member) => !schedulingData.assignedTeamMembers.includes(member))
+                            .map((member) => (
+                              <button
+                                key={member}
+                                type="button"
+                                onClick={() => {
+                                  setSchedulingData({
+                                    ...schedulingData,
+                                    assignedTeamMembers: [...schedulingData.assignedTeamMembers, member]
+                                  });
+                                  setIsTeamMemberDropdownOpen(false);
+                                }}
+                                className="w-full text-left px-4 py-2.5 text-sm text-[#051046] hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center gap-3"
+                              >
+                                <span className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: teamMemberBusyStatus[member] }}></span>
+                                <span className="flex items-center gap-2 flex-1">
+                                  {member} - {teamMemberAvailability[member]}
+                                </span>
+                              </button>
+                            ))}
+                          {schedulingData.assignedTeamMembers.length === 4 && (
+                            <div className="px-4 py-2.5 text-sm text-gray-400 text-center">
+                              All team members selected
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 

@@ -208,6 +208,7 @@ export function LeadsPage() {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [stageFilter, setStageFilter] = useState<string>('All');
+  const [sortBy, setSortBy] = useState('date-desc');
   const [filteredLeadId, setFilteredLeadId] = useState<string | null>(null);
   
   // Developer Notes state
@@ -274,7 +275,7 @@ export function LeadsPage() {
     if (searchQuery || stageFilter !== 'All') {
       setFilteredLeadId(null);
     }
-  }, [searchQuery, stageFilter]);
+  }, [searchQuery, stageFilter, sortBy]);
 
   // Calculate metrics
   const totalLeads = leads.length;
@@ -302,6 +303,19 @@ export function LeadsPage() {
     const matchesStage = stageFilter === 'All' || lead.stage === stageFilter;
     
     return matchesSearch && matchesStage;
+  });
+
+  const sortedLeads = [...filteredLeads].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
+      case 'date-asc':
+        return new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime();
+      case 'client':
+        return a.clientName.localeCompare(b.clientName);
+      default:
+        return 0;
+    }
   });
 
   const getPriorityColor = (priority: string) => {
@@ -938,6 +952,19 @@ export function LeadsPage() {
             </div>
           )}
         </div>
+
+        {/* Sort Filter */}
+        <div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-[220px] h-[44px] px-4 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-600 text-[#051046] text-sm"
+          >
+            <option value="date-desc">Date created (Newest first)</option>
+            <option value="date-asc">Date created (Oldest first)</option>
+            <option value="client">Client Name (A-Z)</option>
+          </select>
+        </div>
         
         {/* Stage Filter */}
         <div>
@@ -1028,7 +1055,7 @@ export function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e2e8f0]">
-              {filteredLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).map((lead) => (
+              {sortedLeads.slice((currentPage - 1) * leadsPerPage, currentPage * leadsPerPage).map((lead) => (
                 <tr
                   key={lead.id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"

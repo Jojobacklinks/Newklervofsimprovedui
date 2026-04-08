@@ -400,7 +400,7 @@ export function ClientsPage() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Company
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Total Jobs
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -486,7 +486,7 @@ export function ClientsPage() {
                   </td>
 
                   {/* Total Jobs Column */}
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-center">
                     <p className="text-sm font-semibold text-[#051046]">{client.totalJobs}</p>
                   </td>
 
