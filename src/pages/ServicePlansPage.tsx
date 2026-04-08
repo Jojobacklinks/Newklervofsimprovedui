@@ -977,23 +977,20 @@ export function ServicePlansPage() {
                   </td>
                   <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
-                          {!isStaffView && (
-                        <>
-                          <button
-                            onClick={() => handleEditClick(plan)}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="Edit service plan"
-                          >
-                            <Edit2 className="w-4 h-4 text-[#8b5cf6]" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(plan.id)}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </button>
-                        </>
-                      )}
+                      <button
+                        onClick={() => handleEditClick(plan)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Edit service plan"
+                      >
+                        <Edit2 className="w-4 h-4 text-[#8b5cf6]" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(plan.id)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Delete service plan"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </button>
                       {plan.status === 'approved' && (
                         <button
                           onClick={() => {
@@ -2564,7 +2561,7 @@ export function ServicePlansPage() {
               </div>
               <h3 className="text-lg font-semibold text-[#051046]">Send Payment Link</h3>
             </div>
-            <p className="text-[#051046] mb-6">This will create the subscription and send a secure payment link to the customer's email address. The customer can complete payment at their convenience through their customer dashboard.</p>
+            <p className="text-[#051046] mb-6">This will create the service plan estimate and send it to the customer's email address and portal for approval. Are you sure?</p>
             <div className="bg-purple-50 border border-purple-200 rounded-[15px] p-4 mb-6">
               <p className="text-xs text-[#051046]"><strong>Send to:</strong> {planForm.clientEmail}<br /><strong>Customer:</strong> {planForm.clientName}<br /><strong>Service:</strong> {planForm.serviceName}<br /><strong>Amount:</strong> ${(() => {
                 const price = parseFloat(planForm.price);
@@ -2578,13 +2575,13 @@ export function ServicePlansPage() {
               })()} {planForm.currency}</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setIsSendConfirmOpen(false)} className="px-6 py-2 border border-[#e8e8e8] text-[#051046] rounded-[15px] hover:bg-gray-50 transition-colors">Cancel</button>
+              <button onClick={() => setIsSendConfirmOpen(false)} className="px-6 py-2 border border-[#e8e8e8] text-[#051046] rounded-[32px] hover:bg-gray-50 transition-colors">Cancel</button>
               <button onClick={() => {
                 createServicePlan();
                 setIsSendConfirmOpen(false);
                 setIsAddPlanModalOpen(false);
                 alert('Payment link sent successfully! 📧\n\nThe customer will receive an email with a secure link to complete payment through Stripe Checkout in their customer dashboard.');
-              }} className="px-6 py-2 bg-[#9473ff] text-white rounded-[15px] hover:bg-[#7f5fd9] transition-colors">Send Link</button>
+              }} className="px-6 py-2 bg-[#9473ff] text-white rounded-[32px] hover:bg-[#7f5fd9] transition-colors">Send Link</button>
             </div>
           </div>
         </div>
