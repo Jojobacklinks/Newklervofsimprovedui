@@ -7,6 +7,11 @@
   export default defineConfig({
     plugins: [react(), tailwindcss()],
     base: process.env.NODE_ENV === 'production' ? '/Newklervofsimprovedui/' : '/',
+    build: {
+      sourcemap: false,
+      target: 'esnext',
+      outDir: 'build',
+    },
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -59,10 +64,6 @@
         '@radix-ui/react-accordion@1.2.3': '@radix-ui/react-accordion',
         '@': path.resolve(__dirname, './src'),
       },
-    },
-    build: {
-      target: 'esnext',
-      outDir: 'build',
     },
     server: {
       port: 3000,
