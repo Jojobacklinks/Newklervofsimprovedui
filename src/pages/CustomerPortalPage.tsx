@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Phone, X, Info } from 'lucide-react';
 import { DeveloperNotesPopup } from '../components/DeveloperNotesPopup';
 
@@ -14,8 +14,9 @@ interface EstimateInvoiceItem {
 interface EstimateInvoice {
   id: string;
   type: 'estimate' | 'invoice';
+  documentLabel?: string;
   date: string;
-  status: 'Estimate' | 'DUE' | 'PAID' | 'Declined';
+  status: 'Approved' | 'Pending' | 'Declined' | 'Paid' | 'Due' | 'Refunded';
   total: number;
   customerName: string;
   customerAddress: string;
@@ -28,6 +29,10 @@ interface EstimateInvoice {
   taxRate?: string;
   taxOption?: 'non-taxable' | 'tax-rate';
   notes?: string;
+  isServicePlanEstimate?: boolean;
+  recurringBillingCycle?: string;
+  companyName?: string;
+  companyWebsite?: string;
 }
 
 export default function CustomerPortalPage() {
@@ -36,14 +41,16 @@ export default function CustomerPortalPage() {
   const [declineReason, setDeclineReason] = useState('');
   const [showDevNotes, setShowDevNotes] = useState(false);
   const [devNotesContent, setDevNotesContent] = useState<React.ReactNode>(null);
+  const [hasAcceptedServiceTerms, setHasAcceptedServiceTerms] = useState(false);
 
   // Mock data - this would come from backend
   const [items, setItems] = useState<EstimateInvoice[]>([
     {
       id: 'EST-001',
       type: 'estimate',
+      documentLabel: 'Service Plan Estimate',
       date: '2026-02-20',
-      status: 'Estimate',
+      status: 'Pending',
       total: 2500,
       customerName: 'John Smith',
       customerAddress: '123 Main Street, Austin, TX 78701',
@@ -59,12 +66,17 @@ export default function CustomerPortalPage() {
       taxRate: '8.25',
       taxOption: 'tax-rate',
       notes: 'Includes all materials and labor. Installation scheduled for next week.',
+      isServicePlanEstimate: true,
+      recurringBillingCycle: 'month',
+      companyName: 'My Plumber Company',
+      companyWebsite: 'https://www.myplumbercompany.com',
     },
     {
       id: 'INV-045',
       type: 'invoice',
+      documentLabel: 'Down Payment Invoice',
       date: '2026-02-15',
-      status: 'DUE',
+      status: 'Due',
       total: 1850,
       customerName: 'John Smith',
       customerAddress: '123 Main Street, Austin, TX 78701',
@@ -85,8 +97,9 @@ export default function CustomerPortalPage() {
     {
       id: 'INV-042',
       type: 'invoice',
+      documentLabel: 'Instant Invoice',
       date: '2026-02-10',
-      status: 'PAID',
+      status: 'Paid',
       total: 950,
       customerName: 'John Smith',
       customerAddress: '123 Main Street, Austin, TX 78701',
@@ -106,8 +119,9 @@ export default function CustomerPortalPage() {
     {
       id: 'EST-002',
       type: 'estimate',
+      documentLabel: 'Job Estimate',
       date: '2026-02-18',
-      status: 'Estimate',
+      status: 'Pending',
       total: 3200,
       customerName: 'John Smith',
       customerAddress: '123 Main Street, Austin, TX 78701',
@@ -127,8 +141,9 @@ export default function CustomerPortalPage() {
     {
       id: 'INV-048',
       type: 'invoice',
+      documentLabel: 'Final Invoice',
       date: '2026-02-22',
-      status: 'DUE',
+      status: 'Due',
       total: 725,
       customerName: 'John Smith',
       customerAddress: '123 Main Street, Austin, TX 78701',
@@ -144,13 +159,88 @@ export default function CustomerPortalPage() {
       taxRate: '8.25',
       taxOption: 'non-taxable',
     },
+    {
+      id: 'EST-003',
+      type: 'estimate',
+      documentLabel: 'Membership Renewal Estimate',
+      date: '2026-02-12',
+      status: 'Approved',
+      total: 1290,
+      customerName: 'John Smith',
+      customerAddress: '123 Main Street, Austin, TX 78701',
+      customerPhone: '(555) 123-4567',
+      customerEmail: 'john.smith@email.com',
+      jobDescription: 'Annual maintenance membership renewal',
+      items: [
+        { id: 1, description: 'Annual Maintenance Membership', notes: '12-month recurring service plan', quantity: 1, price: 1290, taxable: false },
+      ],
+      notes: 'Customer already approved this membership renewal estimate.',
+      isServicePlanEstimate: true,
+      recurringBillingCycle: 'year',
+      companyName: 'My Plumber Company',
+      companyWebsite: 'https://www.myplumbercompany.com',
+    },
+    {
+      id: 'EST-004',
+      type: 'estimate',
+      documentLabel: 'Repair Follow-Up Estimate',
+      date: '2026-02-09',
+      status: 'Declined',
+      total: 680,
+      customerName: 'John Smith',
+      customerAddress: '123 Main Street, Austin, TX 78701',
+      customerPhone: '(555) 123-4567',
+      customerEmail: 'john.smith@email.com',
+      jobDescription: 'Follow-up repair estimate for secondary fixture replacement',
+      items: [
+        { id: 1, description: 'Fixture Replacement', notes: 'Secondary bathroom replacement option', quantity: 1, price: 480, taxable: true },
+        { id: 2, description: 'Labor', notes: 'Follow-up visit labor', quantity: 1, price: 200, taxable: false },
+      ],
+      discountAmount: '0',
+      discountType: '$',
+      taxRate: '8.25',
+      taxOption: 'tax-rate',
+      notes: 'Customer declined this follow-up estimate.',
+    },
+    {
+      id: 'INV-049',
+      type: 'invoice',
+      documentLabel: 'Refunded Invoice',
+      date: '2026-02-08',
+      status: 'Refunded',
+      total: 410,
+      customerName: 'John Smith',
+      customerAddress: '123 Main Street, Austin, TX 78701',
+      customerPhone: '(555) 123-4567',
+      customerEmail: 'john.smith@email.com',
+      jobDescription: 'Returned replacement part credit',
+      items: [
+        { id: 1, description: 'Replacement Part Credit', notes: 'Customer refunded after part return', quantity: 1, price: 410, taxable: false },
+      ],
+      notes: 'This invoice has been refunded back to the customer.',
+    },
   ]);
 
   const handleViewNow = (item: EstimateInvoice) => {
     setSelectedItem(item);
   };
 
+  useEffect(() => {
+    setHasAcceptedServiceTerms(false);
+  }, [selectedItem?.id]);
+
   const handleApprove = () => {
+    if (selectedItem?.isServicePlanEstimate && !hasAcceptedServiceTerms) {
+      return;
+    }
+    if (selectedItem) {
+      setItems(items.map(item =>
+        item.id === selectedItem.id
+          ? { ...item, status: 'Approved' as const }
+          : item
+      ));
+      setSelectedItem({ ...selectedItem, status: 'Approved' });
+    }
     alert('Estimate approved! Converting to invoice...');
     // Backend would handle conversion here
   };
@@ -168,17 +258,39 @@ export default function CustomerPortalPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Estimate':
-        return 'bg-blue-100 text-blue-700';
-      case 'DUE':
-        return 'bg-orange-100 text-orange-700';
-      case 'PAID':
-        return 'bg-green-100 text-green-700';
+      case 'Approved':
+        return '#9473ff';
+      case 'Pending':
+        return '#28bdf2';
+      case 'Paid':
+        return '#b9df10';
+      case 'Due':
+        return '#f0a041';
       case 'Declined':
-        return 'bg-red-100 text-red-700';
+        return '#f16a6a';
+      case 'Refunded':
+        return '#ff6493';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return '#6b7280';
     }
+  };
+
+  const servicePlanConsentText = selectedItem?.isServicePlanEstimate
+    ? {
+        companyName: selectedItem.companyName || 'My Plumber Company',
+        companyWebsite: selectedItem.companyWebsite || 'https://www.myplumbercompany.com',
+        amount: selectedItem.total.toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 2,
+        }),
+        billingCycle: selectedItem.recurringBillingCycle || 'month',
+      }
+    : null;
+
+  const getDocumentDisplayLabel = (item: EstimateInvoice) => {
+    if (item.documentLabel) return item.documentLabel;
+    return item.type === 'estimate' ? 'Estimate' : 'Invoice';
   };
 
   return (
@@ -244,7 +356,7 @@ export default function CustomerPortalPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <p className="font-semibold text-sm" style={{ color: '#051046' }}>
-                          {item.id}
+                          {item.id} <span className="text-gray-500 font-medium">({getDocumentDisplayLabel(item)})</span>
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(item.date).toLocaleDateString('en-US', {
@@ -255,9 +367,12 @@ export default function CustomerPortalPage() {
                         </p>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          item.status
-                        )}`}
+                        className="px-3 py-1 text-xs font-bold"
+                        style={{
+                          backgroundColor: getStatusColor(item.status),
+                          color: '#ffffff',
+                          borderRadius: '.25rem',
+                        }}
                       >
                         {item.status}
                       </span>
@@ -329,7 +444,7 @@ export default function CustomerPortalPage() {
                           </span>
                           <input 
                             type="text" 
-                            value={selectedItem.id} 
+                            value={`${selectedItem.id} (${getDocumentDisplayLabel(selectedItem)})`} 
                             readOnly
                             className="flex-1 px-3 py-2 border border-[#e2e8f0] rounded-[8px] text-sm text-[#051046] bg-gray-50"
                           />
@@ -476,8 +591,34 @@ export default function CustomerPortalPage() {
                     )}
 
                     {/* Action Buttons for Estimates */}
-                    {selectedItem.type === 'estimate' && (
+                    {selectedItem.type === 'estimate' && selectedItem.status === 'Pending' && (
                       <div>
+                        {servicePlanConsentText && (
+                          <div className="mb-4 rounded-[15px] border border-[#e2e8f0] bg-[#f8f7ff] p-4">
+                            <label className="flex items-start gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={hasAcceptedServiceTerms}
+                                onChange={(e) => setHasAcceptedServiceTerms(e.target.checked)}
+                                className="mt-1 h-4 w-4 rounded border-gray-300 text-[#9473ff] focus:ring-[#9473ff]"
+                              />
+                              <span className="text-sm text-[#051046] leading-6">
+                                I agree to the Service Terms outlined by {servicePlanConsentText.companyName}{' '}
+                                <a
+                                  href={servicePlanConsentText.companyWebsite}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[#9473ff] hover:underline"
+                                >
+                                  {servicePlanConsentText.companyWebsite}
+                                </a>{' '}
+                                and authorize recurring charges of {servicePlanConsentText.amount} every{' '}
+                                {servicePlanConsentText.billingCycle} until I cancel.
+                              </span>
+                            </label>
+                          </div>
+                        )}
+
                         <div className="flex gap-4 justify-end mb-4">
                           <button
                             onClick={() => setShowDeclineModal(true)}
@@ -518,9 +659,19 @@ export default function CustomerPortalPage() {
                               setShowDevNotes(true);
                             }}
                             className="px-8 py-3 text-white rounded-[32px] font-semibold transition-colors"
-                            style={{ backgroundColor: '#9473ff' }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
+                            style={{
+                              backgroundColor: selectedItem.isServicePlanEstimate && !hasAcceptedServiceTerms ? '#c4b5fd' : '#9473ff',
+                              cursor: selectedItem.isServicePlanEstimate && !hasAcceptedServiceTerms ? 'not-allowed' : 'pointer',
+                            }}
+                            onMouseOver={(e) => {
+                              if (selectedItem.isServicePlanEstimate && !hasAcceptedServiceTerms) return;
+                              e.currentTarget.style.backgroundColor = '#7f5fd9';
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.backgroundColor =
+                                selectedItem.isServicePlanEstimate && !hasAcceptedServiceTerms ? '#c4b5fd' : '#9473ff';
+                            }}
+                            disabled={selectedItem.isServicePlanEstimate && !hasAcceptedServiceTerms}
                           >
                             Approve
                           </button>
@@ -536,7 +687,7 @@ export default function CustomerPortalPage() {
                     )}
 
                     {/* Status message for paid invoices */}
-                    {selectedItem.type === 'invoice' && selectedItem.status === 'PAID' && (
+                    {selectedItem.type === 'invoice' && selectedItem.status === 'Paid' && (
                       <div className="bg-green-50 border-2 border-green-200 rounded-[15px] p-4 text-center">
                         <p className="text-green-700 font-semibold">
                           ✓ This invoice has been paid
@@ -545,7 +696,7 @@ export default function CustomerPortalPage() {
                     )}
 
                     {/* Pay Now button for due invoices */}
-                    {selectedItem.type === 'invoice' && selectedItem.status === 'DUE' && (
+                    {selectedItem.type === 'invoice' && selectedItem.status === 'Due' && (
                       <div className="flex gap-4 justify-end">
                         <button
                           onClick={handlePayNow}
@@ -556,6 +707,13 @@ export default function CustomerPortalPage() {
                         >
                           Pay Now
                         </button>
+                      </div>
+                    )}
+                    {selectedItem.type === 'invoice' && selectedItem.status === 'Refunded' && (
+                      <div className="bg-[#fff1f6] border-2 border-[#ffb7cf] rounded-[15px] p-4 text-center">
+                        <p className="font-semibold text-[#ff6493]">
+                          This invoice has been refunded
+                        </p>
                       </div>
                     )}
                   </div>
