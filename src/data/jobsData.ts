@@ -22,6 +22,8 @@ export interface Job {
   arrivedLate: boolean;
   scheduledByStaff: boolean;
   isAllDay: boolean;
+  feedbackRating?: number;
+  declineReason?: string;
   servicePlanId?: string; // Links job to a service plan
 }
 
@@ -48,6 +50,8 @@ export const mockJobs: Job[] = [
     arrivedLate: false,
     scheduledByStaff: true,
     isAllDay: false,
+    feedbackRating: 5,
+    declineReason: 'Price',
   },
   {
     id: 'J-102',
@@ -71,6 +75,8 @@ export const mockJobs: Job[] = [
     arrivedLate: false,
     scheduledByStaff: false,
     isAllDay: false,
+    feedbackRating: 4,
+    declineReason: 'Competitor',
   },
   {
     id: 'J-103',
@@ -94,6 +100,7 @@ export const mockJobs: Job[] = [
     arrivedLate: true,
     scheduledByStaff: false,
     isAllDay: false,
+    declineReason: 'Scheduling',
   },
   {
     id: 'J-104',
@@ -117,6 +124,7 @@ export const mockJobs: Job[] = [
     arrivedLate: true,
     scheduledByStaff: true,
     isAllDay: false,
+    declineReason: 'Communication',
   },
   {
     id: 'J-105',
@@ -140,6 +148,7 @@ export const mockJobs: Job[] = [
     arrivedLate: false,
     scheduledByStaff: false,
     isAllDay: false,
+    declineReason: 'Employee',
   },
   {
     id: 'J-106',
@@ -163,6 +172,7 @@ export const mockJobs: Job[] = [
     arrivedLate: false,
     scheduledByStaff: false,
     isAllDay: false,
+    declineReason: 'Price',
   },
   {
     id: 'J-107',
@@ -186,5 +196,6 @@ export const mockJobs: Job[] = [
     arrivedLate: false,
     scheduledByStaff: true,
     isAllDay: false,
+    declineReason: 'Competitor',
   },
 ];

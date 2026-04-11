@@ -92,7 +92,16 @@ export function JobDetailsPageV2() {
 
   // Decode the job ID from the URL and find the job
   const decodedJobId = jobId ? decodeURIComponent(jobId) : '';
-  const selectedJob = jobs.find(job => job.id === decodedJobId);
+  const baseMockJob = mockJobs.find((job) => job.id === decodedJobId);
+  const contextJob = jobs.find((job) => job.id === decodedJobId);
+  const selectedJob = contextJob
+    ? {
+        ...baseMockJob,
+        ...contextJob,
+        feedbackRating: contextJob.feedbackRating ?? baseMockJob?.feedbackRating,
+        declineReason: contextJob.declineReason ?? baseMockJob?.declineReason,
+      }
+    : baseMockJob;
 
   // Check if we're creating a new job from a service plan
   const isNewJob = jobId === 'new';
@@ -1527,7 +1536,7 @@ export function JobDetailsPageV2() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -1859,32 +1868,32 @@ export function JobDetailsPageV2() {
 
                     {/* Inventory Table */}
                     <div className="overflow-x-auto">
-                      <div className="min-w-[640px]">
+                      <div className="min-w-[560px]">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b border-gray-200">
-                              <th className="text-left py-2 text-xs font-semibold text-gray-600">Description</th>
-                              <th className="text-center py-2 text-xs font-semibold text-gray-600">Upsell</th>
-                              <th className="text-center py-2 text-xs font-semibold text-gray-600">Quantity</th>
-                              <th className="text-right py-2 text-xs font-semibold text-gray-600">Price</th>
-                              <th className="text-right py-2 text-xs font-semibold text-gray-600">Total</th>
-                              <th className="text-center py-2 text-xs font-semibold text-gray-600 w-16">Actions</th>
+                              <th className="text-left py-2 pr-3 text-xs font-semibold text-gray-600">Description</th>
+                              <th className="w-16 text-center py-2 px-1 text-xs font-semibold text-gray-600">Upsell</th>
+                              <th className="w-20 text-center py-2 px-1 text-xs font-semibold text-gray-600">Quantity</th>
+                              <th className="w-24 text-right py-2 px-1 text-xs font-semibold text-gray-600">Price</th>
+                              <th className="w-24 text-right py-2 px-1 text-xs font-semibold text-gray-600">Total</th>
+                              <th className="w-14 text-center py-2 pl-2 text-xs font-semibold text-gray-600">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             {inventoryItems.map((item) => (
                               <tr key={item.id} className="border-b border-gray-100">
-                                <td className="py-2 text-[#051046]">{item.description}</td>
-                                <td className="py-2 text-center">
+                                <td className="py-2 pr-3 text-[#051046]">{item.description}</td>
+                                <td className="py-2 px-1 text-center">
                                   <input
                                     type="checkbox"
                                     checked={item.isUpsell}
                                     onChange={() => handleUpsellToggle(item.id)}
                                     disabled={isJobLocked}
-                                    className="w-4 h-4 accent-purple-600"
+                                    className="w-4 h-4 accent-[#9473ff]"
                                   />
                                 </td>
-                                <td className="py-2 text-center">
+                                <td className="py-2 px-1 text-center">
                                   <input
                                     type="number"
                                     value={item.quantity}
@@ -1896,7 +1905,7 @@ export function JobDetailsPageV2() {
                                     }`}
                                   />
                                 </td>
-                                <td className="py-2 text-right">
+                                <td className="py-2 px-1 text-right">
                                   <div className="flex items-center justify-end">
                                     <span className="text-[#051046] mr-1">$</span>
                                     <input
@@ -1912,22 +1921,22 @@ export function JobDetailsPageV2() {
                                     />
                                   </div>
                                 </td>
-                                <td className="py-2 text-right font-semibold text-[#051046]">
+                                <td className="py-2 px-1 text-right font-semibold text-[#051046]">
                                   ${(item.quantity * item.price).toFixed(2)}
                                 </td>
-                                <td className="py-2 text-center">
-                                  {!isJobLocked && (
-                                    <button 
-                                      onClick={() => {
-                                        setDeleteType('inventory');
-                                        setDeleteTarget(item.id);
-                                        setShowDeleteConfirm(true);
-                                      }}
-                                      className="hover:opacity-80 transition-opacity"
-                                    >
-                                      <Trash2 className="w-4 h-4" style={{ color: '#f16a6a' }} />
-                                    </button>
-                                  )}
+                                <td className="py-2 pl-2 text-center">
+                                  <button 
+                                    onClick={() => {
+                                      if (isJobLocked) return;
+                                      setDeleteType('inventory');
+                                      setDeleteTarget(item.id);
+                                      setShowDeleteConfirm(true);
+                                    }}
+                                    disabled={isJobLocked}
+                                    className={`transition-opacity ${isJobLocked ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-80'}`}
+                                  >
+                                    <Trash2 className="w-4 h-4" style={{ color: '#f16a6a' }} />
+                                  </button>
                                 </td>
                               </tr>
                             ))}
@@ -2215,7 +2224,18 @@ export function JobDetailsPageV2() {
                             </span>
                           </div>
                         </div>
-                        
+
+                        {/* Feedback */}
+                        <div className="bg-white/70 rounded-[10px] p-3 mb-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-[#051046]">Feedback</span>
+                            <span className="text-sm font-medium text-[#051046]">
+                              {typeof currentJob?.feedbackRating === 'number'
+                                ? `${currentJob.feedbackRating} ${currentJob.feedbackRating === 1 ? 'star' : 'stars'}`
+                                : 'none'}
+                            </span>
+                          </div>
+                        </div>
                         {/* Job Durations */}
                         <div className="flex items-center justify-between text-xs mb-3">
                           <span className="font-semibold text-[#051046]">Job Durations</span>
@@ -2441,9 +2461,16 @@ export function JobDetailsPageV2() {
                             {estimate.amount}
                           </td>
                           <td className="py-4 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${getStatusColor(estimate.status)}`}></div>
-                              <span className="text-sm text-[#051046]">{estimate.status}</span>
+                            <div className="flex items-start gap-2">
+                              <div className={`w-2 h-2 rounded-full mt-1.5 ${getStatusColor(estimate.status)}`}></div>
+                              <div className="flex flex-col">
+                                <span className="text-sm text-[#051046]">{estimate.status}</span>
+                                {estimate.status === 'Declined' && estimate.declineReason && (
+                                  <span className="text-xs" style={{ color: '#f16a6a' }}>
+                                    ({estimate.declineReason})
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className="py-4 px-4">

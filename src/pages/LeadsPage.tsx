@@ -1047,7 +1047,7 @@ export function LeadsPage() {
                   <div className="group relative inline-flex items-center gap-1.5">
                     Days
                     <Info className="w-3.5 h-3.5 text-gray-400" />
-                    <div className="invisible group-hover:visible fixed bg-gray-900 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-[100] normal-case shadow-lg -translate-y-1/2 -ml-[168px]">
+                    <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-gray-900 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-[100] normal-case shadow-lg">
                       Days in Current Stage
                     </div>
                   </div>

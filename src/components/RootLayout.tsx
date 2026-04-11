@@ -12,6 +12,10 @@ export function RootLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const basePath = location.pathname.startsWith('/staff') ? '/staff' : '/admin';
+  const negativeFeedbackJobs = ['J-101', 'J-105', 'J-107'];
+  const positiveFeedbackJobs = ['J-102', 'J-106'];
+  const notificationCount = 5;
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -115,7 +119,7 @@ export function RootLayout() {
                 <Bell className="w-5 h-5 text-gray-600" />
                 {/* Notification Badge */}
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  3
+                  {notificationCount}
                 </span>
               </button>
               
@@ -129,30 +133,59 @@ export function RootLayout() {
                   <div className="py-2">
                     {/* New Lead Notification */}
                     <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-[#051046] text-sm">
-                        New Lead: <a href="/leads" className="text-purple-600 hover:underline font-medium">5</a>
+                      <p className="text-[#051046] text-[14px]">
+                        New Lead: <button onClick={() => navigate(`${basePath}/leads`)} className="text-purple-600 hover:underline font-medium text-[14px]">5</button>
                       </p>
                     </div>
                     
                     {/* Estimate Accepted Notification */}
                     <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-[#051046] text-sm">
-                        Estimate Accepted: <a href="/jobs/estimates" className="text-purple-600 hover:underline font-medium">2</a>
+                      <p className="text-[#051046] text-[14px]">
+                        Estimate Accepted: <button onClick={() => navigate(`${basePath}/jobs/estimates`)} className="text-purple-600 hover:underline font-medium text-[14px]">2</button>
                       </p>
                     </div>
                     
                     {/* Estimate Declined Notification */}
                     <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-[#051046] text-sm">
-                        Estimate Declined: <a href="/jobs/estimates" className="text-purple-600 hover:underline font-medium">3</a>
+                      <p className="text-[#051046] text-[14px]">
+                        Estimate Declined: <button onClick={() => navigate(`${basePath}/jobs/estimates`)} className="text-purple-600 hover:underline font-medium text-[14px]">3</button>
                       </p>
                     </div>
                     
+                    {/* New Positive Feedback Notification */}
+                    <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                      <div className="text-[#051046] text-[14px]">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span>New Positive Feedback:</span>
+                          {positiveFeedbackJobs.map((jobId) => (
+                            <button
+                              key={jobId}
+                              onClick={() => navigate(`${basePath}/jobs/details/${encodeURIComponent(jobId)}`)}
+                              className="text-purple-600 hover:underline font-medium text-[14px]"
+                            >
+                              {jobId}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
                     {/* New Negative Feedback Notification */}
                     <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-[#051046] text-sm">
-                        New Negative Feedback: <a href="/report" className="text-purple-600 hover:underline font-medium">1</a>
-                      </p>
+                      <div className="text-[#051046] text-[14px]">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span>New Negative Feedback:</span>
+                          {negativeFeedbackJobs.map((jobId) => (
+                            <button
+                              key={jobId}
+                              onClick={() => navigate(`${basePath}/jobs/details/${encodeURIComponent(jobId)}`)}
+                              className="text-purple-600 hover:underline font-medium text-[14px]"
+                            >
+                              {jobId}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
