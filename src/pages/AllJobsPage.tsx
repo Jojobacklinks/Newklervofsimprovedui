@@ -586,7 +586,11 @@ export function AllJobsPage() {
             </thead>
             <tbody>
               {paginatedJobs.map((job) => (
-                <tr key={job.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                <tr
+                  key={job.id}
+                  onClick={() => handleEditJob(job)}
+                  className="border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer"
+                >
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
                       {job.hasUpsell && (
@@ -610,7 +614,10 @@ export function AllJobsPage() {
                         </div>
                       )}
                       <button
-                        onClick={() => handleEditJob(job)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleEditJob(job);
+                        }}
                         className="text-sm font-medium hover:underline"
                         style={{ color: '#9473ff' }}
                       >
@@ -679,7 +686,9 @@ export function AllJobsPage() {
                         )}
                         {typeof job.feedbackRating === 'number' && (
                           <div className="group relative inline-block">
-                            <Star className="w-4 h-4 fill-[#f0a041] text-[#f0a041]" />
+                            <Star
+                              className={`w-4 h-4 ${job.feedbackRating <= 3 ? 'fill-[#f16a6a] text-[#f16a6a]' : 'fill-[#f0a041] text-[#f0a041]'}`}
+                            />
                             <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
                               Rated {job.feedbackRating} {job.feedbackRating === 1 ? 'star' : 'stars'}
                             </div>
@@ -709,14 +718,20 @@ export function AllJobsPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => handleEditJob(job)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleEditJob(job);
+                        }}
                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Edit job"
                       >
                         <Edit2 className="w-4 h-4 text-[#8b5cf6]" />
                       </button>
                       <button
-                        onClick={() => handleDeleteClick(job.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeleteClick(job.id);
+                        }}
                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Delete job"
                       >

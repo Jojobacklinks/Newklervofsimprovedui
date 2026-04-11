@@ -155,6 +155,7 @@ const mockClients: Client[] = [
 export function ClientsPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const basePath = location.pathname.startsWith('/staff') ? '/staff' : '/admin';
   const [searchQuery, setSearchQuery] = useState('');
   const [clients, setClients] = useState<Client[]>(mockClients);
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
@@ -418,7 +419,8 @@ export function ClientsPage() {
               {currentClients.map((client) => (
                 <tr
                   key={client.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  onClick={() => navigate(`${basePath}/clients/${client.id}`)}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   {/* ID Column */}
                   <td className="px-6 py-4">
@@ -463,7 +465,10 @@ export function ClientsPage() {
                     <div className="flex items-center gap-3">
                       <div>
                         <button
-                          onClick={() => navigate(`${location.pathname.startsWith('/staff') ? '/staff' : '/admin'}/clients/${client.id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`${basePath}/clients/${client.id}`);
+                          }}
                           className="font-medium hover:underline cursor-pointer text-left"
                           style={{ color: '#9473ff' }}
                         >
@@ -525,7 +530,10 @@ export function ClientsPage() {
                         type="button"
                         className="p-2 hover:bg-blue-50 rounded-lg transition-colors group cursor-pointer"
                         title="View Client Details"
-                        onClick={() => navigate(`${location.pathname.startsWith('/staff') ? '/staff' : '/admin'}/clients/${client.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`${basePath}/clients/${client.id}`);
+                        }}
                       >
                         <User className="w-4 h-4" style={{ color: '#9473ff' }} />
                       </button>
