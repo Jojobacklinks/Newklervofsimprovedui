@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Phone, X, Info } from 'lucide-react';
+import { Phone, X, Info, CheckCircle2, Star } from 'lucide-react';
 import { DeveloperNotesPopup } from '../components/DeveloperNotesPopup';
 
 interface EstimateInvoiceItem {
@@ -42,6 +42,11 @@ export default function CustomerPortalPage() {
   const [showDevNotes, setShowDevNotes] = useState(false);
   const [devNotesContent, setDevNotesContent] = useState<React.ReactNode>(null);
   const [hasAcceptedServiceTerms, setHasAcceptedServiceTerms] = useState(false);
+  const [showPaymentConfirmModal, setShowPaymentConfirmModal] = useState(false);
+  const [showStripeCheckoutModal, setShowStripeCheckoutModal] = useState(false);
+  const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
 
   // Mock data - this would come from backend
   const [items, setItems] = useState<EstimateInvoice[]>([
@@ -159,6 +164,27 @@ export default function CustomerPortalPage() {
       taxOption: 'non-taxable',
     },
     {
+      id: 'INV-050',
+      type: 'invoice',
+      date: '2026-02-21',
+      status: 'Due',
+      total: 540,
+      customerName: 'John Smith',
+      customerAddress: '123 Main Street, Austin, TX 78701',
+      customerPhone: '(555) 123-4567',
+      customerEmail: 'john.smith@email.com',
+      jobDescription: 'General plumbing repair invoice',
+      items: [
+        { id: 1, description: 'Valve Replacement', notes: 'Standard shutoff valve replacement', quantity: 1, price: 240, taxable: true },
+        { id: 2, description: 'Labor', notes: 'On-site repair labor', quantity: 2, price: 150, taxable: false },
+      ],
+      discountAmount: '0',
+      discountType: '$',
+      taxRate: '8.25',
+      taxOption: 'tax-rate',
+      notes: 'Standard invoice with no special type label.',
+    },
+    {
       id: 'EST-003',
       type: 'estimate',
       documentLabel: 'Serviceplan',
@@ -227,6 +253,12 @@ export default function CustomerPortalPage() {
     setHasAcceptedServiceTerms(false);
   }, [selectedItem?.id]);
 
+  useEffect(() => {
+    if (!showPaymentSuccessModal) {
+      setHoveredRating(0);
+    }
+  }, [showPaymentSuccessModal]);
+
   const handleApprove = () => {
     if (selectedItem?.isServicePlanEstimate && !hasAcceptedServiceTerms) {
       return;
@@ -248,10 +280,41 @@ export default function CustomerPortalPage() {
     // Backend would handle this
   };
 
+  const markInvoicePaid = () => {
+    if (!selectedItem || selectedItem.type !== 'invoice') {
+      return;
+    }
+
+    const paidInvoice = {
+      ...selectedItem,
+      status: 'Paid' as const,
+    };
+
+    setItems(items.map((item) => (
+      item.id === selectedItem.id ? paidInvoice : item
+    )));
+    setSelectedItem(paidInvoice);
+  };
+
   const handlePayNow = () => {
-    // Redirect to Stripe checkout
-    alert('Redirecting to Stripe checkout...');
-    // window.location.href = 'stripe_checkout_url';
+    if (!selectedItem || selectedItem.type !== 'invoice' || selectedItem.status !== 'Due') {
+      return;
+    }
+
+    setShowPaymentConfirmModal(true);
+  };
+
+  const handleConfirmInvoicePayment = () => {
+    setShowPaymentConfirmModal(false);
+    setShowStripeCheckoutModal(true);
+  };
+
+  const handleCompleteStripeCheckout = () => {
+    setShowStripeCheckoutModal(false);
+    markInvoicePaid();
+    setSelectedRating(0);
+    setHoveredRating(0);
+    setShowPaymentSuccessModal(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -800,6 +863,225 @@ export default function CustomerPortalPage() {
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
               >
                 Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Confirmation Modal */}
+      {showPaymentConfirmModal && selectedItem?.type === 'invoice' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-white rounded-[20px] p-8 w-full max-w-[520px]"
+            style={{ border: '1px solid #e2e8f0', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xl font-bold text-[#051046]">Confirm Payment</h3>
+              <button
+                onClick={() => setShowPaymentConfirmModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-[#051046] leading-6 mb-6">
+              Are you sure you want to pay{' '}
+              <span className="font-semibold">{selectedItem.id}</span>{' '}
+              for{' '}
+              <span className="font-semibold">
+                {selectedItem.total.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+              ?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowPaymentConfirmModal(false)}
+                className="px-6 py-2.5 border rounded-[32px] font-medium transition-colors"
+                style={{
+                  borderColor: '#e2e8f0',
+                  color: '#051046',
+                  backgroundColor: 'white',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmInvoicePayment}
+                className="px-6 py-2.5 text-white rounded-[32px] font-medium transition-colors"
+                style={{ backgroundColor: '#9473ff' }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mock Stripe Checkout Modal */}
+      {showStripeCheckoutModal && selectedItem?.type === 'invoice' && (
+        <div className="fixed inset-0 bg-[#0a2540] flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-[720px] rounded-[24px] overflow-hidden bg-white shadow-2xl">
+            <div className="px-8 py-5 bg-[#635bff] text-white flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] opacity-80">Stripe Checkout</p>
+                <h3 className="text-2xl font-semibold mt-1">Complete your payment</h3>
+              </div>
+              <button
+                onClick={() => setShowStripeCheckoutModal(false)}
+                className="text-white/80 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-8 py-8 space-y-6">
+              <div className="rounded-[18px] border border-[#e2e8f0] bg-[#f8fafc] p-5">
+                <div className="flex items-center justify-between text-sm text-[#6a7282] mb-2">
+                  <span>Invoice</span>
+                  <span>{selectedItem.id}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-[#6a7282]">
+                  <span>Amount due</span>
+                  <span className="text-xl font-semibold text-[#051046]">
+                    {selectedItem.total.toLocaleString('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#051046] mb-2">Card number</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="4242 4242 4242 4242"
+                    className="w-full px-4 py-3 border border-[#e2e8f0] rounded-[15px] bg-gray-50 text-sm text-[#051046]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#051046] mb-2">Cardholder</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={selectedItem.customerName}
+                    className="w-full px-4 py-3 border border-[#e2e8f0] rounded-[15px] bg-gray-50 text-sm text-[#051046]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#051046] mb-2">Expiry</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="12 / 28"
+                    className="w-full px-4 py-3 border border-[#e2e8f0] rounded-[15px] bg-gray-50 text-sm text-[#051046]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#051046] mb-2">CVC</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="123"
+                    className="w-full px-4 py-3 border border-[#e2e8f0] rounded-[15px] bg-gray-50 text-sm text-[#051046]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setShowStripeCheckoutModal(false)}
+                  className="px-6 py-2.5 border rounded-[32px] font-medium transition-colors"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    color: '#051046',
+                    backgroundColor: 'white',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleCompleteStripeCheckout}
+                  className="px-6 py-2.5 text-white rounded-[32px] font-medium transition-colors"
+                  style={{ backgroundColor: '#635bff' }}
+                >
+                  Pay {selectedItem.total.toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2,
+                  })}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Success Rating Modal */}
+      {showPaymentSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-white rounded-[20px] p-8 w-full max-w-[520px] text-center"
+            style={{ border: '1px solid #e2e8f0', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}
+          >
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#f5fad6]">
+                <CheckCircle2 className="w-9 h-9" color="#b9df10" />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-[#051046] mb-2">Payment Successful!</h3>
+            <p className="text-sm text-[#051046] mb-6">
+              How was your technician? Please rate your experience!
+            </p>
+
+            <div className="flex items-center justify-center gap-2 mb-8">
+              {[1, 2, 3, 4, 5].map((rating) => {
+                const isActive = rating <= (hoveredRating || selectedRating);
+                return (
+                  <button
+                    key={rating}
+                    type="button"
+                    onClick={() => setSelectedRating(rating)}
+                    onMouseEnter={() => setHoveredRating(rating)}
+                    onMouseLeave={() => setHoveredRating(0)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className="w-8 h-8"
+                      fill={isActive ? '#f0a041' : 'transparent'}
+                      color={isActive ? '#f0a041' : '#cbd5e1'}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowPaymentSuccessModal(false)}
+                className="px-8 py-2.5 text-white rounded-[32px] font-medium transition-colors"
+                style={{ backgroundColor: '#9473ff' }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
+              >
+                Continue
               </button>
             </div>
           </div>
