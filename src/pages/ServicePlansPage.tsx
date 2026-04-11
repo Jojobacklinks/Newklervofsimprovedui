@@ -1265,7 +1265,7 @@ export function ServicePlansPage() {
                                           </span>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
-                                          <span className="text-xs text-gray-500">
+                                          <span className="text-[12px] text-[#6a7282]">
                                             {service.taxable ? 'Taxable' : 'Non-taxable'}
                                           </span>
                                         </div>
@@ -1827,9 +1827,8 @@ export function ServicePlansPage() {
                       setIsEditMode(false);
                       setEditingPlanId(null);
                     }}
-                    className="px-6 py-2 bg-[#9473ff] text-white rounded-[25px] hover:bg-[#7f5fd9] transition-colors flex items-center gap-2"
+                    className="px-6 py-2 bg-[#9473ff] text-white rounded-[25px] hover:bg-[#7f5fd9] transition-colors"
                   >
-                    <CheckCircle className="w-4 h-4" />
                     Save Changes
                   </button>
                 ) : (
@@ -1871,9 +1870,8 @@ export function ServicePlansPage() {
                         setSelectedPlanForPdf(tempPlan);
                         setShowEstimatePdfModal(true);
                       }}
-                      className="px-6 py-2 border border-[#8b5cf6] text-[#8b5cf6] rounded-[25px] hover:bg-purple-50 transition-colors flex items-center gap-2"
+                      className="px-6 py-2 border border-[#8b5cf6] text-[#8b5cf6] rounded-[25px] hover:bg-purple-50 transition-colors"
                     >
-                      <Mail className="w-4 h-4" />
                       View
                     </button>
                     
@@ -1886,9 +1884,8 @@ export function ServicePlansPage() {
                         }
                         setIsSendConfirmOpen(true);
                       }}
-                      className="px-6 py-2 bg-[#9473ff] text-white rounded-[25px] hover:bg-[#7f5fd9] transition-colors flex items-center gap-2"
+                      className="px-6 py-2 bg-[#9473ff] text-white rounded-[25px] hover:bg-[#7f5fd9] transition-colors"
                     >
-                      <Mail className="w-4 h-4" />
                       Send
                     </button>
                   </>
@@ -2108,7 +2105,7 @@ export function ServicePlansPage() {
                         <div>
                           <p className="text-sm font-medium text-[#051046]">{selectedPlanForPdf.serviceName}</p>
                           <p className="text-xs text-gray-500 mt-1">{selectedPlanForPdf.serviceDescription}</p>
-                          <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium bg-[#FFDBE6] text-[#3d424d]">
+                          <span className="inline-block mt-2 text-[12px] font-medium text-[#6a7282]">
                             NON-TAXABLE
                           </span>
                         </div>
@@ -2222,24 +2219,13 @@ export function ServicePlansPage() {
                 </div>
               </div>
 
-              {/* Bill To & Service Location */}
-              <div className="grid grid-cols-2 gap-8 mb-8">
-                {/* Bill To */}
-                <div>
-                  <h4 className="font-semibold text-[#051046] mb-2">Bill To:</h4>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.clientName}</p>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.propertyAddress}</p>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.phone}</p>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.clientEmail}</p>
-                </div>
-
-                {/* Service Location */}
-                <div>
-                  <h4 className="font-semibold text-[#051046] mb-2">Service location:</h4>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.clientName}</p>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.propertyAddress}</p>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.phone}</p>
-                  <p className="text-sm text-[#051046]">{selectedPlanForPdf.clientEmail}</p>
+              <div className="mb-8">
+                <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Bill To</h3>
+                <div className="bg-gray-50 p-4 rounded-[15px]">
+                  <p className="text-sm font-semibold text-[#051046]">{selectedPlanForPdf.clientName}</p>
+                  <p className="text-sm text-gray-600">{selectedPlanForPdf.propertyAddress}</p>
+                  <p className="text-sm text-gray-600">{selectedPlanForPdf.clientEmail}</p>
+                  {selectedPlanForPdf.phone && <p className="text-sm text-gray-600">{selectedPlanForPdf.phone}</p>}
                 </div>
               </div>
 
@@ -2258,16 +2244,18 @@ export function ServicePlansPage() {
                     <tr className="border-b border-[#e2e8f0]">
                       <td className="py-4">
                         <div>
-                          <p className="text-sm font-medium text-[#051046]">{selectedPlanForPdf.serviceName}</p>
-                          <p className="text-xs text-gray-500 mt-1">{selectedPlanForPdf.serviceDescription}</p>
-                          <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium bg-[#FFDBE6] text-[#3d424d]">
+                          <p className="text-sm font-semibold text-[#051046]">{selectedPlanForPdf.serviceName}</p>
+                          <p className="text-xs text-gray-600 mt-1">{selectedPlanForPdf.serviceDescription}</p>
+                          <span className="inline-block mt-2 text-[12px] font-medium text-[#6a7282]">
                             NON-TAXABLE
                           </span>
                         </div>
                       </td>
                       <td className="py-4 text-center text-sm text-[#051046]">1</td>
                       <td className="py-4 text-right text-sm text-[#051046]">${selectedPlanForPdf.price.toFixed(2)}</td>
-                      <td className="py-4 text-right text-sm font-medium text-[#051046]">${selectedPlanForPdf.price.toFixed(2)}</td>
+                      <td className="py-4 text-right">
+                        <p className="text-sm font-semibold text-[#051046]">${selectedPlanForPdf.price.toFixed(2)}</p>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -2293,19 +2281,37 @@ export function ServicePlansPage() {
                     <span className="text-sm text-[#051046]">Non-taxable</span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t-2 border-[#051046]">
-                    <div className="flex flex-col">
-                      <span className="text-lg font-bold text-[#051046]">Total:</span>
-                    </div>
+                  <div className="flex items-center justify-between pt-3 border-t-2 border-[#8b5cf6]">
+                    <span className="text-base font-bold text-[#051046]">Total</span>
                     <span className="text-lg font-bold text-[#051046]">${(selectedPlanForPdf.price - selectedPlanForPdf.discount).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Notes */}
-              <div>
-                <h4 className="font-semibold text-[#051046] mb-2">Notes:</h4>
-                <p className="text-sm text-[#051046]">Thank you for your business! This invoice is for your {selectedPlanForPdf.serviceName} service plan.</p>
+              <div className="mb-8">
+                <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Service Plan Details</h3>
+                <div className="space-y-2 text-xs text-gray-600">
+                  <p>• <strong>Billing Frequency:</strong> {selectedPlanForPdf.intervalCount === 1 ? selectedPlanForPdf.billingInterval.charAt(0).toUpperCase() + selectedPlanForPdf.billingInterval.slice(1) + 'ly' : `Every ${selectedPlanForPdf.intervalCount} ${selectedPlanForPdf.billingInterval}s`}</p>
+                  <p>• <strong>Start Date:</strong> {new Date(selectedPlanForPdf.startDate).toLocaleDateString()}</p>
+                  <p>• <strong>Auto-Renewal:</strong> {selectedPlanForPdf.autoRenew ? 'Enabled' : 'Disabled'}</p>
+                  <p>• <strong>Total Visits:</strong> {selectedPlanForPdf.totalVisits}</p>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-[#e2e8f0] space-y-4">
+                <div className="border border-[#e2e8f0] rounded-[15px] p-4">
+                  <label className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked
+                      disabled
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-[#9473ff] focus:ring-[#9473ff]"
+                    />
+                    <span className="text-sm text-[#6a7282] leading-6">
+                      I agree to the Service Terms outlined by My Plumber Company and authorize recurring charges of ${selectedPlanForPdf.price.toFixed(2)} every {selectedPlanForPdf.intervalCount === 1 ? selectedPlanForPdf.billingInterval : `${selectedPlanForPdf.intervalCount} ${selectedPlanForPdf.billingInterval}s`} until I cancel.
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

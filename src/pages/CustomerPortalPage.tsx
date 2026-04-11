@@ -48,7 +48,7 @@ export default function CustomerPortalPage() {
     {
       id: 'EST-001',
       type: 'estimate',
-      documentLabel: 'Service Plan Estimate',
+      documentLabel: 'Serviceplan',
       date: '2026-02-20',
       status: 'Pending',
       total: 2500,
@@ -74,7 +74,7 @@ export default function CustomerPortalPage() {
     {
       id: 'INV-045',
       type: 'invoice',
-      documentLabel: 'Down Payment Invoice',
+      documentLabel: 'Deposit',
       date: '2026-02-15',
       status: 'Due',
       total: 1850,
@@ -97,7 +97,7 @@ export default function CustomerPortalPage() {
     {
       id: 'INV-042',
       type: 'invoice',
-      documentLabel: 'Instant Invoice',
+      documentLabel: 'Instant',
       date: '2026-02-10',
       status: 'Paid',
       total: 950,
@@ -119,7 +119,6 @@ export default function CustomerPortalPage() {
     {
       id: 'EST-002',
       type: 'estimate',
-      documentLabel: 'Job Estimate',
       date: '2026-02-18',
       status: 'Pending',
       total: 3200,
@@ -141,7 +140,7 @@ export default function CustomerPortalPage() {
     {
       id: 'INV-048',
       type: 'invoice',
-      documentLabel: 'Final Invoice',
+      documentLabel: 'Instant',
       date: '2026-02-22',
       status: 'Due',
       total: 725,
@@ -162,7 +161,7 @@ export default function CustomerPortalPage() {
     {
       id: 'EST-003',
       type: 'estimate',
-      documentLabel: 'Membership Renewal Estimate',
+      documentLabel: 'Serviceplan',
       date: '2026-02-12',
       status: 'Approved',
       total: 1290,
@@ -183,7 +182,6 @@ export default function CustomerPortalPage() {
     {
       id: 'EST-004',
       type: 'estimate',
-      documentLabel: 'Repair Follow-Up Estimate',
       date: '2026-02-09',
       status: 'Declined',
       total: 680,
@@ -205,7 +203,7 @@ export default function CustomerPortalPage() {
     {
       id: 'INV-049',
       type: 'invoice',
-      documentLabel: 'Refunded Invoice',
+      documentLabel: 'Deposit',
       date: '2026-02-08',
       status: 'Refunded',
       total: 410,
@@ -289,8 +287,7 @@ export default function CustomerPortalPage() {
     : null;
 
   const getDocumentDisplayLabel = (item: EstimateInvoice) => {
-    if (item.documentLabel) return item.documentLabel;
-    return item.type === 'estimate' ? 'Estimate' : 'Invoice';
+    return item.documentLabel || '';
   };
 
   return (
@@ -349,14 +346,20 @@ export default function CustomerPortalPage() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded-[20px] p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow"
-                    style={{ borderColor: '#e2e8f0' }}
+                    className="rounded-[20px] p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow"
+                    style={{
+                      borderColor: selectedItem?.id === item.id ? '#d8d8d8' : '#e2e8f0',
+                      backgroundColor: selectedItem?.id === item.id ? '#e8e8e8' : '#ffffff',
+                    }}
                     onClick={() => handleViewNow(item)}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <p className="font-semibold text-sm" style={{ color: '#051046' }}>
-                          {item.id} <span className="text-gray-500 font-medium">({getDocumentDisplayLabel(item)})</span>
+                          {item.id}
+                          {getDocumentDisplayLabel(item) && (
+                            <span className="text-gray-500 font-medium"> ({getDocumentDisplayLabel(item)})</span>
+                          )}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(item.date).toLocaleDateString('en-US', {
@@ -377,11 +380,6 @@ export default function CustomerPortalPage() {
                         {item.status}
                       </span>
                     </div>
-
-                    <p className="text-sm mb-3" style={{ color: '#051046' }}>
-                      {item.jobDescription}
-                    </p>
-
                     <div className="flex items-center justify-between">
                       <p className="text-lg font-semibold" style={{ color: '#051046' }}>
                         ${item.total.toLocaleString()}
@@ -444,7 +442,7 @@ export default function CustomerPortalPage() {
                           </span>
                           <input 
                             type="text" 
-                            value={`${selectedItem.id} (${getDocumentDisplayLabel(selectedItem)})`} 
+                            value={getDocumentDisplayLabel(selectedItem) ? `${selectedItem.id} (${getDocumentDisplayLabel(selectedItem)})` : selectedItem.id}
                             readOnly
                             className="flex-1 px-3 py-2 border border-[#e2e8f0] rounded-[8px] text-sm text-[#051046] bg-gray-50"
                           />
@@ -504,7 +502,7 @@ export default function CustomerPortalPage() {
                                   {lineItem.notes && (
                                     <p className="text-xs text-gray-500 mt-1">{lineItem.notes}</p>
                                   )}
-                                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${lineItem.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'}`}>
+                                  <span className="inline-block mt-2 text-[12px] font-medium text-[#6a7282]">
                                     {lineItem.taxable ? 'TAXABLE' : 'NON-TAXABLE'}
                                   </span>
                                 </div>
@@ -603,16 +601,7 @@ export default function CustomerPortalPage() {
                                 className="mt-1 h-4 w-4 rounded border-gray-300 text-[#9473ff] focus:ring-[#9473ff]"
                               />
                               <span className="text-sm text-[#051046] leading-6">
-                                I agree to the Service Terms outlined by {servicePlanConsentText.companyName}{' '}
-                                <a
-                                  href={servicePlanConsentText.companyWebsite}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-[#9473ff] hover:underline"
-                                >
-                                  {servicePlanConsentText.companyWebsite}
-                                </a>{' '}
-                                and authorize recurring charges of {servicePlanConsentText.amount} every{' '}
+                                I agree to the Service Terms outlined by {servicePlanConsentText.companyName} and authorize recurring charges of {servicePlanConsentText.amount} every{' '}
                                 {servicePlanConsentText.billingCycle} until I cancel.
                               </span>
                             </label>

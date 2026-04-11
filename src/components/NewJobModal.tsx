@@ -555,11 +555,11 @@ export function NewJobModal({
                                     {item.type === 'part' ? 'Part' : 'Service'}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-xs text-gray-500">
-                                    {item.taxable ? 'Taxable' : 'Non-taxable'}
-                                  </span>
-                                </div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[12px] text-[#6a7282]">
+                                      {item.taxable ? 'Taxable' : 'Non-taxable'}
+                                    </span>
+                                  </div>
                               </div>
                               <span className="text-sm font-semibold text-[#9473ff] whitespace-nowrap flex-shrink-0">
                                 ${item.price.toFixed(2)}
@@ -627,7 +627,7 @@ export function NewJobModal({
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-[12px] text-[#6a7282]">
                                       {item.taxable ? 'Taxable' : 'Non-taxable'}
                                     </span>
                                   </div>

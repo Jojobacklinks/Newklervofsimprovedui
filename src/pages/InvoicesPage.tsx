@@ -590,7 +590,7 @@ export function InvoicesPage() {
                             {item.notes && (
                               <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
                             )}
-                            <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${item.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'}`}>
+                            <span className="inline-block mt-2 text-[12px] font-medium text-[#6a7282]">
                               {item.taxable ? 'TAXABLE' : 'NON-TAXABLE'}
                             </span>
                           </div>

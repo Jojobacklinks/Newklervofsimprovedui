@@ -57,10 +57,22 @@ interface ServicePlanSubscription {
   id: string;
   planName: string;
   status: 'Active' | 'Paused' | 'Cancelled';
+  clientName: string;
+  clientEmail: string;
+  propertyAddress: string;
+  phone: string;
+  serviceName: string;
+  serviceDescription: string;
   startDate: string;
   nextBillingDate: string;
   amount: number;
   interval: string;
+  billingInterval: 'day' | 'week' | 'month' | 'year';
+  intervalCount: number;
+  autoRenew: boolean;
+  discount: number;
+  totalVisits: number;
+  createdAt: string;
 }
 
 // Mock client database for autocomplete
@@ -295,6 +307,7 @@ export function ClientProfilePage() {
 
   // Additional modal states for the service plan creation workflow
   const [isPDFViewOpen, setIsPDFViewOpen] = useState(false);
+  const [selectedServicePlanForPdf, setSelectedServicePlanForPdf] = useState<ServicePlanSubscription | null>(null);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
   const [isSendConfirmOpen, setIsSendConfirmOpen] = useState(false);
   const [isCardDeveloperNoteOpen, setIsCardDeveloperNoteOpen] = useState(false);
@@ -462,8 +475,48 @@ export function ClientProfilePage() {
   ];
 
   const mockServicePlans: ServicePlanSubscription[] = [
-    { id: 'SUB-001', planName: 'Premium Maintenance', status: 'Active', startDate: '2024-01-01', nextBillingDate: '2024-04-01', amount: 299, interval: 'Monthly' },
-    { id: 'SUB-002', planName: 'Basic Service', status: 'Active', startDate: '2024-02-15', nextBillingDate: '2024-03-15', amount: 99, interval: 'Monthly' },
+    {
+      id: 'SUB-001',
+      planName: 'Premium Maintenance',
+      status: 'Active',
+      clientName: 'Michael Roberts',
+      clientEmail: 'michael@robertsconstruction.com',
+      propertyAddress: '123 Main St, Anytown, USA',
+      phone: '(555) 123-4567',
+      serviceName: 'Premium Maintenance',
+      serviceDescription: 'Priority recurring maintenance plan with scheduled inspection visits.',
+      startDate: '2024-01-01',
+      nextBillingDate: '2024-04-01',
+      amount: 299,
+      interval: 'Monthly',
+      billingInterval: 'month',
+      intervalCount: 1,
+      autoRenew: true,
+      discount: 0,
+      totalVisits: 12,
+      createdAt: '2024-01-01',
+    },
+    {
+      id: 'SUB-002',
+      planName: 'Basic Service',
+      status: 'Active',
+      clientName: 'Michael Roberts',
+      clientEmail: 'michael@robertsconstruction.com',
+      propertyAddress: '123 Main St, Anytown, USA',
+      phone: '(555) 123-4567',
+      serviceName: 'Basic Service',
+      serviceDescription: 'Recurring essential service plan with routine scheduled visits.',
+      startDate: '2024-02-15',
+      nextBillingDate: '2024-03-15',
+      amount: 99,
+      interval: 'Monthly',
+      billingInterval: 'month',
+      intervalCount: 1,
+      autoRenew: true,
+      discount: 0,
+      totalVisits: 6,
+      createdAt: '2024-02-15',
+    },
   ];
 
   const startEditing = () => {
@@ -482,6 +535,30 @@ export function ClientProfilePage() {
     }
     setIsEditingDetails(false);
     // In real app, save to backend
+  };
+
+  const handleViewServicePlanInvoice = (plan: ServicePlanSubscription) => {
+    setSelectedServicePlanForPdf(plan);
+
+    setPlanForm((prev) => ({
+      ...prev,
+      clientName: plan.clientName,
+      clientEmail: plan.clientEmail,
+      propertyAddress: plan.propertyAddress,
+      phone: plan.phone,
+      serviceName: plan.serviceName,
+      serviceDescription: plan.serviceDescription,
+      price: plan.amount.toString(),
+      billingInterval: plan.billingInterval,
+      intervalCount: plan.intervalCount.toString(),
+      startDate: plan.startDate,
+      autoRenew: plan.autoRenew,
+      discountType: 'fixed',
+      discountValue: plan.discount.toString(),
+      totalVisits: plan.totalVisits.toString(),
+    }));
+
+    setIsPDFViewOpen(true);
   };
 
   // Helper functions for status dot colors (Job Details Style)
@@ -848,7 +925,7 @@ export function ClientProfilePage() {
                       displayClient.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="px-2.5 md:px-3 py-1 rounded-full text-xs md:text-sm border border-gray-300"
+                          className="px-2.5 md:px-3 py-1 rounded-[0.25rem] text-xs md:text-sm border border-gray-300"
                           style={{ backgroundColor: '#e5e7eb', color: '#364153' }}
                         >
                           {tag}
@@ -868,7 +945,7 @@ export function ClientProfilePage() {
                   <div className="flex items-center gap-1.5 md:gap-2 flex-wrap p-3 md:p-4 bg-gray-50 rounded-[15px] min-h-[52px] md:min-h-[56px]">
                     {displayClient?.servicePlan ? (
                       <span
-                        className="px-2.5 md:px-3 py-1 rounded-full text-xs md:text-sm border border-gray-300"
+                        className="px-2.5 md:px-3 py-1 rounded-[0.25rem] text-xs md:text-sm border border-gray-300"
                         style={{ backgroundColor: '#e5e7eb', color: '#364153' }}
                       >
                         {displayClient.servicePlan}
@@ -903,15 +980,8 @@ export function ClientProfilePage() {
         {/* Service Plans Tab */}
         {activeTab === 'service-plans' && (
           <div>
-            <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="mb-4 md:mb-6">
               <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-[#051046]">Service Plan Subscriptions</h2>
-              <button
-                onClick={() => setIsAddPlanModalOpen(true)}
-                className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-[#9473ff] text-white rounded-[32px] hover:bg-[#7f5fd9] transition-colors text-sm md:text-base"
-              >
-                <Plus className="w-4 h-4 md:w-5 md:h-5" />
-                Add Plan
-              </button>
             </div>
             <div className="space-y-4 md:space-y-6">
               {mockServicePlans.map((plan) => (
@@ -963,7 +1033,7 @@ export function ClientProfilePage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate('/admin/service-plans');
+                          handleViewServicePlanInvoice(plan);
                         }}
                         className="w-full sm:w-auto px-4 md:px-6 py-2 text-sm md:text-base bg-white border border-[#e8e8e8] text-[#051046] rounded-[32px] hover:bg-gray-50 transition-colors"
                       >
@@ -1597,7 +1667,7 @@ export function ClientProfilePage() {
                                           </span>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
-                                          <span className="text-xs text-gray-500">
+                                          <span className="text-[12px] text-[#6a7282]">
                                             {service.taxable ? 'Taxable' : 'Non-taxable'}
                                           </span>
                                         </div>
@@ -2006,40 +2076,47 @@ export function ClientProfilePage() {
       )}
 
       {/* PDF View Modal */}
-      {isPDFViewOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-[20px] w-full max-w-4xl border border-[#e2e8f0] overflow-hidden" style={{ boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)' }}>
-            <div className="max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-[#e2e8f0] px-6 py-4 z-10 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-[#051046]">Subscription Preview</h2>
-                <button onClick={() => setIsPDFViewOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                  <X className="w-5 h-5 text-[#051046]" />
-                </button>
+      {isPDFViewOpen && selectedServicePlanForPdf && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsPDFViewOpen(false);
+              setSelectedServicePlanForPdf(null);
+            }
+          }}
+        >
+          <div className="bg-white rounded-[20px] w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-[#e2e8f0]">
+              <div className="sticky top-0 bg-white border-b border-[#e2e8f0] px-6 py-4 flex items-center justify-between rounded-t-[20px]">
+                <div className="flex-1"></div>
+                <h2 className="text-xl font-bold text-[#051046]">INVOICE</h2>
+                <div className="flex-1 flex justify-end">
+                  <button onClick={() => {
+                    setIsPDFViewOpen(false);
+                    setSelectedServicePlanForPdf(null);
+                  }} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <div className="p-8 bg-gray-50">
-                <div className="bg-white p-8 rounded-[20px] border border-[#e2e8f0]" style={{ boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)' }}>
-                  <div className="mb-8 pb-6 border-b-2 border-[#8b5cf6]">
-                    <h1 className="text-3xl font-bold text-[#051046] mb-2">Service Subscription Agreement</h1>
-                    <p className="text-sm text-gray-600">Your Company Name</p>
-                    <p className="text-sm text-gray-600">123 Business Street, City, State 12345</p>
-                    <p className="text-sm text-gray-600">Phone: (555) 123-4567 | Email: info@company.com</p>
+              <div className="p-8">
+                <div className="mb-8 pb-6 border-b-2 border-[#8b5cf6]">
+                  <h1 className="text-3xl font-bold text-[#051046] mb-2">INVOICE</h1>
+                    <p className="text-sm text-[#051046]">KL Plumbing</p>
+                    <p className="text-sm text-[#051046]">huexdesigns@gmail.com</p>
+                    <p className="text-sm text-[#051046]">5555555555</p>
                   </div>
                   <div className="grid grid-cols-2 gap-6 mb-8">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">SUBSCRIPTION ID</p>
-                      <p className="text-sm font-semibold text-[#051046]">SUB-{Date.now().toString().slice(-8)}</p>
+                      <p className="text-xs text-gray-500 mb-1">INVOICE #</p>
+                      <p className="text-sm font-semibold text-[#051046]">{selectedServicePlanForPdf.id.replace('SUB-', 'INV-')}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">CREATED DATE</p>
-                      <p className="text-sm font-semibold text-[#051046]">{new Date().toLocaleDateString()}</p>
+                      <p className="text-sm font-semibold text-[#051046]">{selectedServicePlanForPdf.createdAt}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">START DATE</p>
+                      <p className="text-xs text-gray-500 mb-1">BILLING START DATE</p>
                       <p className="text-sm font-semibold text-[#051046]">{new Date(planForm.startDate).toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">STATUS</p>
-                      <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">Pending Payment</span>
                     </div>
                   </div>
                   <div className="mb-8">
@@ -2057,8 +2134,9 @@ export function ClientProfilePage() {
                       <table className="w-full">
                         <thead>
                           <tr className="bg-gray-50 border-b border-[#e2e8f0]">
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046] uppercase">Service</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046] uppercase">Billing</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046] uppercase">Description</th>
+                            <th className="px-4 py-3 text-center text-xs font-semibold text-[#051046] uppercase">Qty</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#051046] uppercase">Price</th>
                             <th className="px-4 py-3 text-right text-xs font-semibold text-[#051046] uppercase">Amount</th>
                           </tr>
                         </thead>
@@ -2067,14 +2145,12 @@ export function ClientProfilePage() {
                             <td className="px-4 py-4">
                               <p className="text-sm font-semibold text-[#051046]">{planForm.serviceName}</p>
                               <p className="text-xs text-gray-600 mt-1">{planForm.serviceDescription}</p>
-                              {planForm.customNotes && <p className="text-xs text-gray-500 mt-2 italic">Note: {planForm.customNotes}</p>}
+                              <span className="inline-block mt-2 text-[12px] font-medium text-[#6a7282]">NON-TAXABLE</span>
                             </td>
-                            <td className="px-4 py-4">
-                              <p className="text-sm text-[#051046]">{formatBillingInterval(planForm.billingInterval, parseInt(planForm.intervalCount))}</p>
-                              {parseInt(planForm.trialDays) > 0 && <p className="text-xs text-blue-600 mt-1">{planForm.trialDays} day trial</p>}
-                            </td>
+                            <td className="px-4 py-4 text-center text-sm text-[#051046]">1</td>
+                            <td className="px-4 py-4 text-right text-sm text-[#051046]">${parseFloat(planForm.price).toFixed(2)}</td>
                             <td className="px-4 py-4 text-right">
-                              <p className="text-sm font-semibold text-[#051046]">${parseFloat(planForm.price).toFixed(2)} {planForm.currency}</p>
+                              <p className="text-sm font-semibold text-[#051046]">${parseFloat(planForm.price).toFixed(2)}</p>
                             </td>
                           </tr>
                         </tbody>
@@ -2082,11 +2158,11 @@ export function ClientProfilePage() {
                     </div>
                   </div>
                   <div className="mb-8">
-                    <div className="bg-[#f8f5ff] border border-[#e2e8f0] rounded-[15px] p-6">
+                    <div className="border border-[#e2e8f0] rounded-[15px] p-6">
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Subtotal</span>
-                          <span className="text-sm font-medium text-[#051046]">${parseFloat(planForm.price).toFixed(2)} {planForm.currency}</span>
+                          <span className="text-sm font-medium text-[#051046]">${parseFloat(planForm.price).toFixed(2)}</span>
                         </div>
                         {parseFloat(planForm.discountValue) > 0 && (
                           <div className="flex justify-between items-center">
@@ -2101,7 +2177,7 @@ export function ClientProfilePage() {
                           </div>
                         )}
                         <div className="flex justify-between items-center pt-3 border-t-2 border-[#8b5cf6]">
-                          <span className="text-base font-bold text-[#051046]">Total per {planForm.billingInterval}</span>
+                          <span className="text-base font-bold text-[#051046]">Total</span>
                           <span className="text-xl font-bold text-[#8b5cf6]">${(() => {
                             const price = parseFloat(planForm.price);
                             let discount = 0;
@@ -2111,32 +2187,31 @@ export function ClientProfilePage() {
                               discount = parseFloat(planForm.discountValue);
                             }
                             return (price - discount).toFixed(2);
-                          })()} {planForm.currency}</span>
+                          })()}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="mb-8">
-                    <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Subscription Terms</h3>
+                    <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Service Plan Details</h3>
                     <div className="space-y-2 text-xs text-gray-600">
                       <p>• <strong>Billing Frequency:</strong> {formatBillingInterval(planForm.billingInterval, parseInt(planForm.intervalCount))}</p>
                       <p>• <strong>Start Date:</strong> {new Date(planForm.startDate).toLocaleDateString()}</p>
-                      {parseInt(planForm.trialDays) > 0 && <p>• <strong>Trial Period:</strong> {planForm.trialDays} days (no charge during trial)</p>}
                       <p>• <strong>Auto-Renewal:</strong> {planForm.autoRenew ? 'Enabled' : 'Disabled'}</p>
-                      {planForm.cancelAt && <p>• <strong>End Date:</strong> {new Date(planForm.cancelAt).toLocaleDateString()}</p>}
-                      <p>• <strong>Payment Method:</strong> {planForm.collectionMethod === 'collect_in_person' ? 'Collect in Person' : 'Payment Link (Stripe Checkout)'}</p>
+                      <p>• <strong>Total Visits:</strong> {planForm.totalVisits}</p>
                     </div>
                   </div>
-                  <div className="pt-6 border-t border-[#e2e8f0]">
-                    <p className="text-xs text-gray-500 text-center">This is a preview of your service subscription agreement. Once payment is processed, you will receive a confirmation email with your subscription details.</p>
+                  <div className="pt-6 border-t border-[#e2e8f0] space-y-4">
+                    <div className="border border-[#e2e8f0] rounded-[15px] p-4">
+                      <label className="flex items-start gap-3">
+                        <input type="checkbox" checked disabled className="mt-1 h-4 w-4 rounded border-gray-300 text-[#9473ff] focus:ring-[#9473ff]" />
+                        <span className="text-sm text-[#6a7282] leading-6">
+                          I agree to the Service Terms outlined by My Plumber Company and authorize recurring charges of ${parseFloat(planForm.price).toFixed(2)} every {parseInt(planForm.intervalCount) === 1 ? planForm.billingInterval : `${planForm.intervalCount} ${planForm.billingInterval}s`} until I cancel.
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="sticky bottom-0 bg-white border-t border-[#e2e8f0] px-6 py-4 flex justify-end gap-3">
-                <button onClick={() => setIsPDFViewOpen(false)} className="px-6 py-2 border border-[#e8e8e8] text-[#051046] rounded-[25px] hover:bg-gray-50 transition-colors">Close</button>
-                <button onClick={() => alert('PDF download functionality would be implemented here')} className="px-6 py-2 bg-[#9473ff] text-white rounded-[25px] hover:bg-[#7f5fd9] transition-colors">Download PDF</button>
-              </div>
-            </div>
           </div>
         </div>
       )}

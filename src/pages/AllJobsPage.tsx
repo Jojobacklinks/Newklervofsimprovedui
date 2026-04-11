@@ -1007,7 +1007,7 @@ export function AllJobsPage() {
                             <tbody>
                               <tr className="border-t border-gray-100">
                                 <td className="px-3 py-2">
-                                  <span className="inline-block px-2 py-0.5 bg-cyan-500 text-white text-xs rounded">
+                                  <span className="inline-block text-[12px] font-medium text-[#6a7282]">
                                     NON-TAXABLE
                                   </span>
                                   <div className="text-[#051046] mt-1">Service call</div>

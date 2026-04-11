@@ -1840,9 +1840,7 @@ export function JobDetailsPageV2() {
                                           </span>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
-                                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                            item.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'
-                                          }`}>
+                                          <span className="inline-block bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                             {item.taxable ? 'Taxable' : 'Non-taxable'}
                                           </span>
                                         </div>
@@ -3184,9 +3182,7 @@ export function JobDetailsPageV2() {
                                                 </span>
                                               </div>
                                               <div className="flex items-center gap-2 mt-1">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                                  invItem.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'
-                                                }`}>
+                                                <span className="inline-block bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                                   {invItem.taxable ? 'Taxable' : 'Non-taxable'}
                                                 </span>
                                               </div>
@@ -3597,9 +3593,7 @@ export function JobDetailsPageV2() {
                                   {item.notes && (
                                     <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
                                   )}
-                                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                                    item.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'
-                                  }`}>
+                                  <span className="inline-block mt-2 bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                     {item.taxable ? 'TAXABLE' : 'NON-TAXABLE'}
                                   </span>
                                 </div>
@@ -3615,7 +3609,7 @@ export function JobDetailsPageV2() {
                               <div>
                                 <p className="text-sm font-medium text-[#051046]">Service call</p>
                                 <p className="text-xs text-gray-500 mt-1">Service call including checking system, tune up and diagnostics.</p>
-                                <span className="inline-block mt-2 px-3 py-1 bg-[#FFDBE6] text-[#3d424d] rounded-full text-xs font-medium">
+                                <span className="inline-block mt-2 bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                   NON-TAXABLE
                                 </span>
                               </div>
@@ -3834,9 +3828,7 @@ export function JobDetailsPageV2() {
                                   {item.notes && (
                                     <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
                                   )}
-                                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                                    item.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'
-                                  }`}>
+                                  <span className="inline-block mt-2 bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                     {item.taxable ? 'TAXABLE' : 'NON-TAXABLE'}
                                   </span>
                                 </div>
@@ -3852,7 +3844,7 @@ export function JobDetailsPageV2() {
                               <div>
                                 <p className="text-sm font-medium text-[#051046]">Service call</p>
                                 <p className="text-xs text-gray-500 mt-1">Service call including checking system, tune up and diagnostics.</p>
-                                <span className="inline-block mt-2 px-3 py-1 bg-[#FFDBE6] text-[#3d424d] rounded-full text-xs font-medium">
+                                <span className="inline-block mt-2 bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                   NON-TAXABLE
                                 </span>
                               </div>
@@ -4418,9 +4410,7 @@ export function JobDetailsPageV2() {
                                                 </span>
                                               </div>
                                               <div className="flex items-center gap-2 mt-1">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                                  invItem.taxable ? 'bg-[#A6E4FA] text-[#3d424d]' : 'bg-[#FFDBE6] text-[#3d424d]'
-                                                }`}>
+                                                <span className="inline-block bg-transparent px-0 py-0 rounded-none text-[12px] font-medium text-[#6a7282] shadow-none">
                                                   {invItem.taxable ? 'Taxable' : 'Non-taxable'}
                                                 </span>
                                               </div>
