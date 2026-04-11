@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, Truck, HardHat, DollarSign, ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Info } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Truck, HardHat, Star, DollarSign, ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Info } from 'lucide-react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router';
 import { DateRangePicker } from '../components/DateRangePicker';
 import { AddClientModal, ClientData } from '../components/AddClientModal';
@@ -183,6 +183,11 @@ export function AllJobsPage() {
       searchParams.delete('jobId');
       setSearchParams(searchParams, { replace: true });
     }
+
+    const sortByParam = searchParams.get('sortBy');
+    if (sortByParam === 'positive-rated' || sortByParam === 'negative-rated') {
+      setSortBy(sortByParam);
+    }
   }, [searchParams, setSearchParams]);
 
   // Close tag dropdown when clicking outside
@@ -279,24 +284,42 @@ export function AllJobsPage() {
     const matchesTag = selectedTags.length === 0 || job.tags.some(tag => selectedTags.includes(tag));
     const matchesUpsell = !showUpsellsOnly || job.hasUpsell;
     const matchesUpsellFilter = sortBy !== 'upsell-only' || job.hasUpsell;
+    const matchesRatingFilter =
+      sortBy === 'positive-rated'
+        ? typeof job.feedbackRating === 'number' && job.feedbackRating >= 4
+        : sortBy === 'negative-rated'
+          ? typeof job.feedbackRating === 'number' && job.feedbackRating <= 3
+          : true;
     
-    return matchesSearch && matchesJobStatus && matchesTag && matchesUpsell && matchesUpsellFilter;
+    return matchesSearch && matchesJobStatus && matchesTag && matchesUpsell && matchesUpsellFilter && matchesRatingFilter;
   });
 
   // Sorting - create a new array to avoid mutating
   const sortedJobs = [...filteredJobs].sort((a, b) => {
+    const getRatingGroup = (job: Job, type: 'positive' | 'negative') => {
+      const rating = job.feedbackRating;
+      if (typeof rating !== 'number') return 0;
+      return type === 'positive' ? (rating >= 4 ? 1 : 0) : (rating <= 3 ? 1 : 0);
+    };
+
+    const getScheduledTime = (job: Job) => new Date(job.scheduledStart).getTime();
+
     if (sortBy === 'date-desc') {
       // Newest first
       return new Date(b.scheduledStart).getTime() - new Date(a.scheduledStart).getTime();
     } else if (sortBy === 'date-asc') {
       // Oldest first
       return new Date(a.scheduledStart).getTime() - new Date(b.scheduledStart).getTime();
-    } else if (sortBy === 'client') {
-      // Client name A-Z
-      return a.client.localeCompare(b.client);
-    } else if (sortBy === 'tech') {
-      // Tech name A-Z
-      return a.tech.localeCompare(b.tech);
+    } else if (sortBy === 'positive-rated') {
+      const ratingGroupDiff = getRatingGroup(b, 'positive') - getRatingGroup(a, 'positive');
+      if (ratingGroupDiff !== 0) return ratingGroupDiff;
+
+      return getScheduledTime(b) - getScheduledTime(a);
+    } else if (sortBy === 'negative-rated') {
+      const ratingGroupDiff = getRatingGroup(b, 'negative') - getRatingGroup(a, 'negative');
+      if (ratingGroupDiff !== 0) return ratingGroupDiff;
+
+      return getScheduledTime(b) - getScheduledTime(a);
     } else if (sortBy === 'upsell-only') {
       // Sort by newest first when showing upsells only
       return new Date(b.scheduledStart).getTime() - new Date(a.scheduledStart).getTime();
@@ -423,8 +446,8 @@ export function AllJobsPage() {
           >
             <option value="date-desc">Date created (Newest first)</option>
             <option value="date-asc">Date created (Oldest first)</option>
-            <option value="client">Client Name (A-Z)</option>
-            <option value="tech">Tech Name (A-Z)</option>
+            <option value="positive-rated">Positive Rated (4-5 stars)</option>
+            <option value="negative-rated">Negative Rated (3 or below)</option>
             <option value="upsell-only">Upsell only</option>
           </select>
         </div>
@@ -571,7 +594,7 @@ export function AllJobsPage() {
                           <div className="w-5 h-5 bg-[rgb(185,223,16)] flex items-center justify-center rounded-sm">
                             <span className="text-white text-xs font-bold">U</span>
                           </div>
-                          <div className="invisible group-hover:visible fixed bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-[100] ml-8 -translate-y-1/2">
+                          <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
                             Upsell on the job
                           </div>
                         </div>
@@ -645,14 +668,24 @@ export function AllJobsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
-                      {job.scheduledByStaff && (
-                        <div className="group relative inline-block">
-                          <HardHat className="w-4 h-4 text-[#f0a041]" />
-                          <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                            Job was scheduled by the staff/tech
+                      <div className="flex items-center gap-2">
+                        {job.scheduledByStaff && (
+                          <div className="group relative inline-block">
+                            <HardHat className="w-4 h-4 text-[#f0a041]" />
+                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                              Job was scheduled by the staff/tech
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {typeof job.feedbackRating === 'number' && (
+                          <div className="group relative inline-block">
+                            <Star className="w-4 h-4 fill-[#f0a041] text-[#f0a041]" />
+                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                              Rated {job.feedbackRating} {job.feedbackRating === 1 ? 'star' : 'stars'}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       <span className="text-sm text-[#051046]">{job.tech}</span>
                     </div>
                   </td>

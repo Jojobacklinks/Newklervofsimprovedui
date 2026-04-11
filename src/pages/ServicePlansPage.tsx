@@ -114,6 +114,7 @@ export function ServicePlansPage() {
   const [paymentExpiry, setPaymentExpiry] = useState('');
   const [paymentCVV, setPaymentCVV] = useState('');
   const [paymentCardholderName, setPaymentCardholderName] = useState('');
+  const isBillingSetupLocked = isEditMode;
   
   // PDF Preview Modal state
   const [showEstimatePdfModal, setShowEstimatePdfModal] = useState(false);
@@ -1340,7 +1341,8 @@ export function ServicePlansPage() {
                           value={planForm.price}
                           onChange={(e) => setPlanForm({ ...planForm, price: e.target.value })}
                           placeholder="0.00"
-                          className="w-full pl-8 pr-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full pl-8 pr-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         />
                       </div>
                     </div>
@@ -1353,7 +1355,8 @@ export function ServicePlansPage() {
                         <select
                           value={planForm.billingInterval}
                           onChange={(e) => setPlanForm({ ...planForm, billingInterval: e.target.value as any })}
-                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         >
                           <option value="day">Day</option>
                           <option value="week">Week</option>
@@ -1373,7 +1376,8 @@ export function ServicePlansPage() {
                             value={planForm.intervalCount}
                             onChange={(e) => setPlanForm({ ...planForm, intervalCount: e.target.value })}
                             placeholder="1"
-                            className="w-20 px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                            disabled={isBillingSetupLocked}
+                            className={`w-20 px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                           />
                           <span className="text-sm text-[#051046] font-medium">
                             {planForm.intervalCount === '1' ? planForm.billingInterval : `${planForm.billingInterval}s`}
@@ -1394,7 +1398,8 @@ export function ServicePlansPage() {
                           type="date"
                           value={planForm.startDate}
                           onChange={(e) => setPlanForm({ ...planForm, startDate: e.target.value })}
-                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         />
                       </div>
 
@@ -1406,7 +1411,8 @@ export function ServicePlansPage() {
                           type="date"
                           value={planForm.cancelAt}
                           onChange={(e) => setPlanForm({ ...planForm, cancelAt: e.target.value })}
-                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           Last charge occurs before this date
@@ -1526,7 +1532,8 @@ export function ServicePlansPage() {
                         <select
                           value={planForm.discountType}
                           onChange={(e) => setPlanForm({ ...planForm, discountType: e.target.value as any })}
-                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         >
                           <option value="percentage">Percentage (%)</option>
                           <option value="fixed">Fixed Amount ($)</option>
@@ -1538,7 +1545,8 @@ export function ServicePlansPage() {
                           value={planForm.discountValue}
                           onChange={(e) => setPlanForm({ ...planForm, discountValue: e.target.value })}
                           placeholder="0"
-                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         />
                       </div>
                     </div>
@@ -1905,6 +1913,8 @@ export function ServicePlansPage() {
           setIsPlanDetailsModalOpen(false);
         }}
         onEditPlan={(plan) => {
+          setIsPlanDetailsModalOpen(false);
+          setSelectedPlanForDetails(null);
           handleEditClick(plan);
         }}
         onPayNow={(plan) => {

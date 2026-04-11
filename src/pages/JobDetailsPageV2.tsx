@@ -2225,10 +2225,10 @@ export function JobDetailsPageV2() {
                           </div>
                         </div>
 
-                        {/* Feedback */}
+                        {/* Rating */}
                         <div className="bg-white/70 rounded-[10px] p-3 mb-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-[#051046]">Feedback</span>
+                            <span className="text-xs font-semibold text-[#051046]">Rating</span>
                             <span className="text-sm font-medium text-[#051046]">
                               {typeof currentJob?.feedbackRating === 'number'
                                 ? `${currentJob.feedbackRating} ${currentJob.feedbackRating === 1 ? 'star' : 'stars'}`

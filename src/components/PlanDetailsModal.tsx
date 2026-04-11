@@ -1,4 +1,4 @@
-import { X, Calendar, DollarSign, User, MapPin, Phone, Mail } from 'lucide-react';
+import { X, Calendar, DollarSign, User, MapPin, Phone, Mail, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useJobs } from '../contexts/JobsContext';
 
@@ -261,7 +261,17 @@ export function PlanDetailsModal({ isOpen, onClose, plan, onScheduleJob, onEditP
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {onEditPlan && (
+              <button
+                onClick={() => onEditPlan(plan)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#9473ff] border border-[#9473ff] rounded-[32px] hover:bg-[#f8f5ff] transition-colors"
+              >
+                <Edit2 className="w-5 h-5" />
+                Edit
+              </button>
+            )}
+
             {/* View Button - Show for approved and active statuses */}
             {(plan.status === 'approved' || plan.status === 'active') && (
               <button

@@ -154,38 +154,28 @@ export function RootLayout() {
                     
                     {/* New Positive Feedback Notification */}
                     <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <div className="text-[#051046] text-[14px]">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>New Positive Feedback:</span>
-                          {positiveFeedbackJobs.map((jobId) => (
-                            <button
-                              key={jobId}
-                              onClick={() => navigate(`${basePath}/jobs/details/${encodeURIComponent(jobId)}`)}
-                              className="text-purple-600 hover:underline font-medium text-[14px]"
-                            >
-                              {jobId}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      <p className="text-[#051046] text-[14px]">
+                        New Positive Feedback:{' '}
+                        <button
+                          onClick={() => navigate(`${basePath}/jobs/all-jobs?sortBy=positive-rated`)}
+                          className="text-purple-600 hover:underline font-medium text-[14px]"
+                        >
+                          {positiveFeedbackJobs.length}
+                        </button>
+                      </p>
                     </div>
 
                     {/* New Negative Feedback Notification */}
                     <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <div className="text-[#051046] text-[14px]">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>New Negative Feedback:</span>
-                          {negativeFeedbackJobs.map((jobId) => (
-                            <button
-                              key={jobId}
-                              onClick={() => navigate(`${basePath}/jobs/details/${encodeURIComponent(jobId)}`)}
-                              className="text-purple-600 hover:underline font-medium text-[14px]"
-                            >
-                              {jobId}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      <p className="text-[#051046] text-[14px]">
+                        New Negative Feedback:{' '}
+                        <button
+                          onClick={() => navigate(`${basePath}/jobs/all-jobs?sortBy=negative-rated`)}
+                          className="text-purple-600 hover:underline font-medium text-[14px]"
+                        >
+                          {negativeFeedbackJobs.length}
+                        </button>
+                      </p>
                     </div>
                   </div>
                 </div>
