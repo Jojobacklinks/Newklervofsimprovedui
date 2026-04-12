@@ -1019,7 +1019,7 @@ export function ClientProfilePage() {
                           style={{ backgroundColor: '#f16a6a' }}
                         >
                           <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                          Cancel Plan
+                          Stop Auto-Renewal
                         </button>
                         {/* Tooltip */}
                         <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block w-56 z-10">
