@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, User, TrendingUp, TrendingDown, Users, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { Search, Plus, User, TrendingUp, TrendingDown, Users, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X } from 'lucide-react';
 import { useSearchParams, useLocation } from 'react-router';
 import { AddLeadModal } from '../components/AddLeadModal';
 import { LeadDetailModal } from '../components/LeadDetailModal';
@@ -180,7 +180,7 @@ const mockLeads: Lead[] = [
       {
         id: 'A-106',
         type: 'stage_change',
-        description: 'Lead moved to Lost stage',
+        description: 'Lead moved to Lost stage (Competitor)',
         timestamp: '2023-10-06T08:00:00Z',
         user: 'John Tom',
       },
@@ -199,6 +199,8 @@ const LEAD_STAGES: Array<'New' | 'Contacted' | 'Price Shared' | 'Follow-Up' | 'W
   'Lost',
 ];
 
+const LOST_REASON_OPTIONS = ['Price', 'Competitor', 'Scheduling', 'Communication', 'Employee'] as const;
+
 export function LeadsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -208,8 +210,12 @@ export function LeadsPage() {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [stageFilter, setStageFilter] = useState<string>('All');
+  const [lostReasonFilter, setLostReasonFilter] = useState<string>('All');
   const [sortBy, setSortBy] = useState('date-desc');
   const [filteredLeadId, setFilteredLeadId] = useState<string | null>(null);
+  const [showLostReasonModal, setShowLostReasonModal] = useState(false);
+  const [pendingLostLeadId, setPendingLostLeadId] = useState<string | null>(null);
+  const [lostReason, setLostReason] = useState('');
   
   // Developer Notes state
   const [showDevNotes, setShowDevNotes] = useState(false);
@@ -270,12 +276,12 @@ export function LeadsPage() {
     }
   }, [location.state, leads]);
 
-  // Clear filteredLeadId when search query or stage filter changes
+  // Clear filteredLeadId when search query or filters change
   useEffect(() => {
-    if (searchQuery || stageFilter !== 'All') {
+    if (searchQuery || stageFilter !== 'All' || lostReasonFilter !== 'All') {
       setFilteredLeadId(null);
     }
-  }, [searchQuery, stageFilter, sortBy]);
+  }, [searchQuery, stageFilter, lostReasonFilter, sortBy]);
 
   // Calculate metrics
   const totalLeads = leads.length;
@@ -286,6 +292,36 @@ export function LeadsPage() {
   const activeValue = leads.filter((l) => !['Won', 'Lost'].includes(l.stage)).reduce((sum, l) => sum + l.value, 0);
   const winRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : '0.0';
   const lostRate = totalLeads > 0 ? ((lostLeads / totalLeads) * 100).toFixed(1) : '0.0';
+
+  const getLeadLostReason = (lead: Lead) => {
+    const lostActivity = lead.activityTimeline.find((activity) =>
+      activity.description.startsWith('Lead moved to Lost stage')
+    );
+
+    if (!lostActivity) return '';
+
+    const match = lostActivity.description.match(/\(([^)]+)\)$/);
+    return match ? match[1] : '';
+  };
+
+  const topLostReasonsText = (() => {
+    const lostReasonCounts = leads
+      .filter((lead) => lead.stage === 'Lost')
+      .map(getLeadLostReason)
+      .filter(Boolean)
+      .reduce<Record<string, number>>((acc, reason) => {
+        acc[reason] = (acc[reason] || 0) + 1;
+        return acc;
+      }, {});
+
+    const topReasons = Object.entries(lostReasonCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([reason, count]) => `${reason} (${count})`)
+      .join(', ');
+
+    return topReasons ? `Lost: ${lostLeads}/${totalLeads} | ${topReasons}` : `Lost: ${lostLeads}/${totalLeads}`;
+  })();
 
   // Filter leads based on search and stage
   const filteredLeads = leads.filter((lead) => {
@@ -301,8 +337,12 @@ export function LeadsPage() {
       lead.serviceType.toLowerCase().includes(searchLower);
     
     const matchesStage = stageFilter === 'All' || lead.stage === stageFilter;
+    const leadLostReason = getLeadLostReason(lead);
+    const matchesLostReason =
+      lostReasonFilter === 'All' ||
+      (lead.stage === 'Lost' && leadLostReason === lostReasonFilter);
     
-    return matchesSearch && matchesStage;
+    return matchesSearch && matchesStage && matchesLostReason;
   });
 
   const sortedLeads = [...filteredLeads].sort((a, b) => {
@@ -597,7 +637,11 @@ export function LeadsPage() {
     }
   };
 
-  const handleStageChange = (leadId: string, newStage: 'New' | 'Contacted' | 'Price Shared' | 'Follow-Up' | 'Won' | 'Lost') => {
+  const applyStageChange = (
+    leadId: string,
+    newStage: 'New' | 'Contacted' | 'Price Shared' | 'Follow-Up' | 'Won' | 'Lost',
+    reason?: string
+  ) => {
     // Generate unique activity ID once
     const baseTimestamp = Date.now();
     const activityId = `activity-${baseTimestamp}-${leadId}`;
@@ -609,16 +653,27 @@ export function LeadsPage() {
           const newActivity = {
             id: activityId,
             type: 'stage_change' as const,
-            description: `Stage changed to ${newStage}`,
+            description:
+              newStage === 'Lost'
+                ? reason
+                  ? `Lead moved to Lost stage (${reason})`
+                  : 'Lead moved to Lost stage'
+                : `Stage changed to ${newStage}`,
             timestamp: new Date().toISOString(),
             user: 'Current User' // This would come from auth context in real app
           };
           
-          return {
+          const updatedLead = {
             ...lead,
             stage: newStage,
             activityTimeline: [newActivity, ...lead.activityTimeline]
           };
+
+          if (selectedLead && selectedLead.id === leadId) {
+            setSelectedLead(updatedLead);
+          }
+
+          return updatedLead;
         }
         return lead;
       })
@@ -634,6 +689,38 @@ export function LeadsPage() {
 
     // Close the dropdown after selection
     setOpenDropdownId(null);
+  };
+
+  const handleStageChange = (leadId: string, newStage: 'New' | 'Contacted' | 'Price Shared' | 'Follow-Up' | 'Won' | 'Lost') => {
+    if (newStage === 'Lost') {
+      setPendingLostLeadId(leadId);
+      setLostReason('');
+      setShowLostReasonModal(true);
+      setOpenDropdownId(null);
+      return;
+    }
+
+    applyStageChange(leadId, newStage);
+  };
+
+  const handleCloseLostReasonModal = () => {
+    setShowLostReasonModal(false);
+    setPendingLostLeadId(null);
+    setLostReason('');
+  };
+
+  const handleConfirmLostReason = () => {
+    if (!pendingLostLeadId || !lostReason) return;
+
+    applyStageChange(pendingLostLeadId, 'Lost', lostReason);
+    handleCloseLostReasonModal();
+  };
+
+  const handleSkipLostReason = () => {
+    if (!pendingLostLeadId) return;
+
+    applyStageChange(pendingLostLeadId, 'Lost');
+    handleCloseLostReasonModal();
   };
 
   const handleLeadUpdate = (leadId: string, updatedData: Partial<Lead>) => {
@@ -737,7 +824,9 @@ export function LeadsPage() {
         >
           <p className="text-sm text-gray-700 mb-2">Lost Rate</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{lostRate}%</p>
-          <p className="text-xs text-gray-600">Lost: {lostLeads}/{totalLeads}</p>
+          <p className="text-xs text-gray-600 truncate" title={topLostReasonsText}>
+            {topLostReasonsText}
+          </p>
         </div>
 
         {/* Active Leads */}
@@ -980,6 +1069,21 @@ export function LeadsPage() {
             <option value="Follow-Up">Follow-Up</option>
             <option value="Won">Won</option>
             <option value="Lost">Lost</option>
+          </select>
+        </div>
+
+        <div>
+          <select
+            value={lostReasonFilter}
+            onChange={(e) => setLostReasonFilter(e.target.value)}
+            className="w-[190px] h-[44px] px-4 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-600 text-[#051046] text-sm"
+          >
+            <option value="All">All Lost Reasons</option>
+            {LOST_REASON_OPTIONS.map((reason) => (
+              <option key={reason} value={reason}>
+                {reason}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -1247,6 +1351,58 @@ export function LeadsPage() {
         onUpdateStage={handleStageChange}
         onUpdateLead={handleLeadUpdate}
       />
+
+      {showLostReasonModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-white rounded-[20px] border border-[#e2e8f0] p-6 max-w-md w-full"
+            style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[#051046]">Mark Lead as Lost</h3>
+              <button
+                onClick={handleCloseLostReasonModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Lost Reason</label>
+                <select
+                  value={lostReason}
+                  onChange={(e) => setLostReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-[#9473ff]"
+                >
+                  <option value="">Select reason</option>
+                  {LOST_REASON_OPTIONS.map((reason) => (
+                    <option key={reason} value={reason}>
+                      {reason}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleSkipLostReason}
+                  className="flex-1 px-4 py-2 border border-[#e8e8e8] text-[#051046] rounded-[20px] hover:bg-gray-50 transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={handleConfirmLostReason}
+                  className="flex-1 px-4 py-2 bg-[#9473ff] text-white rounded-[20px] hover:bg-[#7f5fd9] transition-colors"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Developer Notes Popup */}
       <DeveloperNotesPopup

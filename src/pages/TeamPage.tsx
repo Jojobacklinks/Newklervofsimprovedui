@@ -139,7 +139,7 @@ export function TeamPage() {
         {/* Search and Filter Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           {/* Search Input */}
-          <div className="relative flex-1">
+          <div className="relative w-full md:w-[180px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
@@ -170,7 +170,7 @@ export function TeamPage() {
           {/* Add Member Button */}
           <button
             onClick={() => setShowAddMemberModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-[32px] transition-all whitespace-nowrap font-medium hover:shadow-lg"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-[32px] transition-all whitespace-nowrap font-medium hover:shadow-lg md:ml-auto"
             style={{ backgroundColor: '#9473ff' }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}

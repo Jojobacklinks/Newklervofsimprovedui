@@ -2155,6 +2155,9 @@ export function JobDetailsPageV2() {
                   {/* Notes */}
                   <div>
                     <h3 className="text-sm font-semibold text-[#051046] mb-3">Tech Notes</h3>
+                    <p className="text-xs text-gray-600 mb-3">
+                      These notes are not shown to the customer. Use this space for tech notes, and relevant links such as proposal PDFs, Google Docs, or Google Sheets.
+                    </p>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}

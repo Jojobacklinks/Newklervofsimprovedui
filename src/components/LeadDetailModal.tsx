@@ -643,7 +643,7 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdateStage, onUpdate
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={handleSaveEdit}
-                      className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-[32px] hover:bg-purple-700 transition-colors text-sm font-medium"
+                      className="flex-1 px-6 py-3 bg-[#9473ff] text-white rounded-[32px] hover:bg-[#7f5fd9] transition-colors text-sm font-medium"
                     >
                       Save Changes
                     </button>

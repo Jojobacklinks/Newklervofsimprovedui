@@ -165,13 +165,13 @@ export function AddPartOrServiceModal({
               }`}
             >
               <Wrench className="w-4 h-4" />
-              Service
+              Service/Plans
             </button>
           </div>
           <p className="text-xs text-gray-600 mt-2 text-center">
             {itemType === 'part' 
               ? 'Parts are physical items tracked in inventory (HVAC filters, pipes, etc.)'
-              : 'Services are labor or work you provide (diagnostics, repairs, maintenance)'}
+              : 'Services and plans are the work or recurring offerings you provide (diagnostics, repairs, maintenance, memberships).'}
           </p>
         </div>
 
