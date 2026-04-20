@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, User, TrendingUp, TrendingDown, Users, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X } from 'lucide-react';
+import { Search, Plus, User, Trophy, Users, CircleCheckBig, CircleX, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X } from 'lucide-react';
 import { useSearchParams, useLocation } from 'react-router';
 import { AddLeadModal } from '../components/AddLeadModal';
 import { LeadDetailModal } from '../components/LeadDetailModal';
@@ -807,9 +807,12 @@ export function LeadsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {/* Total Leads */}
         <div
-          className="rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+            <Users className="w-5 h-5 text-[#9473ff]" />
+          </div>
           <p className="text-sm text-gray-600 mb-2">Total Leads</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{totalLeads}</p>
           <p className="text-xs text-gray-600">Total Value: ${totalValue.toLocaleString()}</p>
@@ -817,9 +820,12 @@ export function LeadsPage() {
 
         {/* Win Rate */}
         <div
-          className="rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <Trophy className="w-5 h-5 text-[#b9df10]" />
+          </div>
           <p className="text-sm text-gray-700 mb-2">Win Rate</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{winRate}%</p>
           <p className="text-xs text-gray-600">Won: {wonLeads}/{totalLeads}</p>
@@ -827,9 +833,12 @@ export function LeadsPage() {
 
         {/* Lost Rate */}
         <div
-          className="rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+            <CircleX className="w-5 h-5 text-[#f16a6a]" />
+          </div>
           <p className="text-sm text-gray-700 mb-2">Lost Rate</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{lostRate}%</p>
           <p className="text-xs text-gray-600 truncate" title={topLostReasonsText}>
@@ -839,9 +848,12 @@ export function LeadsPage() {
 
         {/* Active Leads */}
         <div
-          className="rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <CircleCheckBig className="w-5 h-5 text-[#399deb]" />
+          </div>
           <p className="text-sm text-gray-700 mb-2">Active Leads</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{activeLeads}</p>
           <p className="text-xs text-gray-600">Active Value: ${activeValue.toLocaleString()}</p>
@@ -1137,28 +1149,28 @@ export function LeadsPage() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-[#e2e8f0]">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Lead ID
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Client
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Job Type
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Lead Source
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Value
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Stage
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Priority
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   <div className="group relative inline-flex items-center gap-1.5">
                     Days
                     <Info className="w-3.5 h-3.5 text-gray-400" />

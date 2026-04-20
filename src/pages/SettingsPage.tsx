@@ -777,12 +777,12 @@ export function SettingsPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Plan</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Status</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Start Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">End Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Billing Cycle</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Price</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Plan</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Status</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Start Date</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">End Date</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Billing Cycle</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Price</th>
                       </tr>
                     </thead>
                     <tbody>

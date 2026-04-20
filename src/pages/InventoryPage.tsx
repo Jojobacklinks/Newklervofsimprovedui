@@ -7,6 +7,7 @@ import {
   AlertTriangle, 
   DollarSign, 
   ArrowRightLeft,
+  ArrowBigUpDash,
   Filter,
   Wrench,
   Box,
@@ -505,32 +506,40 @@ export function InventoryPage() {
     <div className="p-4 md:p-8">
       {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Total Value</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+            <DollarSign className="w-5 h-5 text-[#9473ff]" />
           </div>
-          <p className="text-2xl font-bold text-[#051046]">${getTotalInventoryValue().toLocaleString()}</p>
+          <p className="text-sm text-gray-600">Total Value</p>
+          <p className="text-3xl font-bold text-[#051046]">${getTotalInventoryValue().toLocaleString()}</p>
+          <p className="text-xs text-gray-600">Combined inventory value</p>
         </div>
 
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Items in Stock</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <Package className="w-5 h-5 text-[#399deb]" />
           </div>
-          <p className="text-2xl font-bold text-[#051046]">{getTotalItemsInStock()}</p>
+          <p className="text-sm text-gray-600">Items in Stock</p>
+          <p className="text-3xl font-bold text-[#051046]">{getTotalItemsInStock()}</p>
+          <p className="text-xs text-gray-600">Units available across inventory</p>
         </div>
 
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Low Stock Alerts</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+            <AlertTriangle className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-2xl font-bold text-[#051046]">{getLowStockCount()}</p>
+          <p className="text-sm text-gray-600">Low Stock Alerts</p>
+          <p className="text-3xl font-bold text-[#051046]">{getLowStockCount()}</p>
+          <p className="text-xs text-gray-600">Items at or below minimum stock</p>
         </div>
 
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">Average Margin</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <ArrowBigUpDash className="w-5 h-5 text-[#b9df10]" />
           </div>
-          <p className="text-2xl font-bold text-[#051046]">{getAverageMargin().toFixed(1)}%</p>
+          <p className="text-sm text-gray-600">Average Margin</p>
+          <p className="text-3xl font-bold text-[#051046]">{getAverageMargin().toFixed(1)}%</p>
+          <p className="text-xs text-gray-600">Average markup across items</p>
         </div>
       </div>
 
@@ -657,21 +666,21 @@ export function InventoryPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#e2e8f0]">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Item</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Type</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Category</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">SKU</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Item</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Type</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Category</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">SKU</th>
                 {selectedType === 'parts' && (
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-[#051046]">Quantity</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Quantity</th>
                 )}
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Price</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Price</th>
                 {selectedType === 'parts' && (
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Total Value</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Total Value</th>
                 )}
                 {selectedType === 'parts' && (
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Status</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Status</th>
                 )}
-                <th className="text-center py-3 px-4 text-sm font-semibold text-[#051046]">Actions</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>

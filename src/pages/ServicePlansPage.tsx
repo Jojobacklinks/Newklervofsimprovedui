@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Edit2, Trash2, DollarSign, Clock, CheckCircle, AlertCircle, XCircle, Mail, ChevronLeft, ChevronRight, X, CreditCard, Calendar, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, DollarSign, Clock, CircleCheckBig, AlertCircle, XCircle, Mail, ChevronLeft, ChevronRight, X, CreditCard, Calendar, Search } from 'lucide-react';
 import { PlanDetailsModal } from '../components/PlanDetailsModal';
 import { NewJobModal } from '../components/NewJobModal';
 import { useJobs } from '../contexts/JobsContext';
@@ -718,26 +718,42 @@ export function ServicePlansPage() {
     <div className="p-8">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <p className="text-sm text-gray-600 mb-2">Active Total Value</p>
-          <p className="text-2xl font-bold text-[#051046]">
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+            <DollarSign className="w-5 h-5 text-[#9473ff]" />
+          </div>
+          <p className="text-sm text-gray-600">Active Total Value</p>
+          <p className="text-3xl font-bold text-[#051046]">
             ${Math.round(servicePlans.filter(plan => plan.status === 'active').reduce((sum, plan) => sum + plan.price, 0)).toLocaleString()}
           </p>
+          <p className="text-xs text-gray-600">Revenue from active plans</p>
         </div>
 
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <p className="text-sm text-gray-600 mb-2">Active</p>
-          <p className="text-2xl font-bold text-[#051046]">{activeSubscriptions}</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <CircleCheckBig className="w-5 h-5 text-[#399deb]" />
+          </div>
+          <p className="text-sm text-gray-600">Active</p>
+          <p className="text-3xl font-bold text-[#051046]">{activeSubscriptions}</p>
+          <p className="text-xs text-gray-600">Currently billing plans</p>
         </div>
 
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <p className="text-sm text-gray-600 mb-2">Pending Approval</p>
-          <p className="text-2xl font-bold text-[#051046]">{pendingApprovalSubscriptions}</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
+            <Clock className="w-5 h-5 text-[#f0a041]" />
+          </div>
+          <p className="text-sm text-gray-600">Pending Approval</p>
+          <p className="text-3xl font-bold text-[#051046]">{pendingApprovalSubscriptions}</p>
+          <p className="text-xs text-gray-600">Waiting for customer approval</p>
         </div>
 
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <p className="text-sm text-gray-600 mb-2">Canceled</p>
-          <p className="text-2xl font-bold text-[#051046]">{canceledSubscriptions}</p>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+            <XCircle className="w-5 h-5 text-[#f16a6a]" />
+          </div>
+          <p className="text-sm text-gray-600">Canceled</p>
+          <p className="text-3xl font-bold text-[#051046]">{canceledSubscriptions}</p>
+          <p className="text-xs text-gray-600">Plans that are no longer active</p>
         </div>
       </div>
 
@@ -860,15 +876,15 @@ export function ServicePlansPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Subscription ID</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Client</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Service</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Details</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Visits</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Upsell</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Next Billing</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Subscription ID</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Client</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Service</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Details</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Visits</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Upsell</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Next Billing</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -2093,10 +2109,10 @@ export function ServicePlansPage() {
                 <table className="w-full border-t border-b border-[#e2e8f0]">
                   <thead>
                     <tr className="border-b border-[#e2e8f0]">
-                      <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                      <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                      <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                      <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2234,10 +2250,10 @@ export function ServicePlansPage() {
                 <table className="w-full border-t border-b border-[#e2e8f0]">
                   <thead>
                     <tr className="border-b border-[#e2e8f0]">
-                      <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                      <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                      <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                      <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2370,9 +2386,9 @@ export function ServicePlansPage() {
                       <table className="w-full">
                         <thead>
                           <tr className="bg-gray-50 border-b border-[#e2e8f0]">
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046] uppercase">Service</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046] uppercase">Billing</th>
-                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#051046] uppercase">Amount</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Service</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Billing</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
                           </tr>
                         </thead>
                         <tbody>

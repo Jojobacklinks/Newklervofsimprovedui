@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, Truck, HardHat, Star, DollarSign, ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Info } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Truck, HardHat, Star, DollarSign, ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Info, Briefcase, CircleCheckBig, CircleX } from 'lucide-react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router';
 import { DateRangePicker } from '../components/DateRangePicker';
 import { AddClientModal, ClientData } from '../components/AddClientModal';
@@ -333,6 +333,11 @@ export function AllJobsPage() {
   const endIndex = startIndex + itemsPerPage;
   const paginatedJobs = sortedJobs.slice(startIndex, endIndex);
 
+  const totalJobs = jobs.length;
+  const scheduledJobs = jobs.filter((job) => job.jobStatus === 'Scheduled').length;
+  const doneJobs = jobs.filter((job) => job.jobStatus === 'Done').length;
+  const cancelledJobs = jobs.filter((job) => job.jobStatus === 'Cancelled').length;
+
   const handleEditJob = (job: Job) => {
     const basePath = isStaffView ? '/staff' : '/admin';
     navigate(`${basePath}/jobs/details/${encodeURIComponent(job.id)}`);
@@ -385,6 +390,57 @@ export function AllJobsPage() {
 
   return (
     <div className="p-8">
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
+        >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+            <Briefcase className="w-5 h-5 text-[#9473ff]" />
+          </div>
+          <p className="text-sm text-gray-600 mb-2">Total Jobs</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{totalJobs}</p>
+          <p className="text-xs text-gray-600">All jobs in the list</p>
+        </div>
+
+        <div
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
+        >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
+            <Calendar className="w-5 h-5 text-[#f0a041]" />
+          </div>
+          <p className="text-sm text-gray-600 mb-2">Scheduled</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{scheduledJobs}</p>
+          <p className="text-xs text-gray-600">Jobs waiting to be completed</p>
+        </div>
+
+        <div
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
+        >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <CircleCheckBig className="w-5 h-5 text-[#399deb]" />
+          </div>
+          <p className="text-sm text-gray-600 mb-2">Done</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{doneJobs}</p>
+          <p className="text-xs text-gray-600">Completed jobs</p>
+        </div>
+
+        <div
+          className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
+          style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
+        >
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+            <CircleX className="w-5 h-5 text-[#f16a6a]" />
+          </div>
+          <p className="text-sm text-gray-600 mb-2">Cancelled</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{cancelledJobs}</p>
+          <p className="text-xs text-gray-600">Jobs that were cancelled</p>
+        </div>
+      </div>
+
       {/* Filters Section */}
       <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6 mb-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
         {/* Filters Grid */}
@@ -546,8 +602,8 @@ export function AllJobsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">JOB ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">JOB ID</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   <div className="flex items-center gap-1">
                     TAGS
                     <div className="group relative inline-block">
@@ -558,7 +614,7 @@ export function AllJobsPage() {
                     </div>
                   </div>
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   <div className="group relative inline-block">
                     E
                     <div className="invisible group-hover:visible fixed bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-[100] -translate-y-1/2 ml-8 normal-case">
@@ -566,7 +622,7 @@ export function AllJobsPage() {
                     </div>
                   </div>
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   <div className="group relative inline-block">
                     I
                     <div className="invisible group-hover:visible fixed bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-[100] -translate-y-1/2 ml-8 normal-case">
@@ -574,12 +630,12 @@ export function AllJobsPage() {
                     </div>
                   </div>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">CLIENT</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">JOB TYPE</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">JOB STATUS</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Duration</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">SCHEDULED</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">CLIENT</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">JOB TYPE</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">JOB STATUS</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Duration</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">SCHEDULED</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   <div className="inline-flex items-center gap-1 text-[#6a7282]">
                     DETAILS
                     <div className="group relative inline-block">
@@ -590,8 +646,8 @@ export function AllJobsPage() {
                     </div>
                   </div>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ADDRESS</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ACTIONS</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">ADDRESS</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
@@ -1007,11 +1063,11 @@ export function AllJobsPage() {
                           <table className="w-full text-xs">
                             <thead className="bg-gray-50">
                               <tr>
-                                <th className="px-3 py-2 text-left font-semibold text-[#051046]">Description</th>
-                                <th className="px-3 py-2 text-center font-semibold text-[#051046]">Upsell?</th>
-                                <th className="px-3 py-2 text-center font-semibold text-[#051046]">QTY</th>
-                                <th className="px-3 py-2 text-right font-semibold text-[#051046]">Price</th>
-                                <th className="px-3 py-2 text-right font-semibold text-[#051046]">Amount</th>
+                                <th className="px-3 py-2 text-left font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                                <th className="px-3 py-2 text-center font-semibold text-[#6a7282] uppercase tracking-wider">Upsell?</th>
+                                <th className="px-3 py-2 text-center font-semibold text-[#6a7282] uppercase tracking-wider">QTY</th>
+                                <th className="px-3 py-2 text-right font-semibold text-[#6a7282] uppercase tracking-wider">Price</th>
+                                <th className="px-3 py-2 text-right font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
                               </tr>
                             </thead>
                             <tbody>

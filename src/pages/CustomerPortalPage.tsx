@@ -550,10 +550,10 @@ export default function CustomerPortalPage() {
                       <table className="w-full border-t border-b border-[#e2e8f0]">
                         <thead>
                           <tr className="border-b border-[#e2e8f0]">
-                            <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                            <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                            <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                            <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                            <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                            <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                            <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                            <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                           </tr>
                         </thead>
                         <tbody>

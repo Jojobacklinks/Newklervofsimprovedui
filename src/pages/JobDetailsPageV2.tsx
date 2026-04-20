@@ -1870,12 +1870,12 @@ export function JobDetailsPageV2() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b border-gray-200">
-                              <th className="text-left py-2 pr-3 text-xs font-semibold text-gray-600">Description</th>
-                              <th className="w-16 text-center py-2 px-1 text-xs font-semibold text-gray-600">Upsell</th>
-                              <th className="w-20 text-center py-2 px-1 text-xs font-semibold text-gray-600">Quantity</th>
-                              <th className="w-24 text-right py-2 px-1 text-xs font-semibold text-gray-600">Price</th>
-                              <th className="w-24 text-right py-2 px-1 text-xs font-semibold text-gray-600">Total</th>
-                              <th className="w-14 text-center py-2 pl-2 text-xs font-semibold text-gray-600">Actions</th>
+                              <th className="text-left py-2 pr-3 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                              <th className="w-16 text-center py-2 px-1 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Upsell</th>
+                              <th className="w-20 text-center py-2 px-1 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Quantity</th>
+                              <th className="w-24 text-right py-2 px-1 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Price</th>
+                              <th className="w-24 text-right py-2 px-1 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Total</th>
+                              <th className="w-14 text-center py-2 pl-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2414,22 +2414,22 @@ export function JobDetailsPageV2() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-[#e2e8f0]">
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">
                         ESTIMATE ID
                       </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">
                         CLIENT
                       </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">
                         CREATED
                       </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">
                         AMOUNT
                       </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">
                         STATUS
                       </th>
-                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">
                         ACTIONS
                       </th>
                     </tr>
@@ -2749,12 +2749,12 @@ export function JobDetailsPageV2() {
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b border-[#e2e8f0]">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046]">Invoice ID</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046]">Client</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046]">Created</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046]">Amount</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046]">Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046]">Actions</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Invoice ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Client</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Created</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -3580,10 +3580,10 @@ export function JobDetailsPageV2() {
                     <table className="w-full border-t border-b border-[#e2e8f0]">
                       <thead>
                         <tr className="border-b border-[#e2e8f0]">
-                          <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                          <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                          <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                          <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                          <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                          <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                          <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                          <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3815,10 +3815,10 @@ export function JobDetailsPageV2() {
                     <table className="w-full border-t border-b border-[#e2e8f0]">
                       <thead>
                         <tr className="border-b border-[#e2e8f0]">
-                          <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                          <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                          <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                          <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                          <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                          <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                          <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                          <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                         </tr>
                       </thead>
                       <tbody>

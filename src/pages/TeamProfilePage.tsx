@@ -215,36 +215,40 @@ export function TeamProfilePage() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Total Upsells</span>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
             <TrendingUp className="w-5 h-5 text-[#9473ff]" />
           </div>
+          <p className="text-sm text-gray-500">Total Upsells</p>
           <div className="text-3xl font-bold text-[#051046]">{totalUpsells}</div>
+          <p className="text-xs text-gray-600">Upsells credited to this team member</p>
         </div>
         
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Total Revenue</span>
-            <DollarSign className="w-5 h-5 text-green-500" />
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <DollarSign className="w-5 h-5 text-[#399deb]" />
           </div>
+          <p className="text-sm text-gray-500">Total Revenue</p>
           <div className="text-3xl font-bold text-[#051046]">${totalRevenue.toFixed(2)}</div>
+          <p className="text-xs text-gray-600">Revenue generated from credited upsells</p>
         </div>
         
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Total Commission</span>
-            <Percent className="w-5 h-5 text-[#9473ff]" />
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <Percent className="w-5 h-5 text-[#b9df10]" />
           </div>
+          <p className="text-sm text-gray-500">Total Commission</p>
           <div className="text-3xl font-bold text-[#051046]">${totalCommission.toFixed(2)}</div>
+          <p className="text-xs text-gray-600">Commission earned so far</p>
         </div>
         
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">Conversion Rate</span>
-            <TrendingUp className="w-5 h-5 text-green-500" />
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <CheckCircle className="w-5 h-5 text-[#399deb]" />
           </div>
+          <p className="text-sm text-gray-500">Conversion Rate</p>
           <div className="text-3xl font-bold text-[#051046]">{conversionRate}%</div>
+          <p className="text-xs text-gray-600">Upsells converted from total opportunities</p>
         </div>
       </div>
 
@@ -347,14 +351,14 @@ export function TeamProfilePage() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-[#e2e8f0]">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Type</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Client</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Amount</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Commission %</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Commission $</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Paid</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#051046]">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Type</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Client</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Commission %</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Commission $</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Paid</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>

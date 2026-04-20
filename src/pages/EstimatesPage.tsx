@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Search, Plus, MoreVertical, FileText, Trash2, X, Calendar, DollarSign, User, MapPin, Eye, CheckCircle } from 'lucide-react';
+import { Search, Plus, MoreVertical, FileText, Trash2, X, Calendar, DollarSign, User, MapPin, Eye, CheckCircle, CircleX } from 'lucide-react';
 import { DateRangePicker } from '../components/DateRangePicker';
 
 type EstimateStatus = 'Unsent' | 'Pending' | 'Approved' | 'Declined';
@@ -249,25 +249,37 @@ export function EstimatesPage() {
     <div className="p-4 md:p-8">
       {/* Status Count Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Unsent}</div>
-          <div className="text-sm text-gray-600 mb-1">Unsent</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Unsent)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+            <FileText className="w-5 h-5 text-[#9473ff]" />
+          </div>
+          <p className="text-sm text-gray-600">Unsent</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unsent}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unsent)}</p>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Pending}</div>
-          <div className="text-sm text-gray-600 mb-1">Pending</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Pending)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
+            <Calendar className="w-5 h-5 text-[#f0a041]" />
+          </div>
+          <p className="text-sm text-gray-600">Pending</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Pending}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Pending)}</p>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Approved}</div>
-          <div className="text-sm text-gray-600 mb-1">Approved</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Approved)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <CheckCircle className="w-5 h-5 text-[#399deb]" />
+          </div>
+          <p className="text-sm text-gray-600">Approved</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Approved}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Approved)}</p>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Declined}</div>
-          <div className="text-sm text-gray-600 mb-1">Declined</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Declined)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+            <CircleX className="w-5 h-5 text-[#f16a6a]" />
+          </div>
+          <p className="text-sm text-gray-600">Declined</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Declined}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Declined)}</p>
         </div>
       </div>
 
@@ -345,22 +357,22 @@ export function EstimatesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#e2e8f0]">
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Estimate ID
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Client
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -522,10 +534,10 @@ export function EstimatesPage() {
                 <table className="w-full border-t border-b border-[#e2e8f0]">
                   <thead>
                     <tr className="border-b border-[#e2e8f0]">
-                      <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                      <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                      <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                      <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -673,12 +673,12 @@ export function NewJobModal({
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-gray-200">
-                          <th className="text-left py-2 text-xs font-semibold text-gray-600">Description</th>
-                          <th className="text-center py-2 text-xs font-semibold text-gray-600">Upsell</th>
-                          <th className="text-center py-2 text-xs font-semibold text-gray-600">Quantity</th>
-                          <th className="text-right py-2 text-xs font-semibold text-gray-600">Price</th>
-                          <th className="text-right py-2 text-xs font-semibold text-gray-600">Total</th>
-                          <th className="text-center py-2 text-xs font-semibold text-gray-600 w-16">Actions</th>
+                          <th className="text-left py-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                          <th className="text-center py-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Upsell</th>
+                          <th className="text-center py-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Quantity</th>
+                          <th className="text-right py-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Price</th>
+                          <th className="text-right py-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Total</th>
+                          <th className="text-center py-2 text-xs font-semibold text-[#6a7282] uppercase tracking-wider w-16">Actions</th>
                         </tr>
                       </thead>
                       <tbody>

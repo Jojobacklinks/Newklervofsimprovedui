@@ -1101,10 +1101,10 @@ export function Reports() {
           <table className="w-full">
             <thead className="sticky top-0 bg-white">
               <tr className="border-b border-[#e8e8e8]">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Job ID</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Date and Time</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Amount</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Payment Status</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-[#6a7282] uppercase tracking-wider">Job ID</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-[#6a7282] uppercase tracking-wider">Date and Time</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-[#6a7282] uppercase tracking-wider">Amount</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-[#6a7282] uppercase tracking-wider">Payment Status</th>
               </tr>
             </thead>
             <tbody>

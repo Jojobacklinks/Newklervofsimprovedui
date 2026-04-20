@@ -323,11 +323,11 @@ export function ActivityTimelineView({
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#e2e8f0]">
-              <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Activity</th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Item</th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Details</th>
-              <th className="text-center py-3 px-4 text-sm font-semibold text-[#051046]">Quantity</th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-[#051046]">Date & Time</th>
+              <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Activity</th>
+              <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Item</th>
+              <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Details</th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Quantity</th>
+              <th className="text-left py-3 px-4 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Date & Time</th>
             </tr>
           </thead>
           <tbody>

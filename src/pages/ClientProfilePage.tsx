@@ -1086,12 +1086,12 @@ export function ClientProfilePage() {
                 <table className="w-full min-w-[640px]">
                   <thead className="bg-gray-50 border-b border-[#e2e8f0]">
                     <tr>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-500 uppercase">Job ID</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-500 uppercase">Job Type</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-500 uppercase">Job Status</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-500 uppercase">Scheduled</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-500 uppercase">Tech</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Job ID</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Job Type</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Job Status</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Scheduled</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Tech</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e2e8f0]">
@@ -1190,11 +1190,11 @@ export function ClientProfilePage() {
                 <table className="w-full min-w-[640px]">
                   <thead className="bg-gray-50 border-b border-[#e2e8f0]">
                     <tr>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Estimate ID</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Created</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Amount</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Status</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Actions</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Estimate ID</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Created</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Status</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e2e8f0]">
@@ -1292,11 +1292,11 @@ export function ClientProfilePage() {
                 <table className="w-full min-w-[640px]">
                   <thead className="bg-gray-50 border-b border-[#e2e8f0]">
                     <tr>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Invoice ID</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Created</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Amount</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Status</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#051046] uppercase tracking-wider">Actions</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Invoice ID</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Created</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Status</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e2e8f0]">
@@ -1394,12 +1394,12 @@ export function ClientProfilePage() {
                 <table className="w-full min-w-[768px]">
                   <thead className="bg-gray-50 border-b border-[#e2e8f0]">
                     <tr>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-600 uppercase">Lead ID</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-600 uppercase">Job Type</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-600 uppercase">Stage</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-600 uppercase">Source</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-600 uppercase">Value</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-gray-600 uppercase">Created</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Lead ID</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Job Type</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Stage</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Source</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Value</th>
+                      <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[10px] md:text-xs font-semibold text-[#6a7282] uppercase">Created</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e2e8f0]">
@@ -2134,10 +2134,10 @@ export function ClientProfilePage() {
                       <table className="w-full">
                         <thead>
                           <tr className="bg-gray-50 border-b border-[#e2e8f0]">
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#051046] uppercase">Description</th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-[#051046] uppercase">Qty</th>
-                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#051046] uppercase">Price</th>
-                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#051046] uppercase">Amount</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                            <th className="px-4 py-3 text-center text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Qty</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Price</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Amount</th>
                           </tr>
                         </thead>
                         <tbody>

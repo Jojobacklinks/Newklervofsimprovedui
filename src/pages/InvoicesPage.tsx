@@ -305,25 +305,37 @@ export function InvoicesPage() {
     <div className="p-4 md:p-8">
       {/* Status Count Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Due}</div>
-          <div className="text-sm text-gray-600 mb-1">Due</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Due)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
+            <CalendarIcon className="w-5 h-5 text-[#f0a041]" />
+          </div>
+          <p className="text-sm text-gray-600">Due</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Due}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Due)}</p>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Unpaid}</div>
-          <div className="text-sm text-gray-600 mb-1">Unpaid</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Unpaid)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+            <CreditCard className="w-5 h-5 text-[#9473ff]" />
+          </div>
+          <p className="text-sm text-gray-600">Unpaid</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unpaid}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unpaid)}</p>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Paid}</div>
-          <div className="text-sm text-gray-600 mb-1">Paid</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Paid)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <CheckCircle className="w-5 h-5 text-[#399deb]" />
+          </div>
+          <p className="text-sm text-gray-600">Paid</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Paid}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Paid)}</p>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="text-3xl font-bold text-[#051046] mb-2">{statusCounts.Refunded}</div>
-          <div className="text-sm text-gray-600 mb-1">Refunded</div>
-          <div className="text-lg font-semibold text-[#051046]">{formatCurrency(statusAmounts.Refunded)}</div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+            <RotateCcw className="w-5 h-5 text-[#f16a6a]" />
+          </div>
+          <p className="text-sm text-gray-600">Refunded</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Refunded}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Refunded)}</p>
         </div>
       </div>
 
@@ -401,22 +413,22 @@ export function InvoicesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#e2e8f0]">
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Invoice ID
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Client
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#051046] uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -575,10 +587,10 @@ export function InvoicesPage() {
                 <table className="w-full border-t border-b border-[#e2e8f0]">
                   <thead>
                     <tr className="border-b border-[#e2e8f0]">
-                      <th className="text-left py-3 text-sm font-semibold text-[#051046]">Description</th>
-                      <th className="text-center py-3 text-sm font-semibold text-[#051046] w-20">QTY</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-24">Price</th>
-                      <th className="text-right py-3 text-sm font-semibold text-[#051046] w-32">Amount</th>
+                      <th className="text-left py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider">Description</th>
+                      <th className="text-center py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-20">QTY</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-24">Price</th>
+                      <th className="text-right py-3 text-sm font-semibold text-[#6a7282] uppercase tracking-wider w-32">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
