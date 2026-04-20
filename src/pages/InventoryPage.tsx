@@ -1295,7 +1295,8 @@ interface AddItemModalProps {
 function AddItemModal({ onClose, customCategories, onAddCategory }: AddItemModalProps) {
   const [itemType, setItemType] = useState<ItemType>('part');
   const [name, setName] = useState('');
-  const [quantity, setQuantity] = useState(0);
+  const [minStockLevel, setMinStockLevel] = useState(0);
+  const [stockQuantity, setStockQuantity] = useState(0);
   const [sku, setSku] = useState('');
   const [cost, setCost] = useState('');
   const [markupType, setMarkupType] = useState<'percentage' | 'dollar'>('percentage');
@@ -1416,19 +1417,37 @@ function AddItemModal({ onClose, customCategories, onAddCategory }: AddItemModal
 
           {/* Quantity - Only for parts */}
           {itemType === 'part' && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-[#051046] mb-2">
-                Initial Quantity
-              </label>
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-                required
-                className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] placeholder:text-gray-400"
-              />
-            </div>
+            <>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#051046] mb-2">
+                  Minimum Stock Level
+                </label>
+                <input
+                  type="number"
+                  placeholder="Min quantity"
+                  value={minStockLevel}
+                  onChange={(e) => setMinStockLevel(parseInt(e.target.value) || 0)}
+                  required
+                  className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] placeholder:text-gray-400"
+                />
+                <p className="text-xs text-gray-500 mt-1">Status: Good (above), Low (at/below), Out (zero)</p>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#051046] mb-2">
+                  Current Stock Quantity (Warehouse)
+                </label>
+                <input
+                  type="number"
+                  placeholder="Current quantity"
+                  value={stockQuantity}
+                  onChange={(e) => setStockQuantity(parseInt(e.target.value) || 0)}
+                  required
+                  className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] placeholder:text-gray-400"
+                />
+                <p className="text-xs text-gray-500 mt-1">Set the quantity currently on hand</p>
+              </div>
+            </>
           )}
 
           {/* SKU */}

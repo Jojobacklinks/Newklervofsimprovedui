@@ -579,7 +579,17 @@ export function AllJobsPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">JOB STATUS</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Duration</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">SCHEDULED</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">TECH</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                  <div className="inline-flex items-center gap-1 text-[#6a7282]">
+                    DETAILS
+                    <div className="group relative inline-block">
+                      <Info className="w-3 h-3 text-gray-400 cursor-help" />
+                      <div className="invisible group-hover:visible fixed bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-[100] ml-8 -translate-y-1/2 normal-case">
+                        The details about this job
+                      </div>
+                    </div>
+                  </div>
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ADDRESS</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ACTIONS</th>
               </tr>
@@ -593,16 +603,6 @@ export function AllJobsPage() {
                 >
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
-                      {job.hasUpsell && (
-                        <div className="group relative inline-block">
-                          <div className="w-5 h-5 bg-[rgb(185,223,16)] flex items-center justify-center rounded-sm">
-                            <span className="text-white text-xs font-bold">U</span>
-                          </div>
-                          <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                            Upsell on the job
-                          </div>
-                        </div>
-                      )}
                       {job.servicePlanId && (
                         <div className="group relative inline-block">
                           <div className="w-5 h-5 bg-[#28bdf2] flex items-center justify-center rounded-sm">
@@ -676,9 +676,19 @@ export function AllJobsPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
                       <div className="flex items-center gap-2">
+                        {job.hasUpsell && (
+                          <div className="group relative inline-block">
+                            <div className="w-4 h-4 bg-[rgb(185,223,16)] flex items-center justify-center rounded-sm">
+                              <span className="text-white text-[10px] font-bold leading-none">U</span>
+                            </div>
+                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                              Upsell on the job
+                            </div>
+                          </div>
+                        )}
                         {job.scheduledByStaff && (
                           <div className="group relative inline-block">
-                            <HardHat className="w-4 h-4 text-[#f0a041]" />
+                            <HardHat className="w-4 h-4 text-[#BDBDBD]" />
                             <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
                               Job was scheduled by the staff/tech
                             </div>

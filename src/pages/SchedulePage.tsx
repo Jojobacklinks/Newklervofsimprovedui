@@ -387,6 +387,7 @@ export function SchedulePage() {
     name: string;
     type: 'service' | 'part';
     quantity: number;
+    minStockLevel: number;
     sku: string;
     cost: string;
     markup: string;

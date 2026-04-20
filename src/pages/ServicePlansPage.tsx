@@ -949,11 +949,11 @@ export function ServicePlansPage() {
                       plan.upsoldBy ? (
                         <div className="flex flex-col items-start gap-1">
                           <div className="group relative inline-block">
-                            <div className="w-5 h-5 bg-[rgb(185,223,16)] flex items-center justify-center rounded-sm">
-                              <span className="text-white text-xs font-bold">U</span>
+                            <div className="w-4 h-4 bg-[rgb(185,223,16)] flex items-center justify-center rounded-sm">
+                              <span className="text-white text-[10px] font-bold leading-none">U</span>
                             </div>
                             <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                              Upsell on the job
+                              Upsell on the plan
                             </div>
                           </div>
                           <span>

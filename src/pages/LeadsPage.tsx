@@ -201,6 +201,8 @@ const LEAD_STAGES: Array<'New' | 'Contacted' | 'Price Shared' | 'Follow-Up' | 'W
 
 const LOST_REASON_OPTIONS = ['Price', 'Competitor', 'Scheduling', 'Communication', 'Employee'] as const;
 
+const formatLeadId = (value: number) => `L-${value.toString().padStart(3, '0')}`;
+
 export function LeadsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -772,9 +774,15 @@ export function LeadsPage() {
   };
 
   const handleAddLead = (newLead: Omit<Lead, 'id' | 'daysInStage' | 'createdDate' | 'avatar' | 'value'>) => {
+    const nextLeadNumber =
+      leads.reduce((maxId, lead) => {
+        const match = lead.id.match(/^L-(\d{3,})$/);
+        return match ? Math.max(maxId, parseInt(match[1], 10)) : maxId;
+      }, 0) + 1;
+
     const leadWithMetadata: Lead = {
       ...newLead,
-      id: Date.now().toString(),
+      id: formatLeadId(nextLeadNumber),
       daysInStage: 0,
       createdDate: new Date().toISOString(),
       avatar: newLead.clientName
@@ -1130,6 +1138,9 @@ export function LeadsPage() {
             <thead className="bg-gray-50 border-b border-[#e2e8f0]">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Lead ID
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Client
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -1165,6 +1176,11 @@ export function LeadsPage() {
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                   onClick={() => handleLeadClick(lead)}
                 >
+                  {/* Lead ID Column */}
+                  <td className="px-6 py-4">
+                    <p className="text-sm font-medium text-[#051046]">{lead.id}</p>
+                  </td>
+
                   {/* Client Column */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -1212,6 +1228,11 @@ export function LeadsPage() {
                         {lead.stage}
                         <ChevronDown className="w-3.5 h-3.5" />
                       </button>
+                      {lead.stage === 'Lost' && getLeadLostReason(lead) && (
+                        <p className="mt-1 text-xs text-[#f16a6a]">
+                          ({getLeadLostReason(lead)})
+                        </p>
+                      )}
                       {openDropdownId === lead.id && (
                         <>
                           <div
