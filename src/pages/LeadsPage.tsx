@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, User, Trophy, Users, CircleCheckBig, CircleX, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X } from 'lucide-react';
+import { Search, Plus, User, Trophy, Users, CircleX, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X, Megaphone } from 'lucide-react';
 import { useSearchParams, useLocation } from 'react-router';
 import { AddLeadModal } from '../components/AddLeadModal';
 import { LeadDetailModal } from '../components/LeadDetailModal';
@@ -290,10 +290,17 @@ export function LeadsPage() {
   const totalValue = leads.reduce((sum, l) => sum + l.value, 0);
   const wonLeads = leads.filter((l) => l.stage === 'Won').length;
   const lostLeads = leads.filter((l) => l.stage === 'Lost').length;
-  const activeLeads = leads.filter((l) => !['Won', 'Lost'].includes(l.stage)).length;
-  const activeValue = leads.filter((l) => !['Won', 'Lost'].includes(l.stage)).reduce((sum, l) => sum + l.value, 0);
   const winRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : '0.0';
   const lostRate = totalLeads > 0 ? ((lostLeads / totalLeads) * 100).toFixed(1) : '0.0';
+  const topLeadSources = Object.entries(
+    leads.reduce<Record<string, number>>((acc, lead) => {
+      acc[lead.leadSource] = (acc[lead.leadSource] || 0) + lead.value;
+      return acc;
+    }, {})
+  )
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  const [primaryLeadSource, ...secondaryLeadSources] = topLeadSources;
 
   const getLeadLostReason = (lead: Lead) => {
     const lostActivity = lead.activityTimeline.find((activity) =>
@@ -338,7 +345,11 @@ export function LeadsPage() {
       lead.email.toLowerCase().includes(searchLower) ||
       lead.serviceType.toLowerCase().includes(searchLower);
     
-    const matchesStage = stageFilter === 'All' || lead.stage === stageFilter;
+    const matchesStage =
+      stageFilter === 'All' ||
+      (stageFilter === 'Active'
+        ? !['Won', 'Lost'].includes(lead.stage)
+        : lead.stage === stageFilter);
     const leadLostReason = getLeadLostReason(lead);
     const matchesLostReason =
       lostReasonFilter === 'All' ||
@@ -846,17 +857,29 @@ export function LeadsPage() {
           </p>
         </div>
 
-        {/* Active Leads */}
+        {/* Top Lead Source */}
         <div
           className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <CircleCheckBig className="w-5 h-5 text-[#399deb]" />
+            <Megaphone className="w-5 h-5 text-[#399deb]" />
           </div>
-          <p className="text-sm text-gray-700 mb-2">Active Leads</p>
-          <p className="text-3xl font-bold text-[#051046] mb-1">{activeLeads}</p>
-          <p className="text-xs text-gray-600">Active Value: ${activeValue.toLocaleString()}</p>
+          <p className="text-sm text-gray-700 mb-2">Top 3 Lead Source</p>
+          {primaryLeadSource ? (
+            <>
+              <p className="pr-12 text-3xl font-bold text-[#051046] mb-1">
+                {primaryLeadSource[0]}: ${primaryLeadSource[1].toLocaleString()}
+              </p>
+              <p className="pr-12 text-xs text-gray-600 truncate" title={secondaryLeadSources.map(([source, amount]) => `${source}: $${amount.toLocaleString()}`).join(' | ')}>
+                {secondaryLeadSources.length > 0
+                  ? secondaryLeadSources.map(([source, amount]) => `${source}: $${amount.toLocaleString()}`).join(' | ')
+                  : 'No additional lead sources'}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-gray-600">No lead sources yet</p>
+          )}
         </div>
       </div>
 
@@ -1083,6 +1106,7 @@ export function LeadsPage() {
             className="w-[180px] h-[44px] px-4 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-600 text-[#051046] text-sm"
           >
             <option value="All">All Stages</option>
+            <option value="Active">Active</option>
             <option value="New">New</option>
             <option value="Contacted">Contacted</option>
             <option value="Price Shared">Price Shared</option>
