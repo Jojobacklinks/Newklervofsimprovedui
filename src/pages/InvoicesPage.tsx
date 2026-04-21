@@ -4,6 +4,14 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { DateRangePicker } from '../components/DateRangePicker';
 
 type InvoiceStatus = 'Due' | 'Unpaid' | 'Paid' | 'Refunded';
+type InvoicePeriodFilter =
+  | 'all-time'
+  | 'today'
+  | 'last-7-days'
+  | 'current-month'
+  | 'last-month'
+  | 'last-3-months'
+  | 'current-year';
 
 interface Invoice {
   id: string;
@@ -36,6 +44,7 @@ export function InvoicesPage() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'All'>('All');
+  const [periodFilter, setPeriodFilter] = useState<InvoicePeriodFilter>('all-time');
   
   // Read status from URL params on component mount
   useEffect(() => {
@@ -119,6 +128,42 @@ export function InvoicesPage() {
     Refunded: invoices.filter(i => i.status === 'Refunded').reduce((sum, inv) => sum + inv.amount, 0),
   };
 
+  const isWithinSelectedPeriod = (dateString: string) => {
+    if (periodFilter === 'all-time') return true;
+
+    const invoiceDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const compareDate = new Date(invoiceDate);
+    compareDate.setHours(0, 0, 0, 0);
+
+    switch (periodFilter) {
+      case 'today':
+        return compareDate.getTime() === today.getTime();
+      case 'last-7-days': {
+        const start = new Date(today);
+        start.setDate(today.getDate() - 6);
+        return compareDate >= start && compareDate <= today;
+      }
+      case 'current-month':
+        return compareDate.getMonth() === today.getMonth() && compareDate.getFullYear() === today.getFullYear();
+      case 'last-month': {
+        const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        return compareDate >= lastMonthStart && compareDate < currentMonthStart;
+      }
+      case 'last-3-months': {
+        const start = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+        return compareDate >= start && compareDate <= today;
+      }
+      case 'current-year':
+        return compareDate.getFullYear() === today.getFullYear();
+      default:
+        return true;
+    }
+  };
+
   // Filter invoices
   const filteredInvoices = invoices.filter(invoice => {
     // Status filter
@@ -132,6 +177,10 @@ export function InvoicesPage() {
       if (invoiceDate < startDate || invoiceDate > endDate) {
         return false;
       }
+    }
+
+    if (!isWithinSelectedPeriod(invoice.created)) {
+      return false;
     }
 
     // Search filter
@@ -305,37 +354,37 @@ export function InvoicesPage() {
     <div className="p-4 md:p-8">
       {/* Status Count Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
             <CreditCard className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-600">Unpaid</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unpaid}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unpaid)}</p>
+          <p className="text-sm text-gray-600 mb-2">Unpaid</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Unpaid}</p>
+          <p className="text-xs text-gray-600">Total unpaid value: {formatCurrency(statusAmounts.Unpaid)}</p>
         </div>
-        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
             <CalendarIcon className="w-5 h-5 text-[#f0a041]" />
           </div>
-          <p className="text-sm text-gray-600">Due</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Due}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Due)}</p>
+          <p className="text-sm text-gray-600 mb-2">Due</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Due}</p>
+          <p className="text-xs text-gray-600">Total due value: {formatCurrency(statusAmounts.Due)}</p>
         </div>
-        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
             <CheckCircle className="w-5 h-5 text-[#99b80d]" />
           </div>
-          <p className="text-sm text-gray-600">Paid</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Paid}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Paid)}</p>
+          <p className="text-sm text-gray-600 mb-2">Paid</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Paid}</p>
+          <p className="text-xs text-gray-600">Total paid value: {formatCurrency(statusAmounts.Paid)}</p>
         </div>
-        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
             <RotateCcw className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-sm text-gray-600">Refunded</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Refunded}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Refunded)}</p>
+          <p className="text-sm text-gray-600 mb-2">Refunded</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Refunded}</p>
+          <p className="text-xs text-gray-600">Total refunded value: {formatCurrency(statusAmounts.Refunded)}</p>
         </div>
       </div>
 
@@ -388,6 +437,22 @@ export function InvoicesPage() {
                 />
               </div>
             )}
+          </div>
+
+          <div>
+            <select
+              value={periodFilter}
+              onChange={(e) => setPeriodFilter(e.target.value as InvoicePeriodFilter)}
+              className="w-[180px] h-[44px] px-4 border border-[#9473ff] rounded-[15px] text-sm text-[#051046] bg-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+            >
+              <option value="all-time">All Time</option>
+              <option value="today">Today</option>
+              <option value="last-7-days">Last 7 Days</option>
+              <option value="current-month">Current Month</option>
+              <option value="last-month">Last Month</option>
+              <option value="last-3-months">Last 3 Months</option>
+              <option value="current-year">Current Year</option>
+            </select>
           </div>
 
           {/* Status Filter */}

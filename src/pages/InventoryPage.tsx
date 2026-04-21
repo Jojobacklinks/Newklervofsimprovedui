@@ -525,8 +525,8 @@ export function InventoryPage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
             <Boxes className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-600">Parts Total</p>
-          <p className="text-3xl font-bold text-[#051046]">{getTotalPartsCount()}</p>
+          <p className="text-sm text-gray-600 mb-2">Parts Total</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{getTotalPartsCount()}</p>
           <p className="text-xs text-gray-600">Value: ${getTotalPartsValue().toLocaleString()} for parts only</p>
         </div>
 
@@ -534,8 +534,8 @@ export function InventoryPage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
             <SquareCheckBig className="w-5 h-5 text-[#399deb]" />
           </div>
-          <p className="text-sm text-gray-600">Items in Stock</p>
-          <p className="text-3xl font-bold text-[#051046]">{getTotalItemsInStock()}</p>
+          <p className="text-sm text-gray-600 mb-2">Items in Stock</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{getTotalItemsInStock()}</p>
           <p className="text-xs text-gray-600">Count of parts/products (not services)</p>
         </div>
 
@@ -543,8 +543,8 @@ export function InventoryPage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
             <AlertTriangle className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-sm text-gray-600">Low Stock Alerts</p>
-          <p className="text-3xl font-bold text-[#051046]">{getLowStockCount()}</p>
+          <p className="text-sm text-gray-600 mb-2">Low Stock Alerts</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{getLowStockCount()}</p>
           <p className="text-xs text-gray-600">Items at or below minimum stock</p>
         </div>
 
@@ -552,8 +552,8 @@ export function InventoryPage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
             <ArrowBigUpDash className="w-5 h-5 text-[#99b80d]" />
           </div>
-          <p className="text-sm text-gray-600">Average Margin</p>
-          <p className="text-3xl font-bold text-[#051046]">{getAverageMargin().toFixed(1)}%</p>
+          <p className="text-sm text-gray-600 mb-2">Average Margin</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{getAverageMargin().toFixed(1)}%</p>
           <p className="text-xs text-gray-600">Average markup across items</p>
         </div>
       </div>

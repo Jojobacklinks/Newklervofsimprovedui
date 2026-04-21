@@ -225,8 +225,8 @@ export function TeamProfilePage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
             <TrendingUp className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-500">Total Upsells</p>
-          <div className="text-3xl font-bold text-[#051046]">{totalUpsells}/{totalJobsHandled}</div>
+          <p className="text-sm text-gray-600 mb-2">Total Upsells</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{totalUpsells}/{totalJobsHandled}</p>
           <p className="text-xs text-gray-600">Jobs with upsells out of total jobs</p>
         </div>
         
@@ -234,8 +234,8 @@ export function TeamProfilePage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
             <DollarSign className="w-5 h-5 text-[#399deb]" />
           </div>
-          <p className="text-sm text-gray-500">Total Revenue</p>
-          <div className="text-3xl font-bold text-[#051046]">${totalRevenue.toFixed(2)}</div>
+          <p className="text-sm text-gray-600 mb-2">Total Revenue</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">${totalRevenue.toFixed(2)}</p>
           <p className="text-xs text-gray-600">Revenue generated from credited upsells</p>
         </div>
         
@@ -243,8 +243,8 @@ export function TeamProfilePage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
             <Percent className="w-5 h-5 text-[#99b80d]" />
           </div>
-          <p className="text-sm text-gray-500">Total Commission</p>
-          <div className="text-3xl font-bold text-[#051046]">${totalCommission.toFixed(2)}</div>
+          <p className="text-sm text-gray-600 mb-2">Total Commission</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">${totalCommission.toFixed(2)}</p>
           <p className="text-xs text-gray-600">Commission earned so far</p>
         </div>
         
@@ -252,8 +252,8 @@ export function TeamProfilePage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#f3e8ff]">
             <ArrowUpNarrowWide className="w-5 h-5 text-[#9473ff]" />
           </div>
-          <p className="text-sm text-gray-500">Upsell Rate</p>
-          <div className="text-3xl font-bold text-[#051046]">{conversionRate.toFixed(1)}%</div>
+          <p className="text-sm text-gray-600 mb-2">Upsell Rate</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{conversionRate.toFixed(1)}%</p>
           <p className="text-xs text-gray-600">The percentage of jobs with upsells</p>
         </div>
       </div>

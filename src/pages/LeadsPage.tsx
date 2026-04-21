@@ -200,6 +200,14 @@ const LEAD_STAGES: Array<'New' | 'Contacted' | 'Price Shared' | 'Follow-Up' | 'W
 ];
 
 const LOST_REASON_OPTIONS = ['Price', 'Competitor', 'Scheduling', 'Communication', 'Employee'] as const;
+type LeadPeriodFilter =
+  | 'all-time'
+  | 'today'
+  | 'last-7-days'
+  | 'current-month'
+  | 'last-month'
+  | 'last-3-months'
+  | 'current-year';
 
 const formatLeadId = (value: number) => `L-${value.toString().padStart(3, '0')}`;
 
@@ -213,6 +221,7 @@ export function LeadsPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [stageFilter, setStageFilter] = useState<string>('All');
   const [lostReasonFilter, setLostReasonFilter] = useState<string>('All');
+  const [periodFilter, setPeriodFilter] = useState<LeadPeriodFilter>('all-time');
   const [sortBy, setSortBy] = useState('date-desc');
   const [filteredLeadId, setFilteredLeadId] = useState<string | null>(null);
   const [showLostReasonModal, setShowLostReasonModal] = useState(false);
@@ -334,6 +343,42 @@ export function LeadsPage() {
       : `Lost: ${lostLeads}/${totalLeads} | Top 3 reasons: None yet`;
   })();
 
+  const isWithinSelectedPeriod = (dateString: string) => {
+    if (periodFilter === 'all-time') return true;
+
+    const leadDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const compareDate = new Date(leadDate);
+    compareDate.setHours(0, 0, 0, 0);
+
+    switch (periodFilter) {
+      case 'today':
+        return compareDate.getTime() === today.getTime();
+      case 'last-7-days': {
+        const start = new Date(today);
+        start.setDate(today.getDate() - 6);
+        return compareDate >= start && compareDate <= today;
+      }
+      case 'current-month':
+        return compareDate.getMonth() === today.getMonth() && compareDate.getFullYear() === today.getFullYear();
+      case 'last-month': {
+        const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        return compareDate >= lastMonthStart && compareDate < currentMonthStart;
+      }
+      case 'last-3-months': {
+        const start = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+        return compareDate >= start && compareDate <= today;
+      }
+      case 'current-year':
+        return compareDate.getFullYear() === today.getFullYear();
+      default:
+        return true;
+    }
+  };
+
   // Filter leads based on search and stage
   const filteredLeads = leads.filter((lead) => {
     // If filtering by specific lead ID, show only that lead
@@ -356,8 +401,9 @@ export function LeadsPage() {
     const matchesLostReason =
       lostReasonFilter === 'All' ||
       (lead.stage === 'Lost' && leadLostReason === lostReasonFilter);
+    const matchesPeriod = isWithinSelectedPeriod(lead.createdDate);
     
-    return matchesSearch && matchesStage && matchesLostReason;
+    return matchesSearch && matchesStage && matchesLostReason && matchesPeriod;
   });
 
   const sortedLeads = [...filteredLeads].sort((a, b) => {
@@ -1085,6 +1131,22 @@ export function LeadsPage() {
               </div>
             </div>
           )}
+        </div>
+
+        <div>
+          <select
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value as LeadPeriodFilter)}
+            className="w-[180px] h-[44px] px-4 border border-[#9473ff] rounded-[15px] text-sm text-[#051046] bg-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+          >
+            <option value="all-time">All Time</option>
+            <option value="today">Today</option>
+            <option value="last-7-days">Last 7 Days</option>
+            <option value="current-month">Current Month</option>
+            <option value="last-month">Last Month</option>
+            <option value="last-3-months">Last 3 Months</option>
+            <option value="current-year">Current Year</option>
+          </select>
         </div>
 
         {/* Sort Filter */}

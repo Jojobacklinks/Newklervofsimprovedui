@@ -308,33 +308,33 @@ export function EstimatesPage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
             <FileText className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-600">Unsent</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unsent}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unsent)}</p>
+          <p className="text-sm text-gray-600 mb-2">Unsent</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Unsent}</p>
+          <p className="text-xs text-gray-600">Total unsent value: {formatCurrency(statusAmounts.Unsent)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
             <Calendar className="w-5 h-5 text-[#28bdf2]" />
           </div>
-          <p className="text-sm text-gray-600">Pending</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Pending}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Pending)}</p>
+          <p className="text-sm text-gray-600 mb-2">Pending</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Pending}</p>
+          <p className="text-xs text-gray-600">Total pending value: {formatCurrency(statusAmounts.Pending)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
             <CheckCircle className="w-5 h-5 text-[#99b80d]" />
           </div>
-          <p className="text-sm text-gray-600">Approved</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Approved}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Approved)}</p>
+          <p className="text-sm text-gray-600 mb-2">Approved</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Approved}</p>
+          <p className="text-xs text-gray-600">Total approved value: {formatCurrency(statusAmounts.Approved)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
             <CircleX className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-sm text-gray-600">Declined</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Declined}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Declined)}</p>
+          <p className="text-sm text-gray-600 mb-2">Declined</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{statusCounts.Declined}</p>
+          <p className="text-xs text-gray-600">Total declined value: {formatCurrency(statusAmounts.Declined)}</p>
         </div>
       </div>
 

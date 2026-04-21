@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, Truck, HardHat, Star, DollarSign, ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Info, Briefcase, CircleCheckBig, CircleX } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Truck, HardHat, Star, DollarSign, ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, CalendarClock, Info, Briefcase, CircleX } from 'lucide-react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router';
 import { DateRangePicker } from '../components/DateRangePicker';
 import { AddClientModal, ClientData } from '../components/AddClientModal';
@@ -41,6 +41,26 @@ const inventoryDatabase = [
   { id: 115, name: 'Sump Pump Installation', type: 'service' as const, price: 425.00, taxable: false }
 ];
 
+const jobValueById: Record<string, number> = {
+  'J-101': 2500,
+  'J-102': 1800,
+  'J-103': 3200,
+  'J-104': 4500,
+  'J-105': 1500,
+  'J-106': 2800,
+  'J-107': 3600,
+  'J-108': 2200,
+};
+
+type JobPeriodFilter =
+  | 'all-time'
+  | 'today'
+  | 'last-7-days'
+  | 'current-month'
+  | 'last-month'
+  | 'last-3-months'
+  | 'current-year';
+
 export function AllJobsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -49,6 +69,7 @@ export function AllJobsPage() {
   const isStaffView = location.pathname.startsWith('/staff');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date-desc'); // Default to newest first
+  const [periodFilter, setPeriodFilter] = useState<JobPeriodFilter>('all-time');
   const [dateRange, setDateRange] = useState('');
   const [jobStatusFilter, setJobStatusFilter] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -275,6 +296,42 @@ export function AllJobsPage() {
   }, []);
 
   // Filtering
+  const isWithinSelectedPeriod = (dateString: string) => {
+    if (periodFilter === 'all-time') return true;
+
+    const jobDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const compareDate = new Date(jobDate);
+    compareDate.setHours(0, 0, 0, 0);
+
+    switch (periodFilter) {
+      case 'today':
+        return compareDate.getTime() === today.getTime();
+      case 'last-7-days': {
+        const start = new Date(today);
+        start.setDate(today.getDate() - 6);
+        return compareDate >= start && compareDate <= today;
+      }
+      case 'current-month':
+        return compareDate.getMonth() === today.getMonth() && compareDate.getFullYear() === today.getFullYear();
+      case 'last-month': {
+        const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        return compareDate >= lastMonthStart && compareDate < currentMonthStart;
+      }
+      case 'last-3-months': {
+        const start = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+        return compareDate >= start && compareDate <= today;
+      }
+      case 'current-year':
+        return compareDate.getFullYear() === today.getFullYear();
+      default:
+        return true;
+    }
+  };
+
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = searchTerm === '' || 
       job.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -284,6 +341,13 @@ export function AllJobsPage() {
     const matchesTag = selectedTags.length === 0 || job.tags.some(tag => selectedTags.includes(tag));
     const matchesUpsell = !showUpsellsOnly || job.hasUpsell;
     const matchesUpsellFilter = sortBy !== 'upsell-only' || job.hasUpsell;
+    const matchesDateRange =
+      !(startDate && endDate) ||
+      (() => {
+        const jobDate = new Date(job.scheduledStart);
+        return jobDate >= startDate && jobDate <= endDate;
+      })();
+    const matchesPeriod = isWithinSelectedPeriod(job.scheduledStart);
     const matchesRatingFilter =
       sortBy === 'positive-rated'
         ? typeof job.feedbackRating === 'number' && job.feedbackRating >= 4
@@ -291,7 +355,7 @@ export function AllJobsPage() {
           ? typeof job.feedbackRating === 'number' && job.feedbackRating <= 3
           : true;
     
-    return matchesSearch && matchesJobStatus && matchesTag && matchesUpsell && matchesUpsellFilter && matchesRatingFilter;
+    return matchesSearch && matchesJobStatus && matchesTag && matchesUpsell && matchesUpsellFilter && matchesDateRange && matchesPeriod && matchesRatingFilter;
   });
 
   // Sorting - create a new array to avoid mutating
@@ -334,9 +398,71 @@ export function AllJobsPage() {
   const paginatedJobs = sortedJobs.slice(startIndex, endIndex);
 
   const totalJobs = jobs.length;
-  const scheduledJobs = jobs.filter((job) => job.jobStatus === 'Scheduled').length;
-  const doneJobs = jobs.filter((job) => job.jobStatus === 'Done').length;
   const cancelledJobs = jobs.filter((job) => job.jobStatus === 'Cancelled').length;
+  const totalJobsValue = jobs.reduce((sum, job) => sum + (jobValueById[job.id] ?? 0), 0);
+  const averageJobValue = totalJobs > 0 ? totalJobsValue / totalJobs : 0;
+  const cancellationRate = totalJobs > 0 ? (cancelledJobs / totalJobs) * 100 : 0;
+  const lostRevenue = jobs
+    .filter((job) => job.jobStatus === 'Cancelled')
+    .reduce((sum, job) => sum + (jobValueById[job.id] ?? 0), 0);
+  const ratedJobs = jobs.filter((job) => typeof job.feedbackRating === 'number');
+  const averageRating =
+    ratedJobs.length > 0
+      ? ratedJobs.reduce((sum, job) => sum + (job.feedbackRating ?? 0), 0) / ratedJobs.length
+      : 0;
+  const positiveRatedJobs = ratedJobs.filter((job) => (job.feedbackRating ?? 0) >= 4).length;
+  const negativeRatedJobs = ratedJobs.filter((job) => (job.feedbackRating ?? 0) <= 3).length;
+  const parseDurationToMinutes = (duration: string) => {
+    const hoursMatch = duration.match(/(\d+)h/);
+    const minutesMatch = duration.match(/(\d+)min/);
+    const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+    return (hours * 60) + minutes;
+  };
+  const formatMinutesAsDuration = (minutes: number) => {
+    const wholeMinutes = Math.max(0, Math.round(minutes));
+    const hours = Math.floor(wholeMinutes / 60);
+    const remainingMinutes = wholeMinutes % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${remainingMinutes}m`;
+    }
+
+    return `${remainingMinutes}m`;
+  };
+  const averageJobDurationMinutes =
+    totalJobs > 0
+      ? jobs.reduce((sum, job) => sum + parseDurationToMinutes(job.duration), 0) / totalJobs
+      : 0;
+  const averageJobDurationLabel = formatMinutesAsDuration(averageJobDurationMinutes);
+  const longestJobTypesText = Object.entries(
+    jobs.reduce<Record<string, { totalMinutes: number; count: number }>>((acc, job) => {
+      const key = job.jobType || 'Unknown';
+      if (!acc[key]) {
+        acc[key] = { totalMinutes: 0, count: 0 };
+      }
+
+      acc[key].totalMinutes += parseDurationToMinutes(job.duration);
+      acc[key].count += 1;
+      return acc;
+    }, {})
+  )
+    .map(([jobType, stats]) => ({
+      jobType,
+      averageMinutes: stats.count > 0 ? stats.totalMinutes / stats.count : 0,
+    }))
+    .sort((a, b) => b.averageMinutes - a.averageMinutes)
+    .slice(0, 3)
+    .map(({ jobType, averageMinutes }) => `${jobType}: ${formatMinutesAsDuration(averageMinutes)}`)
+    .join(' | ');
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
 
   const handleEditJob = (job: Job) => {
     const basePath = isStaffView ? '/staff' : '/admin';
@@ -413,19 +539,19 @@ export function AllJobsPage() {
           </div>
           <p className="text-sm text-gray-600 mb-2">Total Jobs</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{totalJobs}</p>
-          <p className="text-xs text-gray-600">All jobs in the list</p>
+          <p className="text-xs text-gray-600">Total Jobs: {formatCurrency(totalJobsValue)} | Average Job Value: {formatCurrency(averageJobValue)}</p>
         </div>
 
         <div
           className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <Calendar className="w-5 h-5 text-[#28bdf2]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
+            <Star className="w-5 h-5 text-[#f0a041]" />
           </div>
-          <p className="text-sm text-gray-600 mb-2">Scheduled</p>
-          <p className="text-3xl font-bold text-[#051046] mb-1">{scheduledJobs}</p>
-          <p className="text-xs text-gray-600">Jobs waiting to be completed</p>
+          <p className="text-sm text-gray-600 mb-2">Average Ratings</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{averageRating.toFixed(1)}</p>
+          <p className="text-xs text-gray-600">Positive-rated jobs: {positiveRatedJobs} | Negative-rated jobs: {negativeRatedJobs}</p>
         </div>
 
         <div
@@ -433,11 +559,11 @@ export function AllJobsPage() {
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
-            <CircleCheckBig className="w-5 h-5 text-[#99b80d]" />
+            <CalendarClock className="w-5 h-5 text-[#99b80d]" />
           </div>
-          <p className="text-sm text-gray-600 mb-2">Done</p>
-          <p className="text-3xl font-bold text-[#051046] mb-1">{doneJobs}</p>
-          <p className="text-xs text-gray-600">Completed jobs</p>
+          <p className="text-sm text-gray-600 mb-2">Average Job Duration</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{averageJobDurationLabel}</p>
+          <p className="text-xs text-gray-600">{longestJobTypesText || 'No job duration data yet'}</p>
         </div>
 
         <div
@@ -447,9 +573,9 @@ export function AllJobsPage() {
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
             <CircleX className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-sm text-gray-600 mb-2">Cancelled</p>
-          <p className="text-3xl font-bold text-[#051046] mb-1">{cancelledJobs}</p>
-          <p className="text-xs text-gray-600">Jobs that were cancelled</p>
+          <p className="text-sm text-gray-600 mb-2">Job Cancellation Rate</p>
+          <p className="text-3xl font-bold text-[#051046] mb-1">{cancellationRate.toFixed(1)}%</p>
+          <p className="text-xs text-gray-600">Cancelled jobs: {cancelledJobs} | Lost Revenue: {formatCurrency(lostRevenue)}</p>
         </div>
       </div>
 
@@ -503,6 +629,22 @@ export function AllJobsPage() {
               />
             </div>
           )}
+        </div>
+
+        <div>
+          <select
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value as JobPeriodFilter)}
+            className="w-[180px] h-[44px] px-4 border border-[#9473ff] rounded-[15px] text-[#051046] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+          >
+            <option value="all-time">All Time</option>
+            <option value="today">Today</option>
+            <option value="last-7-days">Last 7 Days</option>
+            <option value="current-month">Current Month</option>
+            <option value="last-month">Last Month</option>
+            <option value="last-3-months">Last 3 Months</option>
+            <option value="current-year">Current Year</option>
+          </select>
         </div>
 
         {/* Sort By Dropdown */}
