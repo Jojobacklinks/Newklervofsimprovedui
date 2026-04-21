@@ -384,8 +384,20 @@ export function AllJobsPage() {
   };
 
   const getStatusColor = (status: string) => {
-    // All statuses use the same color as other text elements
-    return 'text-[#051046]';
+    switch (status) {
+      case 'Scheduled':
+        return 'bg-[#0698c6]';
+      case 'Needs Scheduling':
+        return 'bg-gray-400';
+      case 'In Progress':
+        return 'bg-[#28bdf2]';
+      case 'Done':
+        return 'bg-[#b9df10]';
+      case 'Cancelled':
+        return 'bg-[#f16a6a]';
+      default:
+        return 'bg-gray-400';
+    }
   };
 
   return (
@@ -396,8 +408,8 @@ export function AllJobsPage() {
           className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <Briefcase className="w-5 h-5 text-[#9473ff]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <Briefcase className="w-5 h-5 text-[#BDBDBD]" />
           </div>
           <p className="text-sm text-gray-600 mb-2">Total Jobs</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{totalJobs}</p>
@@ -408,8 +420,8 @@ export function AllJobsPage() {
           className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
-            <Calendar className="w-5 h-5 text-[#f0a041]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
+            <Calendar className="w-5 h-5 text-[#28bdf2]" />
           </div>
           <p className="text-sm text-gray-600 mb-2">Scheduled</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{scheduledJobs}</p>
@@ -420,8 +432,8 @@ export function AllJobsPage() {
           className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <CircleCheckBig className="w-5 h-5 text-[#399deb]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <CircleCheckBig className="w-5 h-5 text-[#99b80d]" />
           </div>
           <p className="text-sm text-gray-600 mb-2">Done</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{doneJobs}</p>
@@ -697,8 +709,11 @@ export function AllJobsPage() {
                   <td className="px-4 py-3 text-center text-sm text-[#051046]">0</td>
                   <td className="px-4 py-3 text-sm text-[#051046]">{job.client}</td>
                   <td className="px-4 py-3 text-sm text-[#051046]">{job.jobType}</td>
-                  <td className={`px-4 py-3 text-sm font-medium ${getStatusColor(job.jobStatus)}`}>
-                    {job.jobStatus}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${getStatusColor(job.jobStatus)}`}></div>
+                      <span className="text-sm text-[#051046]">{job.jobStatus}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">

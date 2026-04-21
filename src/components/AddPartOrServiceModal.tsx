@@ -20,10 +20,13 @@ interface AddPartOrServiceModalProps {
     category: string;
     brand: string;
     description: string;
+    isServicePlan: boolean;
   }) => void;
   customCategories?: string[];
   onAddCategory?: () => void;
 }
+
+const CUSTOM_SERVICE_PLANS_STORAGE_KEY = 'klervo-custom-service-plan-services';
 
 export function AddPartOrServiceModal({ 
   isOpen, 
@@ -45,6 +48,7 @@ export function AddPartOrServiceModal({
   const [category, setCategory] = useState('');
   const [brand, setBrand] = useState('');
   const [description, setDescription] = useState('');
+  const [isServicePlan, setIsServicePlan] = useState(false);
   const [lastModified, setLastModified] = useState<'markup' | 'price' | null>(null);
 
   // Calculate price when cost or markup changes
@@ -88,6 +92,24 @@ export function AddPartOrServiceModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (itemType === 'service' && isServicePlan && typeof window !== 'undefined') {
+      const existingItems = window.localStorage.getItem(CUSTOM_SERVICE_PLANS_STORAGE_KEY);
+      const parsedItems: Array<{ name: string; description: string; price: number }> = existingItems
+        ? JSON.parse(existingItems)
+        : [];
+
+      const nextItems = [
+        ...parsedItems.filter((item) => item.name !== name),
+        {
+          name,
+          description,
+          price: parseFloat(price) || 0,
+        },
+      ];
+
+      window.localStorage.setItem(CUSTOM_SERVICE_PLANS_STORAGE_KEY, JSON.stringify(nextItems));
+    }
     
     onSave({
       name,
@@ -103,6 +125,7 @@ export function AddPartOrServiceModal({
       category,
       brand,
       description,
+      isServicePlan,
     });
 
     // Reset form
@@ -123,6 +146,7 @@ export function AddPartOrServiceModal({
     setCategory('');
     setBrand('');
     setDescription('');
+    setIsServicePlan(false);
     setLastModified(null);
   };
 
@@ -243,6 +267,26 @@ export function AddPartOrServiceModal({
               className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] placeholder:text-gray-400"
             />
           </div>
+
+          {itemType === 'service' && (
+            <div className="mb-4 rounded-[15px] border border-[#e8e8e8] px-4 py-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isServicePlan}
+                  onChange={(e) => setIsServicePlan(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-[#cbd5e1] text-[#9473ff] focus:ring-[#9473ff]"
+                  style={{ accentColor: '#9473ff' }}
+                />
+                <div>
+                  <span className="block text-sm font-medium text-[#051046]">Is this a service plan</span>
+                  <span className="block text-xs text-gray-500 mt-1">
+                    When it is checked, these plans appear in the Service Plans page's All Plans filters.
+                  </span>
+                </div>
+              </label>
+            </div>
+          )}
 
           {/* Cost */}
           <div className="mb-4">

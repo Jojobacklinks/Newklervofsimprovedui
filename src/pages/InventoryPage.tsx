@@ -3,6 +3,8 @@ import {
   Search, 
   Plus, 
   Package, 
+  Boxes,
+  SquareCheckBig,
   Users, 
   AlertTriangle, 
   DollarSign, 
@@ -269,6 +271,19 @@ export function InventoryPage() {
     }, 0);
   };
 
+  const getTotalPartsCount = (): number => {
+    return inventoryItems.filter((item) => item.type === 'part').length;
+  };
+
+  const getTotalPartsValue = (): number => {
+    return inventoryItems
+      .filter((item) => item.type === 'part')
+      .reduce((total, item) => {
+        const totalQty = getTotalStockForItem(item.id);
+        return total + (totalQty * item.unitPrice);
+      }, 0);
+  };
+
   const getLowStockCount = (): number => {
     return inventoryItems.filter(item => {
       if (item.type === 'service') return false;
@@ -507,21 +522,21 @@ export function InventoryPage() {
       {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <DollarSign className="w-5 h-5 text-[#9473ff]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <Boxes className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-600">Total Value</p>
-          <p className="text-3xl font-bold text-[#051046]">${getTotalInventoryValue().toLocaleString()}</p>
-          <p className="text-xs text-gray-600">Combined inventory value</p>
+          <p className="text-sm text-gray-600">Parts Total</p>
+          <p className="text-3xl font-bold text-[#051046]">{getTotalPartsCount()}</p>
+          <p className="text-xs text-gray-600">Value: ${getTotalPartsValue().toLocaleString()} for parts only</p>
         </div>
 
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <Package className="w-5 h-5 text-[#399deb]" />
+            <SquareCheckBig className="w-5 h-5 text-[#399deb]" />
           </div>
           <p className="text-sm text-gray-600">Items in Stock</p>
           <p className="text-3xl font-bold text-[#051046]">{getTotalItemsInStock()}</p>
-          <p className="text-xs text-gray-600">Units available across inventory</p>
+          <p className="text-xs text-gray-600">Count of parts/products (not services)</p>
         </div>
 
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
@@ -535,7 +550,7 @@ export function InventoryPage() {
 
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
-            <ArrowBigUpDash className="w-5 h-5 text-[#b9df10]" />
+            <ArrowBigUpDash className="w-5 h-5 text-[#99b80d]" />
           </div>
           <p className="text-sm text-gray-600">Average Margin</p>
           <p className="text-3xl font-bold text-[#051046]">{getAverageMargin().toFixed(1)}%</p>
@@ -1315,6 +1330,7 @@ function AddItemModal({ onClose, customCategories, onAddCategory }: AddItemModal
   const [category, setCategory] = useState('');
   const [brand, setBrand] = useState('');
   const [description, setDescription] = useState('');
+  const [isServicePlan, setIsServicePlan] = useState(false);
   const [lastModified, setLastModified] = useState<'markup' | 'price' | null>(null);
 
   // Calculate price when cost or markup changes
@@ -1473,6 +1489,26 @@ function AddItemModal({ onClose, customCategories, onAddCategory }: AddItemModal
               className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] placeholder:text-gray-400"
             />
           </div>
+
+          {itemType === 'service' && (
+            <div className="mb-4 rounded-[15px] border border-[#e8e8e8] px-4 py-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isServicePlan}
+                  onChange={(e) => setIsServicePlan(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-[#cbd5e1] text-[#9473ff] focus:ring-[#9473ff]"
+                  style={{ accentColor: '#9473ff' }}
+                />
+                <div>
+                  <span className="block text-sm font-medium text-[#051046]">Is this a service plan</span>
+                  <span className="block text-xs text-gray-500 mt-1">
+                    When it is checked, these plans appear in the Service Plans page's All Plans filters.
+                  </span>
+                </div>
+              </label>
+            </div>
+          )}
 
           {/* Cost */}
           <div className="mb-4">

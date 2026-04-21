@@ -2440,7 +2440,7 @@ export function JobDetailsPageV2() {
                       const getStatusColor = (status: string) => {
                         switch(status) {
                           case 'Approved': return 'bg-[#b9df10]';
-                          case 'Pending': return 'bg-[#f0a041]';
+                          case 'Pending': return 'bg-[#28bdf2]';
                           case 'Declined': return 'bg-[#f16a6a]';
                           case 'Unsent': return 'bg-gray-400';
                           default: return 'bg-gray-400';
@@ -3176,11 +3176,11 @@ export function JobDetailsPageV2() {
                                             <div className="flex-1 min-w-0">
                                               <div className="flex items-center gap-2 flex-wrap">
                                                 <span className="text-sm font-medium text-[#051046] break-words">{invItem.name}</span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                                <span className={`px-3 py-1 text-xs font-medium ${
                                                   invItem.type === 'part' 
                                                     ? 'bg-[#A6E4FA] text-[#399deb]' 
                                                     : 'bg-[#E2F685] text-green-700'
-                                                }`}>
+                                                }`} style={{ borderRadius: '0.25rem' }}>
                                                   {invItem.type === 'part' ? 'Part' : 'Service'}
                                                 </span>
                                               </div>
@@ -4404,11 +4404,11 @@ export function JobDetailsPageV2() {
                                             <div className="flex-1 min-w-0">
                                               <div className="flex items-center gap-2 flex-wrap">
                                                 <span className="text-sm font-medium text-[#051046] break-words">{invItem.name}</span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                                <span className={`px-3 py-1 text-xs font-medium ${
                                                   invItem.type === 'part' 
                                                     ? 'bg-[#A6E4FA] text-[#399deb]' 
                                                     : 'bg-[#E2F685] text-green-700'
-                                                }`}>
+                                                }`} style={{ borderRadius: '0.25rem' }}>
                                                   {invItem.type === 'part' ? 'Part' : 'Service'}
                                                 </span>
                                               </div>

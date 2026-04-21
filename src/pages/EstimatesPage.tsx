@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Search, Plus, MoreVertical, FileText, Trash2, X, Calendar, DollarSign, User, MapPin, Eye, CheckCircle, CircleX, TrendingUp, TrendingDown } from 'lucide-react';
+import { Search, Plus, MoreVertical, FileText, Trash2, X, Calendar, DollarSign, User, MapPin, Eye, CheckCircle, CircleX } from 'lucide-react';
 import { DateRangePicker } from '../components/DateRangePicker';
 
 type EstimateStatus = 'Unsent' | 'Pending' | 'Approved' | 'Declined';
@@ -43,7 +43,7 @@ interface EstimateDetails extends Estimate {
 const getStatusColor = (status: EstimateStatus) => {
   switch(status) {
     case 'Approved': return 'bg-[#b9df10]';
-    case 'Pending': return 'bg-[#f0a041]';
+    case 'Pending': return 'bg-[#28bdf2]';
     case 'Declined': return 'bg-[#f16a6a]';
     case 'Unsent': return 'bg-gray-400';
     default: return 'bg-gray-400';
@@ -117,50 +117,6 @@ export function EstimatesPage() {
     Pending: estimates.filter(e => e.status === 'Pending').reduce((sum, est) => sum + est.amount, 0),
     Approved: estimates.filter(e => e.status === 'Approved').reduce((sum, est) => sum + est.amount, 0),
     Declined: estimates.filter(e => e.status === 'Declined').reduce((sum, est) => sum + est.amount, 0),
-  };
-
-  const totalEstimateValue = estimates.reduce((sum, est) => sum + est.amount, 0);
-  const estimatesSent = estimates.filter((e) => e.status !== 'Unsent').length;
-  const approvedRate = estimatesSent > 0 ? (statusCounts.Approved / estimatesSent) * 100 : 0;
-
-  const estimatesByCreated = [...estimates].sort(
-    (a, b) => new Date(a.created).getTime() - new Date(b.created).getTime()
-  );
-  const splitIndex = Math.max(1, Math.ceil(estimatesByCreated.length / 2));
-  const previousPeriodEstimates = estimatesByCreated.slice(0, splitIndex);
-  const currentPeriodEstimates = estimatesByCreated.slice(splitIndex);
-
-  const getSentCount = (items: Estimate[]) => items.filter((item) => item.status !== 'Unsent').length;
-  const getApprovedRate = (items: Estimate[]) => {
-    const sentCount = getSentCount(items);
-    if (sentCount === 0) return 0;
-    return (items.filter((item) => item.status === 'Approved').length / sentCount) * 100;
-  };
-
-  const previousApprovedRate = getApprovedRate(previousPeriodEstimates);
-  const currentApprovedRate = getApprovedRate(currentPeriodEstimates);
-  const approvedRateDelta = currentApprovedRate - previousApprovedRate;
-
-  const previousDeclinedCount = previousPeriodEstimates.filter((item) => item.status === 'Declined').length;
-  const currentDeclinedCount = currentPeriodEstimates.filter((item) => item.status === 'Declined').length;
-  const declinedDelta = currentDeclinedCount - previousDeclinedCount;
-
-  const renderTrend = (delta: number, suffix: string) => {
-    if (delta === 0) {
-      return <span className="text-xs text-gray-600">No change vs previous period</span>;
-    }
-
-    const isIncrease = delta > 0;
-    const Icon = isIncrease ? TrendingUp : TrendingDown;
-    const colorClass = isIncrease ? 'text-[#399deb]' : 'text-[#f16a6a]';
-    const label = isIncrease ? 'Increase' : 'Decrease';
-
-    return (
-      <span className={`inline-flex items-center gap-1 text-xs ${colorClass}`}>
-        <Icon className="w-3.5 h-3.5" />
-        {label} of {Math.abs(delta).toFixed(suffix === 'pts' ? 1 : 0)} {suffix} vs previous period
-      </span>
-    );
   };
 
   const isWithinSelectedPeriod = (dateString: string) => {
@@ -349,36 +305,36 @@ export function EstimatesPage() {
       {/* Status Count Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <DollarSign className="w-5 h-5 text-[#9473ff]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <FileText className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-600">Total Estimate Value</p>
-          <p className="text-3xl font-bold text-[#051046]">{formatCurrency(totalEstimateValue)}</p>
-          <p className="text-xs text-gray-600">Combined value of all estimates</p>
+          <p className="text-sm text-gray-600">Unsent</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unsent}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unsent)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <CheckCircle className="w-5 h-5 text-[#399deb]" />
+            <Calendar className="w-5 h-5 text-[#28bdf2]" />
           </div>
-          <p className="text-sm text-gray-600">Approved Rate</p>
-          <p className="text-3xl font-bold text-[#051046]">{approvedRate.toFixed(1)}%</p>
-          {renderTrend(approvedRateDelta, 'pts')}
+          <p className="text-sm text-gray-600">Pending</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Pending}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Pending)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
-            <FileText className="w-5 h-5 text-[#f0a041]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <CheckCircle className="w-5 h-5 text-[#99b80d]" />
           </div>
-          <p className="text-sm text-gray-600">Estimates Sent</p>
-          <p className="text-3xl font-bold text-[#051046]">{estimatesSent}</p>
-          <p className="text-xs text-gray-600">Pending, approved, and declined combined</p>
+          <p className="text-sm text-gray-600">Approved</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Approved}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Approved)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
             <CircleX className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-sm text-gray-600">Declined Estimates</p>
+          <p className="text-sm text-gray-600">Declined</p>
           <p className="text-3xl font-bold text-[#051046]">{statusCounts.Declined}</p>
-          {renderTrend(declinedDelta, 'estimates')}
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Declined)}</p>
         </div>
       </div>
 

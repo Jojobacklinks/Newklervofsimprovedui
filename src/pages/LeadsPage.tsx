@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, User, Trophy, Users, CircleX, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X, Megaphone } from 'lucide-react';
+import { Search, Plus, Trophy, Users, CircleX, Clock, ChevronDown, Calendar, ChevronLeft, ChevronRight, Info, X, Megaphone } from 'lucide-react';
 import { useSearchParams, useLocation } from 'react-router';
 import { AddLeadModal } from '../components/AddLeadModal';
 import { LeadDetailModal } from '../components/LeadDetailModal';
@@ -326,10 +326,12 @@ export function LeadsPage() {
     const topReasons = Object.entries(lostReasonCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
-      .map(([reason, count]) => `${reason} (${count})`)
+      .map(([reason], index) => `${index + 1}-${reason}`)
       .join(', ');
 
-    return topReasons ? `Lost: ${lostLeads}/${totalLeads} | ${topReasons}` : `Lost: ${lostLeads}/${totalLeads}`;
+    return topReasons
+      ? `Lost: ${lostLeads}/${totalLeads} | Top 3 reasons: ${topReasons}`
+      : `Lost: ${lostLeads}/${totalLeads} | Top 3 reasons: None yet`;
   })();
 
   // Filter leads based on search and stage
@@ -391,11 +393,11 @@ export function LeadsPage() {
       case 'Contacted':
         return 'bg-[#28BDF2]';
       case 'Price Shared':
-        return 'bg-[#B9DF10]';
+        return 'bg-[#cac2ff]';
       case 'Follow-Up':
         return 'bg-[#F0A041]';
       case 'Won':
-        return 'bg-[#9473ff]';
+        return 'bg-[#b9df10]';
       case 'Lost':
         return 'bg-[#f16a6a]';
       default:
@@ -821,8 +823,8 @@ export function LeadsPage() {
           className="relative flex min-h-[152px] flex-col justify-between rounded-[20px] border border-[#e2e8f0] p-6 bg-white"
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <Users className="w-5 h-5 text-[#9473ff]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <Users className="w-5 h-5 text-[#BDBDBD]" />
           </div>
           <p className="text-sm text-gray-600 mb-2">Total Leads</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{totalLeads}</p>
@@ -835,7 +837,7 @@ export function LeadsPage() {
           style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}
         >
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
-            <Trophy className="w-5 h-5 text-[#b9df10]" />
+            <Trophy className="w-5 h-5 text-[#99b80d]" />
           </div>
           <p className="text-sm text-gray-700 mb-2">Win Rate</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{winRate}%</p>
@@ -1154,7 +1156,7 @@ export function LeadsPage() {
           <span className="text-gray-400">→</span>
           <span className="font-medium text-[#28bdf2]">Contacted</span>
           <span className="text-gray-400">→</span>
-          <span className="font-medium text-[#b9df10]">Price Shared</span>
+          <span className="font-medium text-[#cac2ff]">Price Shared</span>
           <span className="text-gray-400">→</span>
           <span className="font-medium text-[#f0a041]">Follow-Up</span>
           <span className="text-gray-400">→</span>
@@ -1219,16 +1221,9 @@ export function LeadsPage() {
 
                   {/* Client Column */}
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"
-                      >
-                        <User className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#051046]">{lead.clientName}</p>
-                        <p className="text-sm text-gray-500">{lead.email}</p>
-                      </div>
+                    <div>
+                      <p className="font-medium text-[#051046]">{lead.clientName}</p>
+                      <p className="text-sm text-gray-500">{lead.email}</p>
                     </div>
                   </td>
 
@@ -1290,24 +1285,7 @@ export function LeadsPage() {
                                   handleStageChange(lead.id, stage);
                                 }}
                               >
-                                <span className={`inline-flex items-center gap-2`}>
-                                  <span
-                                    className={`w-2 h-2 rounded-full ${
-                                      stage === 'New'
-                                        ? 'bg-blue-500'
-                                        : stage === 'Contacted'
-                                        ? 'bg-cyan-500'
-                                        : stage === 'Price Shared'
-                                        ? 'bg-green-500'
-                                        : stage === 'Follow-Up'
-                                        ? 'bg-orange-500'
-                                        : stage === 'Won'
-                                        ? 'bg-purple-500'
-                                        : 'bg-red-500'
-                                    }`}
-                                  />
-                                  <span className="text-[#051046]">{stage}</span>
-                                </span>
+                                <span className="text-[#051046]">{stage}</span>
                               </button>
                             ))}
                           </div>

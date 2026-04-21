@@ -397,6 +397,7 @@ export function SchedulePage() {
     category: string;
     brand: string;
     description: string;
+    isServicePlan: boolean;
   }) => {
     const newItem = {
       id: Date.now(),

@@ -6,6 +6,8 @@ import { useJobs } from '../contexts/JobsContext';
 import { useNavigate, useLocation } from 'react-router';
 import { DateRangePicker } from '../components/DateRangePicker';
 
+const CUSTOM_SERVICE_PLANS_STORAGE_KEY = 'klervo-custom-service-plan-services';
+
 // Mock client database for autocomplete
 const mockClientDatabase = [
   { id: 'C-101', name: 'Sarah Johnson', email: 'sarah.johnson@email.com', phone: '(512) 555-0123', address: '123 Main St, Austin, TX 78701' },
@@ -66,6 +68,7 @@ interface ServicePlan {
   paymentType?: 'card' | 'cash' | 'other'; // Track original payment type for editing
   discount: number; // Percentage or amount
   status: 'pending' | 'approved' | 'active' | 'canceled' | 'failed' | 'declined'; // Updated flow: pending -> approved -> active
+  declineReason?: string;
   nextBillingDate: string;
   createdAt: string;
   upsoldBy?: { name: string; type: 'T' | 'A' } | null; // Technician or Admin who sold the upsell
@@ -129,6 +132,9 @@ export function ServicePlansPage() {
   const [searchName, setSearchName] = useState('');
   const [selectedService, setSelectedService] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [customServicePlanOptions, setCustomServicePlanOptions] = useState<
+    Array<{ id: string; name: string; description: string; defaultPrice: number }>
+  >([]);
   
   // Date range picker state
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -183,6 +189,36 @@ export function ServicePlansPage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showUpsellOwnerDropdown]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const loadCustomServicePlans = () => {
+      const storedItems = window.localStorage.getItem(CUSTOM_SERVICE_PLANS_STORAGE_KEY);
+      if (!storedItems) {
+        setCustomServicePlanOptions([]);
+        return;
+      }
+
+      try {
+        const parsedItems: Array<{ name: string; description: string; price: number }> = JSON.parse(storedItems);
+        setCustomServicePlanOptions(
+          parsedItems.map((item, index) => ({
+            id: `custom_srv_${index + 1}`,
+            name: item.name,
+            description: item.description,
+            defaultPrice: item.price,
+          }))
+        );
+      } catch {
+        setCustomServicePlanOptions([]);
+      }
+    };
+
+    loadCustomServicePlans();
+    window.addEventListener('storage', loadCustomServicePlans);
+    return () => window.removeEventListener('storage', loadCustomServicePlans);
+  }, []);
 
   // Filter services based on search
   const filteredServices = inventoryDatabase.filter(item =>
@@ -363,9 +399,37 @@ export function ServicePlansPage() {
       paymentMethod: 'Not Collected',
       discount: 0,
       status: 'declined',
+      declineReason: 'Price',
       nextBillingDate: '',
       createdAt: '03/01/2026',
       upsoldBy: null,
+      totalVisits: 2,
+      visitsUsed: 0,
+    },
+    {
+      id: 'S-106',
+      customerId: 'C-106',
+      clientName: 'Amanda Lee',
+      clientEmail: 'amanda.lee@email.com',
+      propertyAddress: '303 Birch St, Sixtown, USA',
+      phone: '(555) 111-2222',
+      serviceName: 'Seasonal HVAC Care Plan',
+      serviceDescription: 'Two seasonal HVAC tune-ups with priority scheduling and filter checks',
+      price: 249,
+      currency: 'USD',
+      billingInterval: 'year',
+      intervalCount: 1,
+      startDate: '04/20/2026',
+      trialDays: 0,
+      cancelAt: null,
+      autoRenew: true,
+      collectionMethod: 'send_invoice',
+      paymentMethod: 'Pending Approval',
+      discount: 0,
+      status: 'pending',
+      nextBillingDate: '04/20/2026',
+      createdAt: '04/20/2026',
+      upsoldBy: { name: 'Sarah Johnson', type: 'A' },
       totalVisits: 2,
       visitsUsed: 0,
     },
@@ -385,22 +449,37 @@ export function ServicePlansPage() {
     { id: 'srv_005', name: 'Bi-Annual Pest Control', description: 'Interior and exterior pest control treatment', defaultPrice: 350 },
   ];
 
-  // Calculate metrics
-  const monthlyRecurringRevenue = servicePlans
-    .filter(p => p.status === 'active' || p.status === 'pending' || p.status === 'approved')
-    .reduce((sum, p) => {
-      // Convert to monthly MRR
-      let monthlyAmount = p.price;
-      if (p.billingInterval === 'year') monthlyAmount = p.price / 12;
-      if (p.billingInterval === 'month') monthlyAmount = p.price;
-      if (p.billingInterval === 'week') monthlyAmount = p.price * 4.33;
-      if (p.billingInterval === 'day') monthlyAmount = p.price * 30;
-      return sum + (monthlyAmount / p.intervalCount);
-    }, 0);
+  const serviceFilterOptions = [...mockServices, ...customServicePlanOptions];
 
+  // Calculate metrics
+  const totalPlans = servicePlans.length;
   const activeSubscriptions = servicePlans.filter(p => p.status === 'active').length;
-  const pendingApprovalSubscriptions = servicePlans.filter(p => p.status === 'pending' || p.status === 'approved').length;
-  const canceledSubscriptions = servicePlans.filter(p => p.status === 'canceled').length;
+  const pendingSubscriptions = servicePlans.filter(p => p.status === 'pending').length;
+  const declinedPlans = servicePlans.filter(p => p.status === 'declined');
+  const declinedRate = totalPlans > 0 ? ((declinedPlans.length / totalPlans) * 100).toFixed(1) : '0.0';
+  const activePlansValue = servicePlans
+    .filter((plan) => plan.status === 'active')
+    .reduce((sum, plan) => sum + plan.price, 0);
+  const pendingPlansValue = servicePlans
+    .filter((plan) => plan.status === 'pending')
+    .reduce((sum, plan) => sum + plan.price, 0);
+  const topDeclineReasonsText = (() => {
+    const declineReasonCounts = declinedPlans
+      .map((plan) => plan.declineReason)
+      .filter(Boolean)
+      .reduce<Record<string, number>>((acc, reason) => {
+        acc[reason as string] = (acc[reason as string] || 0) + 1;
+        return acc;
+      }, {});
+
+    const topReasons = Object.entries(declineReasonCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([reason], index) => `${index + 1}-${reason}`)
+      .join(', ');
+
+    return topReasons ? `Top 3 reasons: ${topReasons}` : 'Top 3 reasons: None yet';
+  })();
 
   // Pagination logic
   const filteredServicePlans = servicePlans.filter(plan => {
@@ -692,7 +771,7 @@ export function ServicePlansPage() {
       case 'pending':
         return '#28bdf2';
       case 'approved':
-        return '#9473ff'; // Purple for approved
+        return '#cac2ff';
       case 'canceled':
         return '#f16a6a';
       case 'failed':
@@ -719,41 +798,39 @@ export function ServicePlansPage() {
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <DollarSign className="w-5 h-5 text-[#9473ff]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <DollarSign className="w-5 h-5 text-[#BDBDBD]" />
           </div>
-          <p className="text-sm text-gray-600">Active Total Value</p>
-          <p className="text-3xl font-bold text-[#051046]">
-            ${Math.round(servicePlans.filter(plan => plan.status === 'active').reduce((sum, plan) => sum + plan.price, 0)).toLocaleString()}
-          </p>
-          <p className="text-xs text-gray-600">Revenue from active plans</p>
+          <p className="text-sm text-gray-600">Total Plans</p>
+          <p className="text-3xl font-bold text-[#051046]">{totalPlans}</p>
+          <p className="text-xs text-gray-600">All plans listed</p>
+        </div>
+
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <CircleCheckBig className="w-5 h-5 text-[#99b80d]" />
+          </div>
+          <p className="text-sm text-gray-600">Active</p>
+          <p className="text-3xl font-bold text-[#051046]">{activeSubscriptions}</p>
+          <p className="text-xs text-gray-600">${Math.round(activePlansValue).toLocaleString()} total active value</p>
         </div>
 
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <CircleCheckBig className="w-5 h-5 text-[#399deb]" />
+            <Clock className="w-5 h-5 text-[#28bdf2]" />
           </div>
-          <p className="text-sm text-gray-600">Active</p>
-          <p className="text-3xl font-bold text-[#051046]">{activeSubscriptions}</p>
-          <p className="text-xs text-gray-600">Currently billing plans</p>
-        </div>
-
-        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
-            <Clock className="w-5 h-5 text-[#f0a041]" />
-          </div>
-          <p className="text-sm text-gray-600">Pending Approval</p>
-          <p className="text-3xl font-bold text-[#051046]">{pendingApprovalSubscriptions}</p>
-          <p className="text-xs text-gray-600">Waiting for customer approval</p>
+          <p className="text-sm text-gray-600">Pending</p>
+          <p className="text-3xl font-bold text-[#051046]">{pendingSubscriptions}</p>
+          <p className="text-xs text-gray-600">${Math.round(pendingPlansValue).toLocaleString()} total pending value</p>
         </div>
 
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFDBE6]">
             <XCircle className="w-5 h-5 text-[#f16a6a]" />
           </div>
-          <p className="text-sm text-gray-600">Canceled</p>
-          <p className="text-3xl font-bold text-[#051046]">{canceledSubscriptions}</p>
-          <p className="text-xs text-gray-600">Plans that are no longer active</p>
+          <p className="text-sm text-gray-600">Declined</p>
+          <p className="text-3xl font-bold text-[#051046]">{declinedRate}%</p>
+          <p className="text-xs text-gray-600 truncate" title={topDeclineReasonsText}>{topDeclineReasonsText}</p>
         </div>
       </div>
 
@@ -828,8 +905,8 @@ export function ServicePlansPage() {
             onChange={(e) => { setSelectedService(e.target.value); resetPage(); }}
             className="w-[180px] h-[44px] px-4 border border-[#e8e8e8] rounded-[15px] text-[#051046] text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
           >
-            <option value="">All Services</option>
-            {mockServices.map(service => (
+            <option value="">All Plans</option>
+            {serviceFilterOptions.map(service => (
               <option key={service.id} value={service.name}>
                 {service.name}
               </option>
@@ -876,7 +953,7 @@ export function ServicePlansPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Subscription ID</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Plan ID</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Client</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Service</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[#6a7282] uppercase tracking-wider">Details</th>
@@ -932,14 +1009,19 @@ export function ServicePlansPage() {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-start gap-2">
                       <div 
-                        className="w-2 h-2 rounded-full"
+                        className="mt-1.5 w-2 h-2 rounded-full"
                         style={{ backgroundColor: getStatusDotColor(plan.status) }}
                       />
-                      <span className="text-sm text-[#051046]">
-                        {plan.status.charAt(0).toUpperCase() + plan.status.slice(1).replace('_', ' ')}
-                      </span>
+                      <div>
+                        <span className="text-sm text-[#051046]">
+                          {plan.status.charAt(0).toUpperCase() + plan.status.slice(1).replace('_', ' ')}
+                        </span>
+                        {plan.status === 'declined' && plan.declineReason && (
+                          <p className="mt-1 text-xs text-[#f16a6a]">({plan.declineReason})</p>
+                        )}
+                      </div>
                       {plan.status === 'failed' && (
                         <div className="group relative inline-block">
                           <AlertCircle className="w-4 h-4 text-orange-500 cursor-help" />

@@ -306,6 +306,14 @@ export function InvoicesPage() {
       {/* Status Count Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
+          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <CreditCard className="w-5 h-5 text-[#BDBDBD]" />
+          </div>
+          <p className="text-sm text-gray-600">Unpaid</p>
+          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unpaid}</p>
+          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unpaid)}</p>
+        </div>
+        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffdbb0]">
             <CalendarIcon className="w-5 h-5 text-[#f0a041]" />
           </div>
@@ -314,16 +322,8 @@ export function InvoicesPage() {
           <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Due)}</p>
         </div>
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <CreditCard className="w-5 h-5 text-[#9473ff]" />
-          </div>
-          <p className="text-sm text-gray-600">Unpaid</p>
-          <p className="text-3xl font-bold text-[#051046]">{statusCounts.Unpaid}</p>
-          <p className="text-xs text-gray-600">{formatCurrency(statusAmounts.Unpaid)}</p>
-        </div>
-        <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-4" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <CheckCircle className="w-5 h-5 text-[#399deb]" />
+          <div className="absolute top-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
+            <CheckCircle className="w-5 h-5 text-[#99b80d]" />
           </div>
           <p className="text-sm text-gray-600">Paid</p>
           <p className="text-3xl font-bold text-[#051046]">{statusCounts.Paid}</p>

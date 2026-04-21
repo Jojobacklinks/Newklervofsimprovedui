@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Download, Calendar, DollarSign, TrendingUp, Percent, Eye, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ArrowLeft, Download, Calendar, DollarSign, TrendingUp, Percent, Eye, ChevronLeft, ChevronRight, Search, CheckCircle, ArrowUpNarrowWide } from 'lucide-react';
 import { DateRangePicker } from '../components/DateRangePicker';
 
 interface Upsell {
@@ -123,9 +123,15 @@ export function TeamProfilePage() {
   
   // Calculate totals
   const totalUpsells = filteredUpsells.length;
+  const jobsWithUpsells = new Set(
+    filteredUpsells
+      .filter((upsell) => upsell.type === 'job_item')
+      .map((upsell) => upsell.sourceId)
+  ).size;
+  const totalJobsHandled = 45;
   const totalRevenue = filteredUpsells.reduce((sum, u) => sum + u.amount, 0);
   const totalCommission = filteredUpsells.reduce((sum, u) => sum + (u.amount * u.commissionPercent / 100), 0);
-  const conversionRate = 45; // This would be calculated from actual job/plan data
+  const conversionRate = totalJobsHandled > 0 ? (totalUpsells / totalJobsHandled) * 100 : 0;
   
   // Handle commission update
   const handleCommissionUpdate = (upsellId: string, newPercent: number) => {
@@ -216,12 +222,12 @@ export function TeamProfilePage() {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-            <TrendingUp className="w-5 h-5 text-[#9473ff]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
+            <TrendingUp className="w-5 h-5 text-[#BDBDBD]" />
           </div>
           <p className="text-sm text-gray-500">Total Upsells</p>
-          <div className="text-3xl font-bold text-[#051046]">{totalUpsells}</div>
-          <p className="text-xs text-gray-600">Upsells credited to this team member</p>
+          <div className="text-3xl font-bold text-[#051046]">{totalUpsells}/{totalJobsHandled}</div>
+          <p className="text-xs text-gray-600">Jobs with upsells out of total jobs</p>
         </div>
         
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
@@ -235,7 +241,7 @@ export function TeamProfilePage() {
         
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#E2F685]">
-            <Percent className="w-5 h-5 text-[#b9df10]" />
+            <Percent className="w-5 h-5 text-[#99b80d]" />
           </div>
           <p className="text-sm text-gray-500">Total Commission</p>
           <div className="text-3xl font-bold text-[#051046]">${totalCommission.toFixed(2)}</div>
@@ -243,12 +249,12 @@ export function TeamProfilePage() {
         </div>
         
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">
-          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#A6E4FA]">
-            <CheckCircle className="w-5 h-5 text-[#399deb]" />
+          <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#f3e8ff]">
+            <ArrowUpNarrowWide className="w-5 h-5 text-[#9473ff]" />
           </div>
-          <p className="text-sm text-gray-500">Conversion Rate</p>
-          <div className="text-3xl font-bold text-[#051046]">{conversionRate}%</div>
-          <p className="text-xs text-gray-600">Upsells converted from total opportunities</p>
+          <p className="text-sm text-gray-500">Upsell Rate</p>
+          <div className="text-3xl font-bold text-[#051046]">{conversionRate.toFixed(1)}%</div>
+          <p className="text-xs text-gray-600">The percentage of jobs with upsells</p>
         </div>
       </div>
 

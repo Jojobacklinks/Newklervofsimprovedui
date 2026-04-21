@@ -227,6 +227,7 @@ export function NewJobModal({
     category: string;
     brand: string;
     description: string;
+    isServicePlan: boolean;
   }) => {
     const newItem: SelectedInventoryItem = {
       id: Date.now(),
