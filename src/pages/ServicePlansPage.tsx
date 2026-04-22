@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Edit2, Trash2, DollarSign, Clock, CircleCheckBig, AlertCircle, XCircle, Mail, ChevronLeft, ChevronRight, X, CreditCard, Calendar, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, ScrollText, Clock, CircleCheckBig, AlertCircle, XCircle, Mail, ChevronLeft, ChevronRight, X, CreditCard, Calendar, Search } from 'lucide-react';
 import { PlanDetailsModal } from '../components/PlanDetailsModal';
 import { NewJobModal } from '../components/NewJobModal';
 import { useJobs } from '../contexts/JobsContext';
@@ -846,7 +846,7 @@ export function ServicePlansPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
           <div className="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]">
-            <DollarSign className="w-5 h-5 text-[#BDBDBD]" />
+            <ScrollText className="w-5 h-5 text-[#BDBDBD]" />
           </div>
           <p className="text-sm text-gray-600 mb-2">Total Plans</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">{totalPlans}</p>

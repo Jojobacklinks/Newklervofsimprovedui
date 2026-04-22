@@ -31,6 +31,9 @@ interface EstimateInvoice {
   notes?: string;
   isServicePlanEstimate?: boolean;
   recurringBillingCycle?: string;
+  recurringBillingIntervalCount?: number;
+  totalVisits?: number;
+  servicePlanStartDate?: string;
   companyName?: string;
   companyWebsite?: string;
 }
@@ -73,6 +76,9 @@ export default function CustomerPortalPage() {
       notes: 'Includes all materials and labor. Installation scheduled for next week.',
       isServicePlanEstimate: true,
       recurringBillingCycle: 'month',
+      recurringBillingIntervalCount: 1,
+      totalVisits: 12,
+      servicePlanStartDate: '2026-04-21',
       companyName: 'My Plumber Company',
       companyWebsite: 'https://www.myplumbercompany.com',
     },
@@ -202,6 +208,33 @@ export default function CustomerPortalPage() {
       notes: 'Customer already approved this membership renewal estimate.',
       isServicePlanEstimate: true,
       recurringBillingCycle: 'year',
+      recurringBillingIntervalCount: 1,
+      totalVisits: 12,
+      servicePlanStartDate: '2026-01-15',
+      companyName: 'My Plumber Company',
+      companyWebsite: 'https://www.myplumbercompany.com',
+    },
+    {
+      id: 'INV-051',
+      type: 'invoice',
+      documentLabel: 'SP Invoice',
+      date: '2026-02-13',
+      status: 'Due',
+      total: 1290,
+      customerName: 'John Smith',
+      customerAddress: '123 Main Street, Austin, TX 78701',
+      customerPhone: '(555) 123-4567',
+      customerEmail: 'john.smith@email.com',
+      jobDescription: 'Invoice created from approved service plan estimate',
+      items: [
+        { id: 1, description: 'Annual Maintenance Membership', notes: 'Converted from approved service plan estimate', quantity: 1, price: 1290, taxable: false },
+      ],
+      notes: 'This invoice was created from an approved service plan estimate.',
+      isServicePlanEstimate: true,
+      recurringBillingCycle: 'year',
+      recurringBillingIntervalCount: 1,
+      totalVisits: 12,
+      servicePlanStartDate: '2026-01-15',
       companyName: 'My Plumber Company',
       companyWebsite: 'https://www.myplumbercompany.com',
     },
@@ -505,7 +538,7 @@ export default function CustomerPortalPage() {
                           </span>
                           <input 
                             type="text" 
-                            value={getDocumentDisplayLabel(selectedItem) ? `${selectedItem.id} (${getDocumentDisplayLabel(selectedItem)})` : selectedItem.id}
+                            value={selectedItem.id}
                             readOnly
                             className="flex-1 px-3 py-2 border border-[#e2e8f0] rounded-[8px] text-sm text-[#051046] bg-gray-50"
                           />
@@ -643,6 +676,26 @@ export default function CustomerPortalPage() {
                       </div>
                     </div>
 
+                    {/* Service Plan Details */}
+                    {selectedItem.isServicePlanEstimate &&
+                      (selectedItem.type === 'invoice' ||
+                        (selectedItem.type === 'estimate' && selectedItem.status === 'Pending')) && (
+                        <div className="mb-6">
+                          <h4 className="font-semibold text-[#051046] mb-2">Service Plan Details:</h4>
+                          <div className="space-y-1">
+                            <p className="text-sm text-[#051046]">
+                              Billing: Every {selectedItem.recurringBillingIntervalCount ?? 1} {selectedItem.recurringBillingCycle ?? 'months'}
+                            </p>
+                            <p className="text-sm text-[#051046]">
+                              Total Visits: {selectedItem.totalVisits ?? 0}
+                            </p>
+                            <p className="text-sm text-[#051046]">
+                              Start Date: {selectedItem.servicePlanStartDate ?? selectedItem.date}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                     {/* Notes */}
                     {selectedItem.notes && (
                       <div className="mb-6">
@@ -740,8 +793,8 @@ export default function CustomerPortalPage() {
 
                     {/* Status message for paid invoices */}
                     {selectedItem.type === 'invoice' && selectedItem.status === 'Paid' && (
-                      <div className="bg-green-50 border-2 border-green-200 rounded-[15px] p-4 text-center">
-                        <p className="text-green-700 font-semibold">
+                      <div className="bg-[#E2F685] border-2 border-[#E2F685] rounded-[15px] p-4 text-center">
+                        <p className="text-[#99b80d] font-semibold">
                           ✓ This invoice has been paid
                         </p>
                       </div>

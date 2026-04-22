@@ -263,11 +263,11 @@ export function TeamPage() {
                         className="text-gray-600 hover:text-gray-900 transition-colors"
                         title="View Profile"
                       >
-                        <User className="w-4 h-4" style={{ color: '#9473ff' }} />
+                        <User className="w-4 h-4" style={{ color: '#8a8a8a' }} />
                       </button>
                       <button
                         onClick={() => handleEditMember(member.id)}
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                        className="text-[#9473ff] hover:text-[#7f5fd9] transition-colors"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -373,7 +373,7 @@ export function TeamPage() {
                 <div className="flex items-center gap-3 ml-auto">
                   <button
                     onClick={() => handleEditMember(member.id)}
-                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    className="text-[#9473ff] hover:text-[#7f5fd9] transition-colors"
                     title="Edit"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -732,16 +732,13 @@ function AddMemberModal({ onClose, onSave }: AddMemberModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-[15px] font-medium transition-colors"
-              style={{ color: '#9473ff', backgroundColor: 'transparent' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              className="flex-1 px-6 py-3 border border-[#e8e8e8] rounded-[32px] font-medium text-[#051046] hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 text-white rounded-[15px] font-medium transition-colors"
+              className="flex-1 px-6 py-3 text-white rounded-[32px] font-medium transition-colors"
               style={{ backgroundColor: '#9473ff' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
@@ -999,16 +996,13 @@ function EditMemberModal({ member, onClose, onSave }: EditMemberModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-[15px] font-medium transition-colors"
-              style={{ color: '#9473ff', backgroundColor: 'transparent' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[32px] font-medium text-[#051046] hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 text-white rounded-[15px] font-medium transition-colors"
+              className="flex-1 px-6 py-3 text-white rounded-[32px] font-medium transition-colors"
               style={{ backgroundColor: '#9473ff' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}

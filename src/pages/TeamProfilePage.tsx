@@ -236,7 +236,7 @@ export function TeamProfilePage() {
           </div>
           <p className="text-sm text-gray-600 mb-2">Total Revenue</p>
           <p className="text-3xl font-bold text-[#051046] mb-1">${totalRevenue.toFixed(2)}</p>
-          <p className="text-xs text-gray-600">Revenue generated from credited upsells</p>
+          <p className="text-xs text-gray-600">Revenue from successful upsells</p>
         </div>
         
         <div className="relative flex min-h-[152px] flex-col justify-between bg-white rounded-[20px] border border-[#e2e8f0] shadow-sm p-6">

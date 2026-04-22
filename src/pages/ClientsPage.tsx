@@ -535,7 +535,7 @@ export function ClientsPage() {
                           navigate(`${basePath}/clients/${client.id}`);
                         }}
                       >
-                        <User className="w-4 h-4" style={{ color: '#9473ff' }} />
+                        <User className="w-4 h-4" style={{ color: '#8a8a8a' }} />
                       </button>
                       <button
                         type="button"

@@ -778,10 +778,10 @@ export function InventoryPage() {
                             setEditingItem(item);
                             setShowEditItemModal(true);
                           }}
-                          className="p-2 hover:bg-blue-50 rounded-[10px] transition-colors"
+                          className="p-2 hover:bg-purple-50 rounded-[10px] transition-colors"
                           title="Edit Item"
                         >
-                          <Pencil className="w-4 h-4 text-blue-600" />
+                          <Pencil className="w-4 h-4 text-[#9473ff]" />
                         </button>
                         {item.type === 'part' && (
                           <button
@@ -789,10 +789,10 @@ export function InventoryPage() {
                               setSelectedItem(item);
                               setShowTransferModal(true);
                             }}
-                            className="p-2 hover:bg-purple-50 rounded-[10px] transition-colors"
+                            className="p-2 hover:bg-blue-50 rounded-[10px] transition-colors"
                             title="Transfer Item"
                           >
-                            <ArrowRightLeft className="w-4 h-4 text-[#9473ff]" />
+                            <ArrowRightLeft className="w-4 h-4 text-[#28bdf2]" />
                           </button>
                         )}
                         <button
@@ -1685,7 +1685,7 @@ function AddItemModal({ onClose, customCategories, onAddCategory }: AddItemModal
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[15px] font-medium text-[#051046] hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[32px] font-medium text-[#051046] hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
@@ -2048,7 +2048,7 @@ function EditItemModal({ item, currentLocation, currentStockQuantity, onClose, o
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[15px] font-medium text-[#051046] hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[32px] font-medium text-[#051046] hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
