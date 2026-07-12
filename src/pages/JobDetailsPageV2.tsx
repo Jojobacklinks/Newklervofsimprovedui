@@ -4,6 +4,7 @@ import { ArrowLeft, X, Plus, Search, Trash2, MapPin, Edit2, Trash, CreditCard, D
 import { mockJobs, Job } from '../data/jobsData';
 import { useJobs } from '../contexts/JobsContext';
 import { DeveloperNotesPopup } from '../components/DeveloperNotesPopup';
+import { ActionAlertPopup } from '../components/ActionAlertPopup';
 
 // Estimate interface
 interface Estimate {
@@ -71,6 +72,7 @@ export function JobDetailsPageV2() {
   const [devNotesContent, setDevNotesContent] = useState<React.ReactNode>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Read tab from URL params on component mount
@@ -645,13 +647,14 @@ export function JobDetailsPageV2() {
   // Estimate line item dropdown states
   const [activeItemDropdown, setActiveItemDropdown] = useState<number | null>(null);
 
-  // Helper function to show success message
-  const showSuccess = (message: string) => {
+  // Show consistent positive and negative feedback for Job Details actions.
+  const showActionAlert = (message: string, type: 'success' | 'error' = 'success') => {
     // Clear any existing timer
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current);
     }
     
+    setAlertType(type);
     setSuccessMessage(message);
     setShowSuccessMessage(true);
     successTimerRef.current = setTimeout(() => {
@@ -660,11 +663,17 @@ export function JobDetailsPageV2() {
     }, 3000);
   };
 
+  const showSuccess = (message: string) => showActionAlert(message, 'success');
+  const showError = (message: string) => showActionAlert(message, 'error');
+
   // ===== ESTIMATE FUNCTIONS =====
 
   // Add Estimate
   const handleAddEstimate = () => {
-    if (!estimateAmount) return;
+    if (!estimateAmount) {
+      showError('Enter an estimate amount before creating the estimate.');
+      return;
+    }
     
     const newEstimate: Estimate = {
       id: `#${selectedJob?.id.split('-')[0]}-${estimates.length + 1}`,
@@ -834,7 +843,10 @@ export function JobDetailsPageV2() {
 
   // Delete Estimate/Invoice
   const handleDeleteConfirm = () => {
-    if (!itemToDelete) return;
+    if (!itemToDelete) {
+      showError('No estimate or invoice was selected for deletion.');
+      return;
+    }
 
     if (itemToDelete.type === 'estimate') {
       setEstimates(estimates.filter(est => est.id !== itemToDelete.id));
@@ -875,6 +887,16 @@ export function JobDetailsPageV2() {
 
   // Send Estimate (Unsent → Pending)
   const handleSendEstimate = (estimateId: string) => {
+    const estimate = estimates.find(est => est.id === estimateId);
+    if (!estimate) {
+      showError('The selected estimate could not be found.');
+      return;
+    }
+    if (estimate.status !== 'Unsent') {
+      showError('Only unsent estimates can be sent to the client.');
+      return;
+    }
+
     setEstimates(estimates.map(est => 
       est.id === estimateId ? { ...est, status: 'Pending' as const } : est
     ));
@@ -1546,15 +1568,12 @@ export function JobDetailsPageV2() {
           Back to Jobs
         </button>
 
-        {/* Success Message */}
-        {showSuccessMessage && (
-          <div className="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-[20px] flex items-center justify-between">
-            <span className="text-sm">✓ {successMessage}</span>
-            <button onClick={() => setShowSuccessMessage(false)} className="text-green-600 hover:text-green-800">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <ActionAlertPopup
+          isOpen={showSuccessMessage}
+          type={alertType}
+          message={successMessage}
+          onClose={() => setShowSuccessMessage(false)}
+        />
 
         {/* Main Card */}
         <div 
@@ -2977,7 +2996,8 @@ export function JobDetailsPageV2() {
                   setDeleteType(null);
                   setDeleteTarget(null);
                 }}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-[20px] hover:bg-red-600 transition-colors"
+                className="flex-1 px-4 py-2 text-white rounded-[20px] transition-colors hover:brightness-95"
+                style={{ backgroundColor: '#f16a6a' }}
               >
                 Delete
               </button>
@@ -3419,7 +3439,8 @@ export function JobDetailsPageV2() {
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-[20px] hover:bg-red-600 transition-colors"
+                className="flex-1 px-4 py-2 text-white rounded-[20px] transition-colors hover:brightness-95"
+                style={{ backgroundColor: '#f16a6a' }}
               >
                 Delete
               </button>
