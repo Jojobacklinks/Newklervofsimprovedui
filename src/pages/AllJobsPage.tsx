@@ -813,16 +813,6 @@ export function AllJobsPage() {
                 >
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
-                      {job.servicePlanId && (
-                        <div className="group relative inline-block">
-                          <div className="w-5 h-5 bg-[#28bdf2] flex items-center justify-center rounded-sm">
-                            <span className="text-white text-xs font-bold">S</span>
-                          </div>
-                          <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                            Service Plan Job
-                          </div>
-                        </div>
-                      )}
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
@@ -889,6 +879,16 @@ export function AllJobsPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
                       <div className="flex items-center gap-2">
+                        {job.servicePlanId && (
+                          <div className="group relative inline-block">
+                            <div className="w-4 h-4 bg-[#28bef3] flex items-center justify-center rounded-sm">
+                              <span className="text-white text-[10px] font-bold leading-none">S</span>
+                            </div>
+                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                              From Service Plan
+                            </div>
+                          </div>
+                        )}
                         {job.hasUpsell && (
                           <div className="group relative inline-block">
                             <div className="w-4 h-4 bg-[rgb(185,223,16)] flex items-center justify-center rounded-sm">

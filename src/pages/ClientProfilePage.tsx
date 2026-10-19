@@ -1,3 +1,7 @@
+import { getPreferredServicePlanTerms } from '../hooks/useServicePlanTerms';
+import { hasServicePlanTerms, ServicePlanTermsContent } from '../components/ServicePlanTermsContent';
+import { useInventoryPlans, type InventoryPlan } from '../hooks/useInventoryPlans';
+import { ServicePlanTermsSelect } from '../components/ServicePlanTermsSelect';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, User, MapPin, Phone, Mail, Building2, Calendar, DollarSign, FileText, Briefcase, Users, CheckCircle, Edit2, Save, X, ChevronLeft, ChevronRight, Info, Eye, Plus, Search, CreditCard, AlertCircle } from 'lucide-react';
@@ -70,6 +74,10 @@ interface ServicePlanSubscription {
   billingInterval: 'day' | 'week' | 'month' | 'year';
   intervalCount: number;
   autoRenew: boolean;
+  memberDiscountType?: 'percentage' | 'fixed';
+  memberDiscountValue?: number;
+  termsOfService?: string;
+  discountType?: 'percentage' | 'fixed';
   discount: number;
   totalVisits: number;
   createdAt: string;
@@ -87,17 +95,6 @@ const mockClientDatabase = [
   { id: '8', name: 'Lisa Anderson', email: 'lisa.anderson@email.com', phone: '(555) 555-6666', address: '707 Ash St, Tentown, USA' },
 ];
 
-// Mock inventory database - services only
-const inventoryDatabase = [
-  { id: 101, name: 'HVAC Tune-Up Service', type: 'service' as const, price: 150.00, description: 'Complete HVAC system inspection and tune-up', taxable: false },
-  { id: 102, name: 'AC Filter Replacement', type: 'service' as const, price: 45.00, description: 'Replace air conditioning filter', taxable: false },
-  { id: 103, name: 'Drain Cleaning', type: 'service' as const, price: 125.00, description: 'Professional drain cleaning service', taxable: false },
-  { id: 104, name: 'Water Heater Installation', type: 'service' as const, price: 850.00, description: 'Complete water heater installation', taxable: false },
-  { id: 105, name: 'Electrical Inspection', type: 'service' as const, price: 95.00, description: 'Comprehensive electrical system inspection', taxable: false },
-  { id: 106, name: 'Plumbing Maintenance', type: 'service' as const, price: 180.00, description: 'Routine plumbing maintenance check', taxable: false },
-  { id: 107, name: 'Duct Cleaning', type: 'service' as const, price: 300.00, description: 'Complete air duct cleaning service', taxable: false },
-  { id: 108, name: 'Furnace Repair', type: 'service' as const, price: 250.00, description: 'Furnace diagnostic and repair', taxable: false },
-];
 
 // Mock team members database
 const mockTeamMembers = [
@@ -272,7 +269,8 @@ export function ClientProfilePage() {
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
   const serviceInputRef = useRef<HTMLDivElement>(null);
 
-  const filteredServices = inventoryDatabase.filter(item =>
+  const inventoryPlans = useInventoryPlans();
+  const filteredServices = inventoryPlans.filter(item =>
     item.name.toLowerCase().includes(serviceSearch.toLowerCase())
   );
 
@@ -297,6 +295,9 @@ export function ClientProfilePage() {
     upsellRole: 'T' as 'T' | 'A',
     collectionMethod: 'send_payment_link' as 'collect_in_person' | 'send_payment_link',
     discountType: 'percentage' as 'percentage' | 'fixed',
+    memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+    memberDiscountValue: '0',
+    termsOfService: getPreferredServicePlanTerms(),
     discountValue: '0',
     totalVisits: '12',
     cardNumber: '',
@@ -365,7 +366,7 @@ export function ClientProfilePage() {
     setShowClientDropdown(false);
   };
 
-  const handleSelectService = (service: typeof inventoryDatabase[0]) => {
+  const handleSelectService = (service: InventoryPlan) => {
     setServiceSearch(service.name);
     setPlanForm({
       ...planForm,
@@ -402,6 +403,10 @@ export function ClientProfilePage() {
   };
 
   const createServicePlan = () => {
+    if (!hasServicePlanTerms(planForm.termsOfService)) {
+      alert('Please enter your terms of service.');
+      return;
+    }
     alert('Service plan created successfully! In a production environment, this would create the plan in your backend.');
     // Reset form
     setPlanForm({
@@ -425,6 +430,9 @@ export function ClientProfilePage() {
       upsellRole: 'T' as 'T' | 'A',
       collectionMethod: 'send_payment_link',
       discountType: 'percentage',
+      memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+      memberDiscountValue: '0',
+      termsOfService: getPreferredServicePlanTerms(),
       discountValue: '0',
       totalVisits: '12',
       cardNumber: '',
@@ -554,6 +562,9 @@ export function ClientProfilePage() {
       startDate: plan.startDate,
       autoRenew: plan.autoRenew,
       discountType: 'fixed',
+      memberDiscountType: plan.memberDiscountType || 'percentage',
+      memberDiscountValue: (plan.memberDiscountValue || 0).toString(),
+      termsOfService: plan.termsOfService ?? '',
       discountValue: plan.discount.toString(),
       totalVisits: plan.totalVisits.toString(),
     }));
@@ -1522,6 +1533,9 @@ export function ClientProfilePage() {
                       upsellRole: 'T' as 'T' | 'A',
                       collectionMethod: 'send_payment_link',
                       discountType: 'percentage',
+                      memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+                      memberDiscountValue: '0',
+                      termsOfService: getPreferredServicePlanTerms(),
                       discountValue: '0',
                       totalVisits: '12',
                       cardNumber: '',
@@ -1643,7 +1657,7 @@ export function ClientProfilePage() {
                           value={serviceSearch}
                           onChange={(e) => setServiceSearch(e.target.value)}
                           onFocus={() => setShowServiceDropdown(true)}
-                          placeholder="Search services..."
+                          placeholder="Search plans..."
                           className="w-full px-4 py-2 pr-10 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                         />
                         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -1662,8 +1676,8 @@ export function ClientProfilePage() {
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
                                           <span className="text-sm font-medium text-[#051046] break-words">{service.name}</span>
-                                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#E2F685] text-green-700">
-                                            Service
+                                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#a5e7fb] text-[#051046]">
+                                            Plan
                                           </span>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
@@ -1681,7 +1695,7 @@ export function ClientProfilePage() {
                               </div>
                             ) : (
                               <div className="px-4 py-6 text-center text-sm text-gray-500">
-                                No services found matching "{serviceSearch}"
+                                No inventory plans found{serviceSearch ? ` matching "${serviceSearch}"` : '. Add a service plan in Inventory to get started.'}
                               </div>
                             )}
                           </div>
@@ -1892,7 +1906,7 @@ export function ClientProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#051046] mb-2">Apply Discount (Optional)</label>
+                      <label className="block text-sm font-medium text-[#051046] mb-2">Apply Discount on Plan</label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <select
                           value={planForm.discountType}
@@ -1913,6 +1927,39 @@ export function ClientProfilePage() {
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#051046] mb-2">Plan Member Discount</label>
+                      <p className="text-xs text-gray-500 mb-3">Automatically applied to eligible items on this customer’s estimates and invoices.</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <select
+                          aria-label="Plan member discount type"
+                          value={planForm.memberDiscountType}
+                          onChange={(e) => setPlanForm({ ...planForm, memberDiscountType: e.target.value as 'percentage' | 'fixed' })}
+                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                          <option value="percentage">Percentage (%)</option>
+                          <option value="fixed">Fixed Amount ($)</option>
+                        </select>
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          max={planForm.memberDiscountType === 'percentage' ? 100 : undefined}
+                          aria-label="Plan member discount value"
+                          value={planForm.memberDiscountValue}
+                          onChange={(e) => setPlanForm({ ...planForm, memberDiscountValue: e.target.value })}
+                          placeholder="0"
+                          className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+                    </div>
+
+                    <ServicePlanTermsSelect
+                      value={planForm.termsOfService}
+                      onChange={(termsOfService) => setPlanForm({ ...planForm, termsOfService })}
+                    />
 
                     {planForm.price && (
                       <div className="p-4 bg-[#f8f5ff] border border-[#e2e8f0] rounded-[15px]">
@@ -2011,6 +2058,9 @@ export function ClientProfilePage() {
                       upsellRole: 'T' as 'T' | 'A',
                       collectionMethod: 'send_payment_link',
                       discountType: 'percentage',
+                      memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+                      memberDiscountValue: '0',
+                      termsOfService: getPreferredServicePlanTerms(),
                       discountValue: '0',
                       totalVisits: '12',
                       cardNumber: '',
@@ -2028,7 +2078,11 @@ export function ClientProfilePage() {
                 <button
                   onClick={() => {
                     // Validate required fields
-                    if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
+                    if (!hasServicePlanTerms(planForm.termsOfService)) {
+                        alert('Please enter your terms of service.');
+                        return;
+                      }
+                      if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
                       alert('Please fill in all required fields (marked with *)');
                       return;
                     }
@@ -2043,7 +2097,11 @@ export function ClientProfilePage() {
                 <button
                   onClick={() => {
                     // Validate required fields
-                    if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
+                    if (!hasServicePlanTerms(planForm.termsOfService)) {
+                        alert('Please enter your terms of service.');
+                        return;
+                      }
+                      if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
                       alert('Please fill in all required fields (marked with *)');
                       return;
                     }
@@ -2058,7 +2116,11 @@ export function ClientProfilePage() {
                 <button
                   onClick={() => {
                     // Validate required fields
-                    if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
+                    if (!hasServicePlanTerms(planForm.termsOfService)) {
+                        alert('Please enter your terms of service.');
+                        return;
+                      }
+                      if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
                       alert('Please fill in all required fields (marked with *)');
                       return;
                     }
@@ -2193,6 +2255,10 @@ export function ClientProfilePage() {
                     </div>
                   </div>
                   <div className="mb-8">
+                    <div className="mb-4">
+                      {parseFloat(planForm.memberDiscountValue) > 0 && <p className="text-sm text-[#051046] mb-3">Plan Member Discount: {planForm.memberDiscountType === 'percentage' ? planForm.memberDiscountValue + '%' : '$' + parseFloat(planForm.memberDiscountValue).toFixed(2)}</p>}
+                      {planForm.termsOfService && <><h3 className="text-sm font-semibold text-[#051046] mb-2">Terms of Service</h3><ServicePlanTermsContent value={planForm.termsOfService} /></>}
+                    </div>
                     <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Service Plan Details</h3>
                     <div className="space-y-2 text-xs text-gray-600">
                       <p>• <strong>Billing Frequency:</strong> {formatBillingInterval(planForm.billingInterval, parseInt(planForm.intervalCount))}</p>

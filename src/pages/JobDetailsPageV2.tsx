@@ -1,3 +1,9 @@
+import { ItemOrMemberDiscountToggle } from '../components/ItemOrMemberDiscountToggle';
+import { MemberDiscountToggle } from '../components/MemberDiscountToggle';
+import { getPlanMemberDiscount, lineItemAmount, type MemberDiscount } from '../utils/memberDiscount';
+import { ServicePlanTermsSelect } from '../components/ServicePlanTermsSelect';
+import { ServicePlanTermsContent } from '../components/ServicePlanTermsContent';
+import { getPreferredServicePlanTerms } from '../hooks/useServicePlanTerms';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router';
 import { ArrowLeft, X, Plus, Search, Trash2, MapPin, Edit2, Trash, CreditCard, DollarSign, AlertCircle } from 'lucide-react';
@@ -21,11 +27,13 @@ interface Estimate {
     quantity: number;
     price: number;
     taxable: boolean;
+    memberDiscount?: MemberDiscount;
   }>;
   discountAmount?: string;
   discountType?: '%' | '$';
   taxRate?: string;
   taxOption?: 'non-taxable' | 'standard-sales-tax' | 'austin-sales-tax';
+  termsOfService?: string;
   estimateNotes?: string;
 }
 
@@ -46,11 +54,13 @@ interface Invoice {
     quantity: number;
     price: number;
     taxable: boolean;
+    memberDiscount?: MemberDiscount;
   }>;
   discountAmount?: string;
   discountType?: '%' | '$';
   taxRate?: string;
   taxOption?: 'non-taxable' | 'standard-sales-tax' | 'austin-sales-tax';
+  termsOfService?: string;
   invoiceNotes?: string;
 }
 
@@ -133,6 +143,8 @@ export function JobDetailsPageV2() {
     scheduledByStaff: false,
     isAllDay: false,
     servicePlanId: servicePlanData.servicePlanId || '',
+    memberDiscountType: servicePlanData.memberDiscountType as 'percentage' | 'fixed' | undefined,
+    memberDiscountValue: servicePlanData.memberDiscountValue as number | undefined,
   } : selectedJob;
 
   // Update form states when selectedJob changes
@@ -146,9 +158,29 @@ export function JobDetailsPageV2() {
     }
   }, [displayJob]);
 
+  const isServicePlanJob = Boolean(displayJob?.servicePlanId);
+  const planMemberDiscount: MemberDiscount = displayJob?.servicePlanId
+    ? getPlanMemberDiscount(displayJob.servicePlanId, {
+        type: displayJob.memberDiscountType || 'percentage',
+        value: Math.max(0, displayJob.memberDiscountValue || 0),
+      })
+    : { type: 'percentage', value: 0 };
+
   // Details tab state
   const [showTeamDropdown, setShowTeamDropdown] = useState(false);
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
+  const [showFinalizeVisitConfirm, setShowFinalizeVisitConfirm] = useState(false);
+  const [finalizedVisits, setFinalizedVisits] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(window.localStorage.getItem('klervo-finalized-job-visits') || '{}') || {}; } catch { return {}; }
+  });
+  const isVisitFinalized = Boolean(displayJob?.id && finalizedVisits[displayJob.id]);
+  const [showRecordVisit, setShowRecordVisit] = useState(false);
+  const [visitPhotos, setVisitPhotos] = useState(false);
+  const [visitChecklist, setVisitChecklist] = useState(false);
+  const [visitNotes, setVisitNotes] = useState('');
+  const [visitNotesError, setVisitNotesError] = useState('');
+  const [recordedVisits, setRecordedVisits] = useState<Array<{ id: string; recordedAt: string; includePhotos: boolean; checklist: Array<{ text: string; completed: boolean }> | null; notes: string }>>([]);
+  const [viewVisitId, setViewVisitId] = useState<string | null>(null);
   const [jobStage, setJobStage] = useState<'onMyWay' | 'started' | 'completed'>('onMyWay');
   const [inventoryItems, setInventoryItems] = useState([
     { 
@@ -310,14 +342,14 @@ export function JobDetailsPageV2() {
 
   // Calculate total cost
   const calculateTotalCost = () => {
-    return inventoryItems.reduce((total, item) => total + (item.quantity * item.price), 0);
+    return inventoryItems.reduce((total, item) => total + lineItemAmount(item), 0);
   };
 
   // Calculate total upsell amount
   const calculateUpsellAmount = () => {
     return inventoryItems
       .filter(item => item.isUpsell)
-      .reduce((total, item) => total + (item.quantity * item.price), 0);
+      .reduce((total, item) => total + lineItemAmount(item), 0);
   };
 
   const handleUpsellToggle = (itemId: number) => {
@@ -617,10 +649,13 @@ export function JobDetailsPageV2() {
     quantity: number;
     price: number;
     taxable: boolean;
+    memberDiscount?: MemberDiscount;
   }>>([]);
   const [editDiscountAmount, setEditDiscountAmount] = useState('');
   const [editDiscountType, setEditDiscountType] = useState<'%' | '$'>('%');
   const [editTaxRate, setEditTaxRate] = useState('8.25');
+  const [editEstimateTerms, setEditEstimateTerms] = useState(getPreferredServicePlanTerms);
+  const [newInvoiceTerms, setNewInvoiceTerms] = useState(getPreferredServicePlanTerms);
   const [editEstimateNotes, setEditEstimateNotes] = useState('');
   const [editTaxOption, setEditTaxOption] = useState<'non-taxable' | 'standard-sales-tax' | 'austin-sales-tax'>('non-taxable');
   const [editEstimateDate, setEditEstimateDate] = useState('');
@@ -633,6 +668,7 @@ export function JobDetailsPageV2() {
     quantity: number;
     price: number;
     taxable: boolean;
+    memberDiscount?: MemberDiscount;
   }>>([{ id: Date.now(), description: '', notes: '', quantity: 1, price: 0, taxable: false }]);
   const [newInvoiceDiscountAmount, setNewInvoiceDiscountAmount] = useState('');
   const [newInvoiceDiscountType, setNewInvoiceDiscountType] = useState<'%' | '$'>('%');
@@ -670,6 +706,7 @@ export function JobDetailsPageV2() {
 
   // Add Estimate
   const handleAddEstimate = () => {
+    if (isVisitFinalized) { showError('This visit is finalized. New estimates and invoices cannot be created for this job.'); return; }
     if (!estimateAmount) {
       showError('Enter an estimate amount before creating the estimate.');
       return;
@@ -751,6 +788,7 @@ export function JobDetailsPageV2() {
     setEditDiscountType(estimate.discountType || '%');
     setEditTaxRate(estimate.taxRate || '8.25');
     setEditTaxOption(estimate.taxOption || 'non-taxable');
+    setEditEstimateTerms(estimate.termsOfService ?? getPreferredServicePlanTerms());
     setEditEstimateNotes(estimate.estimateNotes || '');
     setEditEstimateDate(estimate.created);
     
@@ -759,10 +797,11 @@ export function JobDetailsPageV2() {
 
   // Save Edit Estimate
   const handleSaveEditEstimate = () => {
+    if (isVisitFinalized && !estimates.some(estimate => estimate.id === selectedEstimate?.id)) { showError('This visit is finalized. New estimates cannot be created for this job.'); return; }
     if (!selectedEstimate) return;
 
     // Calculate totals
-    const subtotal = editEstimateItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const subtotal = editEstimateItems.reduce((sum, item) => sum + lineItemAmount(item), 0);
     let discountValue = 0;
     if (editDiscountAmount) {
       if (editDiscountType === '%') {
@@ -772,7 +811,7 @@ export function JobDetailsPageV2() {
       }
     }
     const afterDiscount = subtotal - discountValue;
-    const taxableAmount = editEstimateItems.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const taxableAmount = editEstimateItems.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
     const taxAmount = editTaxOption !== 'non-taxable' ? taxableAmount * (TAX_RATES[editTaxOption] / 100) : 0;
     const total = afterDiscount + taxAmount;
 
@@ -790,6 +829,7 @@ export function JobDetailsPageV2() {
         discountType: editDiscountType,
         taxRate: editTaxRate,
         taxOption: editTaxOption,
+        termsOfService: editEstimateTerms,
         estimateNotes: editEstimateNotes
       };
       setEstimates([newEstimate, ...estimates]);
@@ -807,7 +847,8 @@ export function JobDetailsPageV2() {
               discountType: editDiscountType,
               taxRate: editTaxRate,
               taxOption: editTaxOption,
-              estimateNotes: editEstimateNotes
+              termsOfService: editEstimateTerms,
+        estimateNotes: editEstimateNotes
             }
           : est
       ));
@@ -1023,6 +1064,7 @@ export function JobDetailsPageV2() {
 
   // Create Invoice from Approved Estimate
   const handleCreateInvoice = (estimate: Estimate) => {
+    if (isVisitFinalized) { showError('This visit is finalized. New estimates and invoices cannot be created for this job.'); return; }
     const dateString = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
@@ -1046,6 +1088,7 @@ export function JobDetailsPageV2() {
       discountType: estimate.discountType,
       taxRate: estimate.taxRate,
       taxOption: estimate.taxOption,
+      termsOfService: estimate.termsOfService,
       invoiceNotes: estimate.estimateNotes
     };
 
@@ -1078,8 +1121,9 @@ export function JobDetailsPageV2() {
 
   // Add Instant Invoice
   const handleAddInstantInvoice = () => {
+    if (isVisitFinalized) { showError('This visit is finalized. New estimates and invoices cannot be created for this job.'); return; }
     // Calculate subtotal
-    const subtotal = newInvoiceItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const subtotal = newInvoiceItems.reduce((sum, item) => sum + lineItemAmount(item), 0);
     
     // Calculate discount
     let discountValue = 0;
@@ -1093,7 +1137,7 @@ export function JobDetailsPageV2() {
     const afterDiscount = subtotal - discountValue;
     
     // Calculate tax
-    const taxableAmount = newInvoiceItems.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const taxableAmount = newInvoiceItems.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
     const taxAmount = newInvoiceTaxOption !== 'non-taxable' ? (taxableAmount - (newInvoiceDiscountType === '%' ? taxableAmount * (parseFloat(newInvoiceDiscountAmount || '0') / 100) : 0)) * (TAX_RATES[newInvoiceTaxOption] / 100) : 0;
     
     const total = afterDiscount + taxAmount;
@@ -1121,6 +1165,7 @@ export function JobDetailsPageV2() {
       discountType: newInvoiceDiscountType,
       taxRate: newInvoiceTaxRate,
       taxOption: newInvoiceTaxOption,
+      termsOfService: newInvoiceTerms,
       invoiceNotes: newInvoiceNotes
     };
 
@@ -1637,7 +1682,7 @@ export function JobDetailsPageV2() {
           {activeTab === 'Details' && (
             <div className="p-6">
               {/* Status and Action Button */}
-              <div className="flex items-center gap-4 mb-6">
+              <div className="flex flex-wrap items-center gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">Status:</span>
@@ -1667,6 +1712,7 @@ export function JobDetailsPageV2() {
                 >
                   {getButtonText()}
                 </button>
+                <button type="button" disabled={isJobLocked || isVisitFinalized} onClick={() => { setVisitPhotos(false); setVisitChecklist(false); setVisitNotes(''); setVisitNotesError(''); setShowRecordVisit(true); }} className="px-4 py-2 border border-[#9473ff] text-[#9473ff] rounded-[20px] text-sm hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Record Visit</button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -1939,7 +1985,7 @@ export function JobDetailsPageV2() {
                                   </div>
                                 </td>
                                 <td className="py-2 px-1 text-right font-semibold text-[#051046]">
-                                  ${(item.quantity * item.price).toFixed(2)}
+                                  ${lineItemAmount(item).toFixed(2)}
                                 </td>
                                 <td className="py-2 pl-2 text-center">
                                   <button 
@@ -2259,8 +2305,14 @@ export function JobDetailsPageV2() {
                         {/* Job Durations */}
                         <div className="flex items-center justify-between text-xs mb-3">
                           <span className="font-semibold text-[#051046]">Job Durations</span>
-                          <span className="text-gray-500">{jobDurations.length} visits</span>
+                          <span className="text-gray-500">{jobDurations.length + recordedVisits.length} visits</span>
                         </div>
+                        {recordedVisits.map(visit => (
+                          <div key={visit.id} className="bg-white/70 rounded-[10px] p-2 text-xs mb-2">
+                            <p className="font-semibold text-[#051046]">Recorded {new Date(visit.recordedAt).toLocaleString()}</p>
+                            <button type="button" onClick={() => setViewVisitId(visit.id)} className="text-purple-600 mt-1">View visit details</button>
+                          </div>
+                        ))}
                         {jobDurations.map((duration, index) => (
                           <div key={index} className="bg-white/70 rounded-[10px] p-2 text-xs">
                             <div className="flex items-center justify-between">
@@ -2379,10 +2431,12 @@ export function JobDetailsPageV2() {
           {/* ESTIMATE TAB */}
           {activeTab === 'Estimate' && (
             <div className="p-6">
+              {isVisitFinalized && <p className="text-sm text-gray-500 mb-4">This visit is finalized. New estimates and invoices cannot be created for this job.</p>}
               {/* Header with Add Estimate button */}
               <div className="flex justify-end mb-4">
-                <button 
+                <button disabled={isVisitFinalized}
                   onClick={() => {
+                    if (isVisitFinalized) { showError('This visit is finalized. New estimates cannot be created for this job.'); return; }
                     // Pre-populate edit estimate modal with data from Details tab
                     const prepopulatedItems = inventoryItems.map(item => ({
                       id: item.id,
@@ -2398,6 +2452,7 @@ export function JobDetailsPageV2() {
                     setEditDiscountType('%');
                     setEditTaxOption('non-taxable');
                     setEditTaxRate('8.25');
+                    setEditEstimateTerms(getPreferredServicePlanTerms());
                     setEditEstimateNotes('');
                     setEditEstimateDate('');
                     
@@ -2702,7 +2757,7 @@ export function JobDetailsPageV2() {
                                   >
                                     Request Deposit
                                   </button>
-                                  <button 
+                                  <button disabled={isVisitFinalized}
                                     onClick={() => handleCreateInvoice(estimate)}
                                     className="px-3 py-1.5 border border-[#e8e8e8] text-[#051046] rounded-[36px] hover:bg-gray-50 transition-colors font-medium text-sm whitespace-nowrap"
                                   >
@@ -2750,8 +2805,8 @@ export function JobDetailsPageV2() {
           {activeTab === 'Invoice' && (
             <div className="p-6">
               <div className="flex items-center justify-end mb-6">
-                <button
-                  onClick={() => setShowAddInstantInvoiceModal(true)}
+                <button disabled={isVisitFinalized}
+                  onClick={() => { if (isVisitFinalized) { showError('This visit is finalized. New invoices cannot be created for this job.'); return; } setNewInvoiceTerms(getPreferredServicePlanTerms()); setShowAddInstantInvoiceModal(true); }}
                   className="px-5 py-2.5 bg-[#9473ff] text-white rounded-[20px] text-sm hover:bg-[#7f5fd9] transition-colors flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
@@ -2964,6 +3019,69 @@ export function JobDetailsPageV2() {
       </div>
 
       {/* MODALS */}
+
+      {showRecordVisit && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="record-visit-title" className="bg-white rounded-[20px] border border-[#e2e8f0] p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h3 id="record-visit-title" className="text-lg font-semibold text-[#051046]">Record Visit</h3>
+              <button type="button" aria-label="Close" onClick={() => setShowRecordVisit(false)}><X className="w-5 h-5 text-gray-400" /></button>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">Select the visit details to include in the email sent to the customer.</p>
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 text-sm text-[#051046]"><input autoFocus type="checkbox" checked={visitPhotos} onChange={(event) => setVisitPhotos(event.target.checked)} className="w-4 h-4 accent-[#9473ff]" />Before &amp; after photos</label>
+              <label className="flex items-center gap-3 text-sm text-[#051046]"><input type="checkbox" checked={visitChecklist} onChange={(event) => setVisitChecklist(event.target.checked)} className="w-4 h-4 accent-[#9473ff]" />Checklist</label>
+              <label className="block text-sm font-medium text-[#051046]">Visit Notes <span className="text-red-500">*</span><span id="record-visit-notes-help" className="block text-xs font-normal text-gray-500 mt-1">These notes will be visible to the customer.</span><textarea id="record-visit-notes" required aria-required="true" aria-invalid={Boolean(visitNotesError)} aria-describedby="record-visit-notes-help record-visit-notes-error" value={visitNotes} onChange={(event) => { setVisitNotes(event.target.value); setVisitNotesError(''); }} rows={4} placeholder="Add notes about this visit..." className="block mt-2 w-full px-3 py-2 border border-[#e8e8e8] rounded-[15px] text-sm focus:outline-none focus:ring-2 focus:ring-purple-600" /></label>
+            </div>
+            <p id="record-visit-notes-error" role="alert" className="text-xs text-red-600 mt-2">{visitNotesError}</p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button type="button" onClick={() => setShowRecordVisit(false)} className="px-5 py-2 border border-[#e8e8e8] rounded-[60px] text-sm text-[#051046]">Cancel</button>
+              <button type="button" disabled={isJobLocked} onClick={() => {
+                if (!visitNotes.trim()) {
+                  setVisitNotesError('Please enter visit notes before recording the visit.');
+                  document.getElementById('record-visit-notes')?.focus();
+                  return;
+                }
+                setShowFinalizeVisitConfirm(true);
+              }} className="px-5 py-2 bg-[#9473ff] text-white rounded-[60px] text-sm hover:bg-[#7f5fd9] disabled:opacity-50">Record It</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showFinalizeVisitConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="finalize-visit-title" aria-describedby="finalize-visit-warning" className="bg-white rounded-[20px] border border-[#e2e8f0] p-6 max-w-md w-full">
+            <h3 id="finalize-visit-title" className="text-lg font-semibold text-[#051046] mb-3">Finalize this visit?</h3>
+            <p id="finalize-visit-warning" className="text-sm text-gray-600">You will no longer be able to create new estimates or invoices for this job. Make sure all estimates and invoices have been created before recording this visit.</p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button autoFocus type="button" onClick={() => setShowFinalizeVisitConfirm(false)} className="px-5 py-2 border border-[#e8e8e8] rounded-[60px] text-sm text-[#051046]">Go Back</button>
+              <button type="button" onClick={() => {
+                if (!displayJob?.id || isVisitFinalized || isJobLocked) return;
+                if (!visitNotes.trim()) { setShowFinalizeVisitConfirm(false); setVisitNotesError('Please enter visit notes before recording the visit.'); return; }
+                const nextFinalized = { ...finalizedVisits, [displayJob.id]: true };
+                try { window.localStorage.setItem('klervo-finalized-job-visits', JSON.stringify(nextFinalized)); }
+                catch { showError('Unable to finalize this visit. Please try again.'); return; }
+                setFinalizedVisits(nextFinalized);
+                setRecordedVisits(visits => [...visits, { id: crypto.randomUUID(), recordedAt: new Date().toISOString(), includePhotos: visitPhotos, checklist: visitChecklist ? checklist.map(({ text, completed }) => ({ text, completed })) : null, notes: visitNotes.trim() }]);
+                setShowRecordVisit(false);
+                showSuccess('Visit recorded and finalized.');
+                setShowFinalizeVisitConfirm(false);
+              }} className="px-5 py-2 bg-[#9473ff] text-white rounded-[60px] text-sm hover:bg-[#7f5fd9]">Yes, Finalize Visit</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {viewVisitId && (() => {
+        const visit = recordedVisits.find(item => item.id === viewVisitId);
+        if (!visit) return null;
+        return <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"><div role="dialog" aria-modal="true" aria-labelledby="visit-details-title" className="bg-white rounded-[20px] p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4"><h3 id="visit-details-title" className="text-lg font-semibold text-[#051046]">View visit details</h3><button type="button" aria-label="Close" onClick={() => setViewVisitId(null)}><X className="w-5 h-5" /></button></div>
+          {visit.includePhotos && <div className="mb-4"><h4 className="font-medium text-sm">Before &amp; after photos</h4><p className="text-sm text-gray-500">No photos attached to this job.</p></div>}
+          {visit.checklist && <div className="mb-4"><h4 className="font-medium text-sm mb-2">Checklist</h4>{visit.checklist.map((item, index) => <p key={index} className="text-sm text-gray-600">{item.completed ? '?' : '?'} {item.text}</p>)}</div>}
+          {visit.notes && <div><h4 className="font-medium text-sm mb-2">Visit Notes</h4><p className="text-sm whitespace-pre-wrap break-words text-gray-600">{visit.notes}</p></div>}
+          {!visit.includePhotos && !visit.checklist && !visit.notes && <p className="text-sm text-gray-500">No additional details included.</p>}
+        </div></div>;
+      })()}
 
       {/* Delete Confirm Modal for Inventory/Visit */}
       {showDeleteConfirm && (
@@ -3284,7 +3402,7 @@ export function JobDetailsPageV2() {
                           <label className="block text-xs text-gray-500 mb-1">Amount</label>
                           <input
                             type="text"
-                            value={`$${(item.quantity * item.price).toFixed(2)}`}
+                            value={`$${lineItemAmount(item).toFixed(2)}`}
                             readOnly
                             className="w-full px-3 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] bg-gray-50"
                           />
@@ -3305,6 +3423,8 @@ export function JobDetailsPageV2() {
                           </label>
                         </div>
                       </div>
+                        {decodedJobId === 'J-104' ? <ItemOrMemberDiscountToggle discount={item.memberDiscount} onChange={(discount) => setEditEstimateItems(items => items.map((line, lineIndex) => lineIndex === index ? { ...line, memberDiscount: discount } : line))} /> : isServicePlanJob && <MemberDiscountToggle discount={item.memberDiscount || planMemberDiscount} checked={Boolean(item.memberDiscount)} onChange={(enabled) => setEditEstimateItems(items => items.map((line, lineIndex) => lineIndex === index ? { ...line, memberDiscount: enabled ? { ...planMemberDiscount } : undefined } : line))} />}
+
                     </div>
                   );
                   })}
@@ -3319,7 +3439,7 @@ export function JobDetailsPageV2() {
                   <div className="flex items-center justify-between pb-3 border-b border-[#e2e8f0]">
                     <span className="text-sm font-semibold text-[#051046]">Subtotal:</span>
                     <span className="text-sm text-[#051046]">
-                      ${editEstimateItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
+                      ${editEstimateItems.reduce((sum, item) => sum + lineItemAmount(item), 0).toFixed(2)}
                     </span>
                   </div>
 
@@ -3363,7 +3483,7 @@ export function JobDetailsPageV2() {
                     <span className="text-base font-bold text-[#051046]">Total:</span>
                     <span className="text-base font-bold text-[#051046]">
                       ${(() => {
-                        const subtotal = editEstimateItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const subtotal = editEstimateItems.reduce((sum, item) => sum + lineItemAmount(item), 0);
                         let discountValue = 0;
                         if (editDiscountAmount) {
                           if (editDiscountType === '%') {
@@ -3373,7 +3493,7 @@ export function JobDetailsPageV2() {
                           }
                         }
                         const afterDiscount = subtotal - discountValue;
-                        const taxableAmount = editEstimateItems.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const taxableAmount = editEstimateItems.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
                         const taxAmount = editTaxOption !== 'non-taxable' ? taxableAmount * (TAX_RATES[editTaxOption] / 100) : 0;
                         return (afterDiscount + taxAmount).toFixed(2);
                       })()}
@@ -3381,6 +3501,8 @@ export function JobDetailsPageV2() {
                   </div>
                 </div>
               </div>
+
+              <div className="mb-6"><ServicePlanTermsSelect value={editEstimateTerms} onChange={setEditEstimateTerms} /></div>
 
               {/* Notes */}
               <div className="mb-6">
@@ -3624,7 +3746,7 @@ export function JobDetailsPageV2() {
                               </td>
                               <td className="py-4 text-center text-sm text-[#051046]">{item.quantity}</td>
                               <td className="py-4 text-right text-sm text-[#051046]">${item.price.toFixed(2)}</td>
-                              <td className="py-4 text-right text-sm font-medium text-[#051046]">${(item.quantity * item.price).toFixed(2)}</td>
+                              <td className="py-4 text-right text-sm font-medium text-[#051046]">${lineItemAmount(item).toFixed(2)}{item.memberDiscount && <span className="block text-xs text-[#99B80D]">{item.memberDiscount.mode === 'item' ? 'Item discount applied' : 'Member discount applied'}</span>}</td>
                             </tr>
                           ))
                         ) : (
@@ -3653,7 +3775,7 @@ export function JobDetailsPageV2() {
                       {(() => {
                         // Calculate financial summary from estimate items
                         const items = selectedEstimate.items || [];
-                        const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const subtotal = items.reduce((sum, item) => sum + lineItemAmount(item), 0);
                         
                         // Discount calculation
                         let discountValue = 0;
@@ -3668,7 +3790,7 @@ export function JobDetailsPageV2() {
                         const afterDiscount = subtotal - discountValue;
                         
                         // Tax calculation
-                        const taxableAmount = items.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const taxableAmount = items.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
                         const taxRate = selectedEstimate.taxRate ? parseFloat(selectedEstimate.taxRate) : 8.25;
                         const useTax = selectedEstimate.taxOption === 'tax-rate' || pdfTaxOption === 'tax-rate';
                         const taxAmount = useTax ? taxableAmount * (taxRate / 100) : 0;
@@ -3739,6 +3861,7 @@ export function JobDetailsPageV2() {
                     </div>
                   </div>
 
+                  {selectedEstimate.termsOfService && <div className="mb-6"><h4 className="text-sm font-semibold text-[#051046] mb-2">Terms of Service</h4><ServicePlanTermsContent value={selectedEstimate.termsOfService} /></div>}
                   {/* Notes */}
                   <div className="mb-8">
                     <h4 className="text-sm font-semibold text-[#051046] mb-2">Notes</h4>
@@ -3859,7 +3982,7 @@ export function JobDetailsPageV2() {
                               </td>
                               <td className="py-4 text-center text-sm text-[#051046]">{item.quantity}</td>
                               <td className="py-4 text-right text-sm text-[#051046]">${item.price.toFixed(2)}</td>
-                              <td className="py-4 text-right text-sm font-medium text-[#051046]">${(item.quantity * item.price).toFixed(2)}</td>
+                              <td className="py-4 text-right text-sm font-medium text-[#051046]">${lineItemAmount(item).toFixed(2)}{item.memberDiscount && <span className="block text-xs text-[#99B80D]">{item.memberDiscount.mode === 'item' ? 'Item discount applied' : 'Member discount applied'}</span>}</td>
                             </tr>
                           ))
                         ) : (
@@ -3888,7 +4011,7 @@ export function JobDetailsPageV2() {
                       {(() => {
                         // Calculate financial summary from invoice items
                         const items = selectedInvoice.items || [];
-                        const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const subtotal = items.reduce((sum, item) => sum + lineItemAmount(item), 0);
                         
                         // Discount calculation
                         let discountValue = 0;
@@ -3903,7 +4026,7 @@ export function JobDetailsPageV2() {
                         const afterDiscount = subtotal - discountValue;
                         
                         // Tax calculation
-                        const taxableAmount = items.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const taxableAmount = items.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
                         const taxRate = selectedInvoice.taxRate ? parseFloat(selectedInvoice.taxRate) : 8.25;
                         const useTax = selectedInvoice.taxOption === 'tax-rate' || pdfTaxOption === 'tax-rate';
                         const taxAmount = useTax ? taxableAmount * (taxRate / 100) : 0;
@@ -3977,6 +4100,7 @@ export function JobDetailsPageV2() {
                     </div>
                   </div>
 
+                  {selectedInvoice.termsOfService && <div className="mb-6"><h4 className="text-sm font-semibold text-[#051046] mb-2">Terms of Service</h4><ServicePlanTermsContent value={selectedInvoice.termsOfService} /></div>}
                   {/* Notes */}
                   <div className="mb-8">
                     <h4 className="text-sm font-semibold text-[#051046] mb-2">Notes</h4>
@@ -4513,7 +4637,7 @@ export function JobDetailsPageV2() {
                             <label className="block text-xs text-gray-500 mb-1">Amount</label>
                             <input
                               type="text"
-                              value={`$${(item.quantity * item.price).toFixed(2)}`}
+                              value={`$${lineItemAmount(item).toFixed(2)}`}
                               readOnly
                               className="w-full px-3 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] bg-gray-50"
                             />
@@ -4534,6 +4658,8 @@ export function JobDetailsPageV2() {
                             </label>
                           </div>
                         </div>
+                        {decodedJobId === 'J-104' ? <ItemOrMemberDiscountToggle discount={item.memberDiscount} onChange={(discount) => setNewInvoiceItems(items => items.map((line, lineIndex) => lineIndex === index ? { ...line, memberDiscount: discount } : line))} /> : isServicePlanJob && <MemberDiscountToggle discount={item.memberDiscount || planMemberDiscount} checked={Boolean(item.memberDiscount)} onChange={(enabled) => setNewInvoiceItems(items => items.map((line, lineIndex) => lineIndex === index ? { ...line, memberDiscount: enabled ? { ...planMemberDiscount } : undefined } : line))} />}
+
                       </div>
                     );
                   })}
@@ -4548,7 +4674,7 @@ export function JobDetailsPageV2() {
                   <div className="flex items-center justify-between pb-3 border-b border-[#e2e8f0]">
                     <span className="text-sm font-semibold text-[#051046]">Subtotal:</span>
                     <span className="text-sm text-[#051046]">
-                      ${newInvoiceItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
+                      ${newInvoiceItems.reduce((sum, item) => sum + lineItemAmount(item), 0).toFixed(2)}
                     </span>
                   </div>
 
@@ -4577,7 +4703,7 @@ export function JobDetailsPageV2() {
                     <span className="text-sm text-[#051046]">Amount after discount:</span>
                     <span className="text-sm text-[#051046]">
                       ${(() => {
-                        const subtotal = newInvoiceItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const subtotal = newInvoiceItems.reduce((sum, item) => sum + lineItemAmount(item), 0);
                         let discount = 0;
                         if (newInvoiceDiscountAmount) {
                           if (newInvoiceDiscountType === '%') {
@@ -4610,7 +4736,7 @@ export function JobDetailsPageV2() {
                     <span className="text-base font-bold text-[#051046]">Total:</span>
                     <span className="text-base font-bold text-[#051046]">
                       ${(() => {
-                        const subtotal = newInvoiceItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const subtotal = newInvoiceItems.reduce((sum, item) => sum + lineItemAmount(item), 0);
                         let discount = 0;
                         if (newInvoiceDiscountAmount) {
                           if (newInvoiceDiscountType === '%') {
@@ -4620,7 +4746,7 @@ export function JobDetailsPageV2() {
                           }
                         }
                         const afterDiscount = subtotal - discount;
-                        const taxableAmount = newInvoiceItems.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        const taxableAmount = newInvoiceItems.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
                         const taxAmount = newInvoiceTaxOption !== 'non-taxable' ? taxableAmount * (TAX_RATES[newInvoiceTaxOption] / 100) : 0;
                         return (afterDiscount + taxAmount).toFixed(2);
                       })()}
@@ -4628,6 +4754,8 @@ export function JobDetailsPageV2() {
                   </div>
                 </div>
               </div>
+
+              <div className="mb-6"><ServicePlanTermsSelect value={newInvoiceTerms} onChange={setNewInvoiceTerms} /></div>
 
               {/* Invoice Notes */}
               <div className="mb-6">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Box, Wrench, Plus } from 'lucide-react';
+import { INVENTORY_PLANS_CHANGED } from '../hooks/useInventoryPlans';
 
 type ItemType = 'part' | 'service';
 
@@ -86,9 +87,20 @@ export function AddPartOrServiceModal({
   const getAllCategories = () => {
     const baseCategories = itemType === 'part' 
       ? ['HVAC Parts', 'Plumbing', 'Electrical', 'Tools']
-      : ['HVAC Services', 'Plumbing Services', 'Electrical Services', 'Maintenance'];
+      : ['HVAC Services', 'Plumbing Services', 'Electrical Services', 'Maintenance', 'Plan'];
     return [...baseCategories, ...customCategories];
   };
+
+  useEffect(() => {
+    if (itemType === 'service' && isServicePlan) {
+      setCategory('Plan');
+      return;
+    }
+
+    if (itemType !== 'service' && category === 'Plan') {
+      setCategory('');
+    }
+  }, [itemType, isServicePlan, category]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,10 +117,12 @@ export function AddPartOrServiceModal({
           name,
           description,
           price: parseFloat(price) || 0,
+          taxable: taxable === 'taxable',
         },
       ];
 
       window.localStorage.setItem(CUSTOM_SERVICE_PLANS_STORAGE_KEY, JSON.stringify(nextItems));
+      window.dispatchEvent(new Event(INVENTORY_PLANS_CHANGED));
     }
     
     onSave({
@@ -391,13 +405,17 @@ export function AddPartOrServiceModal({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] text-gray-700"
+              disabled={itemType === 'service' && isServicePlan}
+              className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] text-gray-700 disabled:bg-gray-50 disabled:text-gray-400"
             >
               <option value="">Select category...</option>
               {getAllCategories().map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+            {itemType === 'service' && isServicePlan && (
+              <p className="text-xs text-gray-500 mt-1">Category is automatically set to Plan for service plans.</p>
+            )}
             {onAddCategory && (
               <button 
                 type="button" 

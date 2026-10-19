@@ -505,13 +505,6 @@ export function InventoryPage() {
     setItemToDelete(null);
   };
 
-  const getAllCategories = () => {
-    const baseCategories = itemType === 'part' 
-      ? ['HVAC Parts', 'Plumbing', 'Electrical', 'Tools']
-      : ['HVAC Services', 'Plumbing Services', 'Electrical Services', 'Maintenance'];
-    return [...baseCategories, ...customCategories];
-  };
-
   // Reset to page 1 when filters change
   useEffect(() => {
     setInventoryCurrentPage(1);
@@ -1613,13 +1606,17 @@ function AddItemModal({ onClose, customCategories, onAddCategory }: AddItemModal
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] text-gray-700"
+              disabled={itemType === 'service' && isServicePlan}
+              className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] text-gray-700 disabled:bg-gray-50 disabled:text-gray-400"
             >
               <option value="">Select category...</option>
               {getAllCategories().map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+            {itemType === 'service' && isServicePlan && (
+              <p className="text-xs text-gray-500 mt-1">Category is automatically set to Plan for service plans.</p>
+            )}
             <button 
               type="button" 
               className="mt-2 text-sm text-[#9473ff] hover:text-[#7f5fd9] font-medium" 

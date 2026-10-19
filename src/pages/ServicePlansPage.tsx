@@ -1,3 +1,7 @@
+import { getPreferredServicePlanTerms } from '../hooks/useServicePlanTerms';
+import { hasServicePlanTerms, ServicePlanTermsContent } from '../components/ServicePlanTermsContent';
+import { useInventoryPlans, type InventoryPlan } from '../hooks/useInventoryPlans';
+import { ServicePlanTermsSelect } from '../components/ServicePlanTermsSelect';
 import { useState, useRef, useEffect } from 'react';
 import { Plus, Edit2, Trash2, ScrollText, Clock, CircleCheckBig, AlertCircle, XCircle, Mail, ChevronLeft, ChevronRight, X, CreditCard, Calendar, Search } from 'lucide-react';
 import { PlanDetailsModal } from '../components/PlanDetailsModal';
@@ -20,20 +24,6 @@ const mockClientDatabase = [
   { id: 'C-108', name: 'Lisa Anderson', email: 'lisa.anderson@email.com', phone: '(555) 555-6666', address: '707 Ash St, Tentown, USA' },
 ];
 
-// Mock inventory database - services only
-const inventoryDatabase = [
-  { id: 101, name: 'HVAC Tune-Up Service', type: 'service' as const, price: 150.00, description: 'Complete HVAC system inspection and tune-up', taxable: false },
-  { id: 102, name: 'AC Filter Replacement', type: 'service' as const, price: 45.00, description: 'Replace air conditioning filter', taxable: false },
-  { id: 103, name: 'Drain Cleaning', type: 'service' as const, price: 125.00, description: 'Professional drain cleaning service', taxable: false },
-  { id: 104, name: 'Water Heater Installation', type: 'service' as const, price: 850.00, description: 'Complete water heater installation', taxable: false },
-  { id: 105, name: 'Electrical Inspection', type: 'service' as const, price: 95.00, description: 'Comprehensive electrical system inspection', taxable: false },
-  { id: 106, name: 'Annual HVAC Maintenance', type: 'service' as const, price: 499.00, description: 'Complete HVAC system inspection and maintenance', taxable: false },
-  { id: 107, name: 'Quarterly Plumbing Check', type: 'service' as const, price: 799.00, description: 'Comprehensive plumbing inspection and maintenance', taxable: false },
-  { id: 108, name: 'Monthly Lawn Care', type: 'service' as const, price: 100.00, description: 'Professional lawn maintenance and care', taxable: false },
-  { id: 109, name: 'Quarterly Pool Service', type: 'service' as const, price: 299.00, description: 'Pool cleaning and chemical balance', taxable: false },
-  { id: 110, name: 'Bi-Annual Pest Control', type: 'service' as const, price: 350.00, description: 'Interior and exterior pest control treatment', taxable: false },
-  { id: 115, name: 'Sump Pump Installation', type: 'service' as const, price: 425.00, description: 'Professional sump pump installation', taxable: false },
-];
 
 // Mock team members database
 const mockTeamMembers = [
@@ -66,6 +56,10 @@ interface ServicePlan {
   collectionMethod: 'charge_automatically' | 'send_invoice';
   paymentMethod: string;
   paymentType?: 'card' | 'cash' | 'other'; // Track original payment type for editing
+  memberDiscountType?: 'percentage' | 'fixed';
+  memberDiscountValue?: number;
+  termsOfService?: string;
+  discountType?: 'percentage' | 'fixed';
   discount: number; // Percentage or amount
   status: 'pending' | 'approved' | 'active' | 'canceled' | 'failed' | 'declined'; // Updated flow: pending -> approved -> active
   declineReason?: string;
@@ -231,7 +225,8 @@ export function ServicePlansPage() {
   }, []);
 
   // Filter services based on search
-  const filteredServices = inventoryDatabase.filter(item =>
+  const inventoryPlans = useInventoryPlans();
+  const filteredServices = inventoryPlans.filter(item =>
     item.name.toLowerCase().includes(serviceSearch.toLowerCase())
   );
 
@@ -265,6 +260,9 @@ export function ServicePlansPage() {
     // Payment
     collectionMethod: 'send_payment_link' as 'collect_in_person' | 'send_payment_link',
     discountType: 'percentage' as 'percentage' | 'fixed',
+    memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+    memberDiscountValue: '0',
+    termsOfService: getPreferredServicePlanTerms(),
     discountValue: '0',
     
     // Card Information (for edit mode)
@@ -275,7 +273,12 @@ export function ServicePlansPage() {
   });
 
   // Sample data for Service Plans (Stripe subscriptions)
-  const allServicePlans: ServicePlan[] = [
+  const [allServicePlans, setServicePlans] = useState<ServicePlan[]>(() => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem('klervo-service-plans') || 'null');
+      if (Array.isArray(stored)) return stored;
+    } catch { /* Use initial plans when storage is unavailable. */ }
+    return [
     {
       id: 'S-101',
       customerId: 'C-101',
@@ -444,6 +447,11 @@ export function ServicePlansPage() {
       visitsUsed: 0,
     },
   ];
+  });
+
+  useEffect(() => {
+    try { window.localStorage.setItem('klervo-service-plans', JSON.stringify(allServicePlans)); } catch { /* Keep session state when storage is unavailable. */ }
+  }, [allServicePlans]);
 
   // Filter service plans based on user role - Staff only see their own plans
   const servicePlans = location.pathname.startsWith('/staff') 
@@ -581,7 +589,7 @@ export function ServicePlansPage() {
   };
 
   // Service selection handler
-  const handleSelectService = (service: typeof inventoryDatabase[0]) => {
+  const handleSelectService = (service: InventoryPlan) => {
     setServiceSearch(service.name);
     setPlanForm({
       ...planForm,
@@ -641,7 +649,10 @@ export function ServicePlansPage() {
       cancelAt: plan.cancelAt || '',
       autoRenew: plan.autoRenew,
       collectionMethod: plan.collectionMethod === 'charge_automatically' ? 'collect_in_person' : 'send_payment_link',
-      discountType: 'percentage',
+      discountType: plan.discountType || 'percentage',
+      memberDiscountType: plan.memberDiscountType || 'percentage',
+      memberDiscountValue: (plan.memberDiscountValue || 0).toString(),
+      termsOfService: plan.termsOfService ?? '',
       discountValue: plan.discount.toString(),
       isUpsell: plan.upsoldBy ? true : false,
       upsellOwner: plan.upsoldBy?.name || '',
@@ -669,6 +680,10 @@ export function ServicePlansPage() {
   };
 
   const createServicePlan = () => {
+    if (!hasServicePlanTerms(planForm.termsOfService)) {
+      alert('Please enter your terms of service.');
+      return;
+    }
     // Calculate next billing date
     const startDate = new Date(planForm.startDate);
     const nextBilling = new Date(startDate);
@@ -728,6 +743,10 @@ export function ServicePlansPage() {
             autoRenew: planForm.autoRenew,
             collectionMethod: planForm.collectionMethod === 'collect_in_person' ? 'charge_automatically' : 'send_invoice',
             paymentMethod: updatedPaymentMethod,
+            memberDiscountType: planForm.memberDiscountType,
+            memberDiscountValue: parseFloat(planForm.memberDiscountValue || '0'),
+            termsOfService: planForm.termsOfService,
+            discountType: planForm.discountType,
             discount: discount,
             nextBillingDate: nextBilling.toLocaleDateString(),
             totalVisits: parseInt(planForm.totalVisits) || 0,
@@ -769,6 +788,10 @@ export function ServicePlansPage() {
         collectionMethod: planForm.collectionMethod === 'collect_in_person' ? 'charge_automatically' : 'send_invoice',
         paymentMethod: selectedPaymentMethod === 'card' ? 'Card (Stripe)' : selectedPaymentMethod === 'cash' ? 'Cash' : selectedPaymentMethod === 'other' ? 'Other' : 'Payment Link',
         paymentType: selectedPaymentMethod || undefined,
+        memberDiscountType: planForm.memberDiscountType,
+        memberDiscountValue: parseFloat(planForm.memberDiscountValue || '0'),
+        termsOfService: planForm.termsOfService,
+        discountType: planForm.discountType,
         discount: discount,
         status: 'pending',
         nextBillingDate: nextBilling.toLocaleDateString(),
@@ -805,6 +828,9 @@ export function ServicePlansPage() {
       upsellRole: 'T' as 'T' | 'A',
       collectionMethod: 'send_payment_link',
       discountType: 'percentage',
+      memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+      memberDiscountValue: '0',
+      termsOfService: getPreferredServicePlanTerms(),
       discountValue: '0',
     });
     setIsEditMode(false);
@@ -1280,6 +1306,9 @@ export function ServicePlansPage() {
                       upsellRole: 'T' as 'T' | 'A',
                       collectionMethod: 'send_payment_link',
                       discountType: 'percentage',
+                      memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+                      memberDiscountValue: '0',
+                      termsOfService: getPreferredServicePlanTerms(),
                       discountValue: '0',
                       cardNumber: '',
                       cardExpiry: '',
@@ -1401,7 +1430,7 @@ export function ServicePlansPage() {
                           value={serviceSearch}
                           onChange={(e) => setServiceSearch(e.target.value)}
                           onFocus={() => setShowServiceDropdown(true)}
-                          placeholder="Search services..."
+                          placeholder="Search plans..."
                           className="w-full px-4 py-2 pr-10 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                         />
                         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -1421,8 +1450,8 @@ export function ServicePlansPage() {
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
                                           <span className="text-sm font-medium text-[#051046] break-words">{service.name}</span>
-                                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#E2F685] text-green-700">
-                                            Service
+                                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#a5e7fb] text-[#051046]">
+                                            Plan
                                           </span>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
@@ -1440,7 +1469,7 @@ export function ServicePlansPage() {
                               </div>
                             ) : (
                               <div className="px-4 py-6 text-center text-sm text-gray-500">
-                                No services found matching "{serviceSearch}"
+                                No inventory plans found{serviceSearch ? ` matching "${serviceSearch}"` : '. Add a service plan in Inventory to get started.'}
                               </div>
                             )}
                           </div>
@@ -1688,7 +1717,7 @@ export function ServicePlansPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#051046] mb-2">Apply Discount (Optional)</label>
+                      <label className="block text-sm font-medium text-[#051046] mb-2">Apply Discount on Plan</label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <select
                           value={planForm.discountType}
@@ -1711,6 +1740,41 @@ export function ServicePlansPage() {
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#051046] mb-2">Plan Member Discount</label>
+                      <p className="text-xs text-gray-500 mb-3">Automatically applied to eligible items on this customer’s estimates and invoices.</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <select
+                          aria-label="Plan member discount type"
+                          value={planForm.memberDiscountType}
+                          onChange={(e) => setPlanForm({ ...planForm, memberDiscountType: e.target.value as 'percentage' | 'fixed' })}
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        >
+                          <option value="percentage">Percentage (%)</option>
+                          <option value="fixed">Fixed Amount ($)</option>
+                        </select>
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          max={planForm.memberDiscountType === 'percentage' ? 100 : undefined}
+                          aria-label="Plan member discount value"
+                          value={planForm.memberDiscountValue}
+                          onChange={(e) => setPlanForm({ ...planForm, memberDiscountValue: e.target.value })}
+                          placeholder="0"
+                          disabled={isBillingSetupLocked}
+                          className={`w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600 ${isBillingSetupLocked ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        />
+                      </div>
+                    </div>
+
+                    <ServicePlanTermsSelect
+                      value={planForm.termsOfService}
+                      onChange={(termsOfService) => setPlanForm({ ...planForm, termsOfService })}
+                    />
 
                     {/* Price Summary */}
                     {planForm.price && (
@@ -1965,6 +2029,9 @@ export function ServicePlansPage() {
                       upsellRole: 'T' as 'T' | 'A',
                       collectionMethod: 'send_payment_link',
                       discountType: 'percentage',
+                      memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+                      memberDiscountValue: '0',
+                      termsOfService: getPreferredServicePlanTerms(),
                       discountValue: '0',
                     });
                   }}
@@ -1978,6 +2045,10 @@ export function ServicePlansPage() {
                   <button
                     onClick={() => {
                       // Validate required fields
+                      if (!hasServicePlanTerms(planForm.termsOfService)) {
+                        alert('Please enter your terms of service.');
+                        return;
+                      }
                       if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
                         alert('Please fill in all required fields (marked with *)');
                         return;
@@ -1997,7 +2068,11 @@ export function ServicePlansPage() {
                     <button
                       onClick={() => {
                         // Validate required fields
-                        if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
+                        if (!hasServicePlanTerms(planForm.termsOfService)) {
+                        alert('Please enter your terms of service.');
+                        return;
+                      }
+                      if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
                           alert('Please fill in all required fields (marked with *)');
                           return;
                         }
@@ -2021,6 +2096,10 @@ export function ServicePlansPage() {
                           autoRenew: planForm.autoRenew,
                           collectionMethod: planForm.collectionMethod,
                           paymentMethod: 'Not Set',
+                          memberDiscountType: planForm.memberDiscountType,
+                          memberDiscountValue: parseFloat(planForm.memberDiscountValue || '0'),
+                          termsOfService: planForm.termsOfService,
+                          discountType: planForm.discountType,
                           discount: parseFloat(planForm.discountValue || '0'),
                           status: 'pending',
                           nextBillingDate: new Date(new Date(planForm.startDate).getTime() + planForm.trialDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -2039,7 +2118,11 @@ export function ServicePlansPage() {
                     <button
                       onClick={() => {
                         // Validate required fields
-                        if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
+                        if (!hasServicePlanTerms(planForm.termsOfService)) {
+                        alert('Please enter your terms of service.');
+                        return;
+                      }
+                      if (!planForm.clientName || !planForm.clientEmail || !planForm.propertyAddress || !planForm.serviceName || !planForm.price) {
                           alert('Please fill in all required fields (marked with *)');
                           return;
                         }
@@ -2108,7 +2191,11 @@ export function ServicePlansPage() {
           const properJobId = `J-${nextJobNumber}`;
           
           // Replace temporary ID with proper J-XXX format
-          const jobWithProperID = { ...jobData, id: properJobId };
+          const originatingPlan = allServicePlans.find(plan => plan.id === jobData.servicePlanId);
+          const jobWithProperID = { ...jobData, id: properJobId,
+            memberDiscountType: originatingPlan?.memberDiscountType || 'percentage' as const,
+            memberDiscountValue: originatingPlan?.memberDiscountValue || 0,
+          };
           
           addJob(jobWithProperID);
           setIsNewJobModalOpen(false);
@@ -2450,6 +2537,10 @@ export function ServicePlansPage() {
               </div>
 
               <div className="mb-8">
+                <div className="mb-4">
+                      {parseFloat(String(selectedPlanForPdf.memberDiscountValue || 0)) > 0 && <p className="text-sm text-[#051046] mb-3">Plan Member Discount: {selectedPlanForPdf.memberDiscountType === 'percentage' ? String(selectedPlanForPdf.memberDiscountValue || 0) + '%' : '$' + parseFloat(String(selectedPlanForPdf.memberDiscountValue || 0)).toFixed(2)}</p>}
+                      {selectedPlanForPdf.termsOfService && <><h3 className="text-sm font-semibold text-[#051046] mb-2">Terms of Service</h3><ServicePlanTermsContent value={selectedPlanForPdf.termsOfService} /></>}
+                    </div>
                 <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Service Plan Details</h3>
                 <div className="space-y-2 text-xs text-gray-600">
                   <p>• <strong>Billing Frequency:</strong> {selectedPlanForPdf.intervalCount === 1 ? selectedPlanForPdf.billingInterval.charAt(0).toUpperCase() + selectedPlanForPdf.billingInterval.slice(1) + 'ly' : `Every ${selectedPlanForPdf.intervalCount} ${selectedPlanForPdf.billingInterval}s`}</p>
@@ -2591,6 +2682,10 @@ export function ServicePlansPage() {
                     </div>
                   </div>
                   <div className="mb-8">
+                    <div className="mb-4">
+                      {parseFloat(planForm.memberDiscountValue) > 0 && <p className="text-sm text-[#051046] mb-3">Plan Member Discount: {planForm.memberDiscountType === 'percentage' ? planForm.memberDiscountValue + '%' : '$' + parseFloat(planForm.memberDiscountValue).toFixed(2)}</p>}
+                      {planForm.termsOfService && <><h3 className="text-sm font-semibold text-[#051046] mb-2">Terms of Service</h3><ServicePlanTermsContent value={planForm.termsOfService} /></>}
+                    </div>
                     <h3 className="text-sm font-bold text-[#051046] mb-3 uppercase">Subscription Terms</h3>
                     <div className="space-y-2 text-xs text-gray-600">
                       <p>• <strong>Billing Frequency:</strong> {formatBillingInterval(planForm.billingInterval, parseInt(planForm.intervalCount))}</p>
@@ -2690,6 +2785,10 @@ export function ServicePlansPage() {
                   autoRenew: planForm.autoRenew,
                   collectionMethod: planForm.collectionMethod === 'collect_in_person' ? 'charge_automatically' : 'send_invoice',
                   paymentMethod: planForm.collectionMethod === 'collect_in_person' ? 'Card' : 'Payment Link',
+                  memberDiscountType: planForm.memberDiscountType,
+                  memberDiscountValue: parseFloat(planForm.memberDiscountValue || '0'),
+                  termsOfService: planForm.termsOfService,
+                  discountType: planForm.discountType,
                   discount: discount,
                   status: 'incomplete',
                   nextBillingDate: nextBilling.toLocaleDateString(),
@@ -2720,6 +2819,9 @@ export function ServicePlansPage() {
                   autoRenew: true,
                   collectionMethod: 'send_payment_link',
                   discountType: 'percentage',
+                  memberDiscountType: 'percentage' as 'percentage' | 'fixed',
+                  memberDiscountValue: '0',
+                  termsOfService: getPreferredServicePlanTerms(),
                   discountValue: '0',
                 });
               }} className="px-6 py-2 bg-blue-600 text-white rounded-[15px] hover:bg-blue-700 transition-colors">Proceed to Checkout</button>

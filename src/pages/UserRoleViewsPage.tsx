@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { UserCircle, Users, User, LogIn, LayoutGrid } from "lucide-react";
+import { UserCircle, Users, User, LogIn, LayoutGrid, Smartphone } from "lucide-react";
 
 export function UserRoleViewsPage() {
   const navigate = useNavigate();
@@ -25,6 +25,16 @@ export function UserRoleViewsPage() {
 
         {/* Role Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <button
+            onClick={() => navigate('/staff-app')}
+            className="group relative bg-white p-8 rounded-[20px] border border-[#e2e8f0] hover:border-[#9473ff] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(148,115,255,0.25)] md:col-span-3"
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+              <div className="w-20 h-20 shrink-0 rounded-[24px] bg-[#051046] flex items-center justify-center"><Smartphone className="w-10 h-10 text-[#c6b4ff]" /></div>
+              <div className="flex-1"><h2 className="text-2xl font-bold text-[#051046] mb-2">Staff App</h2><p className="text-base text-slate-500">Explore the iOS &amp; Android mobile mockup for staff members</p></div>
+              <span className="px-6 py-3 rounded-full font-semibold bg-[#9473ff] text-white group-hover:bg-[#7f5fd9]">View App Mockup</span>
+            </div>
+          </button>
           {/* Admin Card */}
           <button
             onClick={() => navigate('/admin')}

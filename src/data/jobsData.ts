@@ -25,6 +25,8 @@ export interface Job {
   feedbackRating?: number;
   declineReason?: string;
   servicePlanId?: string; // Links job to a service plan
+  memberDiscountType?: 'percentage' | 'fixed';
+  memberDiscountValue?: number;
 }
 
 export const mockJobs: Job[] = [
@@ -52,6 +54,7 @@ export const mockJobs: Job[] = [
     isAllDay: false,
     feedbackRating: 5,
     declineReason: 'Price',
+    servicePlanId: 'S-101',
   },
   {
     id: 'J-102',
@@ -177,6 +180,7 @@ export const mockJobs: Job[] = [
     isAllDay: false,
     feedbackRating: 5,
     declineReason: 'Price',
+    servicePlanId: 'S-102',
   },
   {
     id: 'J-107',

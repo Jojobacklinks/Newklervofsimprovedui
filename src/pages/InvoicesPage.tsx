@@ -1,3 +1,4 @@
+import { lineItemAmount, type MemberDiscount } from '../utils/memberDiscount';
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Eye, Calendar as CalendarIcon, Search, Bell, Trash2, ChevronDown, CreditCard, Banknote, MoreHorizontal, RotateCcw, X, CheckCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -31,6 +32,7 @@ interface InvoiceDetails extends Invoice {
     quantity: number;
     price: number;
     taxable: boolean;
+    memberDiscount?: MemberDiscount;
   }>;
   discountAmount?: string;
   discountType?: '%' | '$';
@@ -674,7 +676,7 @@ export function InvoicesPage() {
                         </td>
                         <td className="py-4 text-center text-sm text-[#051046]">{item.quantity}</td>
                         <td className="py-4 text-right text-sm text-[#051046]">${item.price.toFixed(2)}</td>
-                        <td className="py-4 text-right text-sm font-medium text-[#051046]">${(item.quantity * item.price).toFixed(2)}</td>
+                        <td className="py-4 text-right text-sm font-medium text-[#051046]">${lineItemAmount(item).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -686,7 +688,7 @@ export function InvoicesPage() {
                 <div className="w-96 space-y-3">
                   {(() => {
                     const items = selectedInvoice.items || [];
-                    const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                    const subtotal = items.reduce((sum, item) => sum + lineItemAmount(item), 0);
                     
                     let discountValue = 0;
                     if (selectedInvoice.discountAmount) {
@@ -699,7 +701,7 @@ export function InvoicesPage() {
                     
                     const afterDiscount = subtotal - discountValue;
                     
-                    const taxableAmount = items.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                    const taxableAmount = items.filter(item => item.taxable).reduce((sum, item) => sum + lineItemAmount(item), 0);
                     const taxRate = selectedInvoice.taxRate ? parseFloat(selectedInvoice.taxRate) : 8.25;
                     const useTax = selectedInvoice.taxOption === 'tax-rate';
                     const taxAmount = useTax ? taxableAmount * (taxRate / 100) : 0;

@@ -24,6 +24,7 @@ import CustomerPortalPage from "./pages/CustomerPortalPage";
 import TechnicianIndicatorDemo from "./pages/TechnicianIndicatorDemo";
 import { SignupLoginPage } from "./pages/SignupLoginPage";
 import { JoinPage } from "./pages/JoinPage";
+import { StaffAppPage } from "./pages/StaffAppPage";
 
 function NotFoundPage() {
   return (
@@ -38,6 +39,7 @@ function NotFoundPage() {
 }
 
 export const router = createHashRouter([
+  { path: "/staff-app", Component: StaffAppPage },
   {
     path: "/",
     Component: UserRoleViewsPage,

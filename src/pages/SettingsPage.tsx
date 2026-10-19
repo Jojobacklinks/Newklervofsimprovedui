@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import { Settings, CreditCard, Palette, Plug, Upload, Eye, EyeOff, Edit2, Trash2, Plus, Info, Settings2, Tag, Copy, Check } from 'lucide-react';
 import { useLocation } from 'react-router';
 import userAvatar from 'figma:asset/f42899e907ff2d454cb3bd2c065e1b8acf0167d3.png';
@@ -8,7 +9,7 @@ import { usePromotions } from '../contexts/PromotionsContext';
 export function SettingsPage() {
   const location = useLocation();
   const isStaffView = location.pathname.startsWith('/staff');
-  const [activeTab, setActiveTab] = useState('settings');
+  const [activeTab, setActiveTab] = useState(() => !isStaffView && new URLSearchParams(location.search).get('tab') === 'customization' ? 'customization' : 'settings');
   const { promotions, setPromotions } = usePromotions();
   
   // Settings Tab States
@@ -30,7 +31,15 @@ export function SettingsPage() {
   const [googleReviewLink, setGoogleReviewLink] = useState('');
   const [companyAddress, setCompanyAddress] = useState('456 Business Blvd, Austin, TX 78701');
   const [primaryIndustry, setPrimaryIndustry] = useState('Plumbing');
+  const [companyLogoImage, setCompanyLogoImage] = useState<string | null>(companyLogo);
+  const [companyTimezone, setCompanyTimezone] = useState(() => {
+    try { return window.localStorage.getItem('klervo-company-timezone') || 'America/Chicago'; } catch { return 'America/Chicago'; }
+  });
   const [website, setWebsite] = useState('www.abcservices.com');
+  const [termsOfServiceLink, setTermsOfServiceLink] = useState(() => {
+    try { return window.localStorage.getItem('klervo-company-terms-of-service-link') || ''; } catch { return ''; }
+  });
+  const [termsLinkError, setTermsLinkError] = useState('');
   const [greenThreshold, setGreenThreshold] = useState('0-3');
   const [orangeThreshold, setOrangeThreshold] = useState('4-7');
   const [redThreshold, setRedThreshold] = useState('8-11');
@@ -656,16 +665,22 @@ export function SettingsPage() {
                       className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                   </div>
+
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-[#051046] mb-2">Company logo</label>
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <img src={companyLogo} alt="Company Logo" className="w-full h-full object-contain rounded-full" />
-                      </div>
-                      <button className="px-4 py-2 border border-[#e8e8e8] rounded-[32px] text-sm text-[#051046] hover:bg-gray-100 transition-colors flex items-center gap-2">
-                        <Upload className="w-4 h-4" />
-                        Upload Logo
-                      </button>
+                    <div className="flex flex-col items-start gap-2">
+                      <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-purple-400" title="Upload company logo">
+                        {companyLogoImage ? <img src={companyLogoImage} alt="Company Logo" className="w-full h-full object-contain rounded-full" /> : <Upload className="w-6 h-6 text-gray-400" />}
+                        <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload company logo" className="sr-only" onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) return;
+                          const reader = new FileReader();
+                          reader.onload = () => setCompanyLogoImage(String(reader.result));
+                          reader.readAsDataURL(file);
+                          event.target.value = '';
+                        }} />
+                      </label>
+                      {companyLogoImage && <button type="button" onClick={() => setCompanyLogoImage(null)} className="text-sm text-[#9473ff] hover:text-purple-700">Remove</button>}
                     </div>
                   </div>
                   <div className="md:col-span-2">
@@ -678,6 +693,7 @@ export function SettingsPage() {
                       className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-[#051046] mb-2">Primary industry</label>
                     <select
@@ -701,6 +717,19 @@ export function SettingsPage() {
                     </select>
                   </div>
                   <div>
+                    <label htmlFor="company-timezone" className="block text-sm font-medium text-[#051046] mb-2">Timezone</label>
+                    <select id="company-timezone" value={companyTimezone} onChange={(event) => setCompanyTimezone(event.target.value)} className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600">
+                      <option value="America/New_York">Eastern Time (ET) ? New York</option>
+                      <option value="America/Chicago">Central Time (CT) ? Chicago</option>
+                      <option value="America/Denver">Mountain Time (MT) ? Denver</option>
+                      <option value="America/Phoenix">Arizona Time ? Phoenix</option>
+                      <option value="America/Los_Angeles">Pacific Time (PT) ? Los Angeles</option>
+                      <option value="America/Anchorage">Alaska Time ? Anchorage</option>
+                      <option value="Pacific/Honolulu">Hawaii Time ? Honolulu</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-sm font-medium text-[#051046] mb-2">Website (optional)</label>
                     <input
                       type="text"
@@ -709,13 +738,44 @@ export function SettingsPage() {
                       className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                   </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <label htmlFor="company-terms-link" className="text-sm font-medium text-[#051046]">Terms of Service Link (optional)</label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button type="button" aria-label="About the Terms of Service link" className="text-gray-400 hover:text-purple-600 focus-visible:outline-purple-600 rounded-full">
+                              <Info className="w-4 h-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[280px]" side="top" sideOffset={6}>Attaches your legal terms to all customer documents for chargeback protection.</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <input id="company-terms-link" type="url" value={termsOfServiceLink} onChange={(event) => { setTermsOfServiceLink(event.target.value); setTermsLinkError(''); }} placeholder="https://yourcompany.com/terms" aria-invalid={Boolean(termsLinkError)} aria-describedby={termsLinkError ? 'company-terms-link-error' : undefined} className="w-full px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600" />
+                      {termsLinkError && <p id="company-terms-link-error" role="alert" className="text-xs text-red-600 mt-2">{termsLinkError}</p>}
+                    </div>
+                  </div>
                 </div>
                 <button
                   className="px-6 py-2 rounded-[32px] text-white font-medium transition-colors"
                   style={{ backgroundColor: '#9473ff' }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
-                  onClick={() => alert('Company data updated successfully!')}
+                  onClick={() => {
+                    const link = termsOfServiceLink.trim();
+                    if (link) {
+                      try {
+                        const url = new URL(link);
+                        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Invalid URL');
+                      } catch { setTermsLinkError('Enter a valid link starting with https:// or http://.'); return; }
+                    }
+                    try {
+                      window.localStorage.setItem('klervo-company-terms-of-service-link', link);
+                      window.localStorage.setItem('klervo-company-timezone', companyTimezone);
+                      setTermsOfServiceLink(link);
+                      setTermsLinkError('');
+                      alert('Company data updated successfully!');
+                    } catch { setTermsLinkError('Unable to save the link. Please try again.'); }
+                  }}
                 >
                   Update Company Data
                 </button>
@@ -1630,6 +1690,8 @@ export function SettingsPage() {
                 </div>
               )}
             </div>
+
+
 
             {/* Team Workload Color Threshold */}
             <div className="bg-gray-50 rounded-[20px] border border-[#e2e8f0] p-6">
