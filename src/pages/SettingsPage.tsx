@@ -65,6 +65,10 @@ export function SettingsPage() {
   const [scheduleJobHours, setScheduleJobHours] = useState('24');
   const [estimateHours, setEstimateHours] = useState('48');
   const [birthdayDays, setBirthdayDays] = useState('7');
+  const [completionEmailContent, setCompletionEmailContent] = useState(() => {
+    try { const stored = JSON.parse(window.localStorage.getItem('klervo-completion-email-content') || '{}'); return { photos: stored.photos === true, checklist: stored.checklist === true }; }
+    catch { return { photos: false, checklist: false }; }
+  });
   const [invoiceOverdueHours, setInvoiceOverdueHours] = useState('48');
   const [defaultTechnicianCommission, setDefaultTechnicianCommission] = useState('15');
   const [checklistName, setChecklistName] = useState('');
@@ -882,7 +886,7 @@ export function SettingsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium text-[#051046]">
+                      <label className="text-sm font-semibold text-[#051046]">
                         Reminder - "Scheduled Job Details"
                       </label>
                       <div className="relative group">
@@ -907,7 +911,7 @@ export function SettingsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium text-[#051046]">
+                      <label className="text-sm font-semibold text-[#051046]">
                         Reminder - "Your Estimate Is Now Available"
                       </label>
                       <div className="relative group">
@@ -932,7 +936,7 @@ export function SettingsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium text-[#051046]">
+                      <label className="text-sm font-semibold text-[#051046]">
                         "Friendly Reminder: Invoice Overdue"
                       </label>
                       <div className="relative group">
@@ -957,7 +961,7 @@ export function SettingsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium text-[#051046]">
+                      <label className="text-sm font-semibold text-[#051046]">
                         Up Coming Birthday
                       </label>
                       <div className="relative group">
@@ -980,13 +984,17 @@ export function SettingsPage() {
                 </div>
               </div>
 
+              <div className="mt-6 pt-5 border-t border-[#e2e8f0] space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" className="mt-0.5 w-4 h-4 accent-[#9473ff] shrink-0" checked={completionEmailContent.photos} onChange={event => setCompletionEmailContent(current => ({ ...current, photos: event.target.checked }))} /><span className="text-sm text-[#051046]">Send customers job and visit photos in the final emails</span></label>
+                <label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" className="mt-0.5 w-4 h-4 accent-[#9473ff] shrink-0" checked={completionEmailContent.checklist} onChange={event => setCompletionEmailContent(current => ({ ...current, checklist: event.target.checked }))} /><span className="text-sm text-[#051046]">Send customers job and visit checklists in the final emails</span></label>
+              </div>
               <div className="mt-6 flex items-center gap-3">
                 <button
                   className="px-6 py-2 rounded-[32px] text-white font-medium transition-colors"
                   style={{ backgroundColor: '#9473ff' }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
-                  onClick={() => alert('Notification settings updated successfully!')}
+                  onClick={() => { try { window.localStorage.setItem('klervo-completion-email-content', JSON.stringify(completionEmailContent)); alert('Notification settings updated successfully!'); } catch { alert('Unable to save notification settings. Please try again.'); } }}
                 >
                   Save Notification Settings
                 </button>
@@ -1000,6 +1008,7 @@ export function SettingsPage() {
                     setEstimateHours('48');
                     setInvoiceOverdueHours('48');
                     setBirthdayDays('7');
+                    setCompletionEmailContent({ photos: false, checklist: false });
                   }}
                 >
                   Restore Defaults
