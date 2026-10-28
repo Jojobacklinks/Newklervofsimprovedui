@@ -9,7 +9,7 @@ import { StaffAppClientProfile } from '../components/StaffAppClientProfile';
 import { StaffAppJobDetails } from '../components/StaffAppJobDetails';
 import { useState, useRef, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { ArrowLeft, ChevronLeft, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, ClipboardList, Clock, FileText, HelpCircle, Handshake, LayoutDashboard, MapPin, MoreHorizontal, Package, Phone, Navigation, UserRound, Search, Settings, ShieldCheck, Smartphone, Sparkles, Tag, Users, Briefcase, Wrench, Plus, ListFilter, X } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronDown, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, ClipboardList, Clock, FileText, HelpCircle, Handshake, LayoutDashboard, MapPin, MoreHorizontal, Package, Phone, Navigation, UserRound, Search, Settings, ShieldCheck, Smartphone, Sparkles, Tag, Users, Briefcase, Wrench, Plus, ListFilter, X } from 'lucide-react';
 import './StaffAppPage.css';
 import '../components/StaffAppDropdowns.css';
 
@@ -72,6 +72,9 @@ const initialJobs = jobs;
 const initialActivities = activities;
 
 export function StaffAppPage() {
+  const monthDialog = useRef<HTMLDialogElement>(null);
+  const [monthPickerYear, setMonthPickerYear] = useState(2026);
+  const [pickerMonth, setPickerMonth] = useState<number | null>(null);
   const [profileParams, setProfileParams] = useSearchParams();
   const [jobs] = useState(initialJobs);
   const [activities] = useState(initialActivities);
@@ -217,10 +220,35 @@ export function StaffAppPage() {
       return <>{title}
         <section className="sa-date-navigator" aria-label="Schedule date navigation">
           <button type="button" aria-label="Previous day" onClick={() => moveDate(-1)}><ChevronLeft size={20} /></button>
-          <div><strong>{scheduleDate === today ? 'Today, ' : ''}{selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</strong><span>{summary}</span><input type="date" aria-label="Choose schedule date" value={scheduleDate} onChange={event => { if (event.target.value) setScheduleDate(event.target.value); }} /></div>
+          <div><button type="button" className="sa-month-picker-trigger" aria-haspopup="dialog" aria-label="Choose schedule date" onClick={() => { setMonthPickerYear(selectedDate.getFullYear()); setPickerMonth(selectedDate.getMonth()); monthDialog.current?.showModal(); }}><strong>{scheduleDate === today ? 'Today, ' : ''}{selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} <span aria-hidden="true">▾</span></strong><span>{summary}</span></button></div>
           <button type="button" aria-label="Next day" onClick={() => moveDate(1)}><ChevronRight size={20} /></button>
         </section>
         {scheduleFilter !== 'all' && <div className="sa-timeline-filter"><span>{scheduleFilter === 'done' ? 'Completed jobs (Done)' : 'Jobs only'}</span><button className="sa-text-button" onClick={() => setScheduleFilter('all')}>Show all events</button></div>}
+        <dialog ref={monthDialog} className="sa-status-dialog sa-month-picker" aria-label="Choose schedule date" onClick={event => { if (event.target === event.currentTarget) monthDialog.current?.close(); }}>
+          <div className="sa-status-title"><button type="button" className="sa-text-button sa-picker-today" aria-label="Go to today" onClick={() => { setScheduleDate(today); monthDialog.current?.close(); }}><CalendarDays size={16} aria-hidden="true" />Today</button><button type="button" aria-label="Close date picker" onClick={() => monthDialog.current?.close()}><X size={18} /></button></div>
+          {pickerMonth === null ? <>
+          <div className="sa-month-picker-year">
+            <button type="button" aria-label="Previous year" onClick={() => setMonthPickerYear(year => year - 1)}><ChevronLeft size={20} /></button>
+            <strong aria-live="polite">{monthPickerYear}</strong>
+            <button type="button" aria-label="Next year" onClick={() => setMonthPickerYear(year => year + 1)}><ChevronRight size={20} /></button>
+          </div>
+          <div className="sa-month-picker-grid">{Array.from({ length: 12 }, (_, month) => {
+            const name = new Date(2026, month, 1).toLocaleDateString('en-US', { month: 'short' });
+            return <button type="button" key={month} aria-label={`${name} ${monthPickerYear}`} aria-pressed={selectedDate.getMonth() === month && selectedDate.getFullYear() === monthPickerYear} onClick={() => setPickerMonth(month)}>{name}</button>;
+          })}</div>
+          </> : <>
+            <button type="button" className="sa-day-picker-month" onClick={() => setPickerMonth(null)}>{new Date(monthPickerYear, pickerMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}<ChevronDown size={18} aria-hidden="true" /></button>
+            <div className="sa-day-picker-grid">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <span key={day}>{day}</span>)}
+              {Array.from({ length: new Date(monthPickerYear, pickerMonth, 1).getDay() }, (_, index) => <span key={`blank-${index}`} />)}
+              {Array.from({ length: new Date(monthPickerYear, pickerMonth + 1, 0).getDate() }, (_, index) => {
+                const day = index + 1;
+                const date = `${monthPickerYear}-${String(pickerMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                return <button type="button" key={day} aria-label={new Date(monthPickerYear, pickerMonth, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} aria-pressed={date === scheduleDate} aria-current={date === today ? 'date' : undefined} onClick={() => { setScheduleDate(date); monthDialog.current?.close(); }}>{day}</button>;
+              })}
+            </div>
+          </>}
+        </dialog>
         {scheduleDate !== today && <button className="sa-text-button" onClick={() => setScheduleDate(today)}>Back to today</button>}
         <div className={`sa-timeline ${USE_COLORED_TIMELINE ? 'sa-timeline-colored' : ''}`}>{entries.map(entry => <section className="sa-timeline-entry" key={entry.id}>
           <div className="sa-timeline-time">{entry.time.split(/\s*[–-]\s*/)[0]}<i className={'sa-timeline-dot sa-timeline-dot-' + entry.kind} /></div>
