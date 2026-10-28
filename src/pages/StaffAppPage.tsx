@@ -1,3 +1,4 @@
+import * as ProfileMenu from '@radix-ui/react-dropdown-menu';
 import { StaffAppAI } from '../components/StaffAppAI';
 import { StaffAppSettings } from '../components/StaffAppSettings';
 import { StaffAppTabs } from '../components/StaffAppTabs';
@@ -9,7 +10,7 @@ import { StaffAppClientProfile } from '../components/StaffAppClientProfile';
 import { StaffAppJobDetails } from '../components/StaffAppJobDetails';
 import { useState, useRef, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { ArrowLeft, ChevronLeft, ChevronDown, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, ClipboardList, Clock, FileText, HelpCircle, Handshake, LayoutDashboard, MapPin, MoreHorizontal, Package, Phone, Navigation, UserRound, Search, Settings, ShieldCheck, Smartphone, Sparkles, Tag, Users, Briefcase, Wrench, Plus, ListFilter, X } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronDown, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, ClipboardList, Clock, FileText, HelpCircle, Handshake, LayoutDashboard, MapPin, MoreHorizontal, Package, Phone, Navigation, UserRound, Search, Settings, ShieldCheck, Smartphone, Sparkles, Tag, Users, Briefcase, Wrench, Plus, ListFilter, LogOut, X } from 'lucide-react';
 import './StaffAppPage.css';
 import '../components/StaffAppDropdowns.css';
 
@@ -136,7 +137,13 @@ export function StaffAppPage() {
         <div><p>Thursday, October 15</p><h1>Hi, Paonda</h1></div>
         <div className="sa-home-controls">
           <button className="sa-home-notification" aria-label="Notifications" onClick={() => open('Notifications')}><Bell size={23} />{!read && <span>3</span>}</button>
-          <button className="sa-home-profile" aria-label="Your profile" onClick={() => open('More')}>PP</button>
+          <ProfileMenu.Root>
+            <ProfileMenu.Trigger asChild><button type="button" className="sa-home-profile" aria-label="Your profile">PP</button></ProfileMenu.Trigger>
+            <ProfileMenu.Content className="sa-profile-menu" align="end" sideOffset={8}>
+              <ProfileMenu.Item className="sa-profile-menu-item" onSelect={() => open('Settings')}><Settings size={18} aria-hidden="true" />Settings</ProfileMenu.Item>
+              <ProfileMenu.Item className="sa-profile-menu-item" onSelect={() => { window.location.href = 'https://jojobacklinks.github.io/Newklervofsimprovedui/'; }}><LogOut size={18} aria-hidden="true" />Log Out</ProfileMenu.Item>
+            </ProfileMenu.Content>
+          </ProfileMenu.Root>
         </div>
       </div></header>;
   const dashboard = <>

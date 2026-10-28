@@ -56,3 +56,5 @@
 
 
 .sa-day-picker-month{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;margin:12px auto 10px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#051046;font-size:16px!important;font-weight:600}.sa-day-picker-month:hover{background:#f4f0fb}
+
+.sa-profile-menu{z-index:50;min-width:170px;padding:6px;background:#fff;border:1px solid #e8e1f5;border-radius:14px;box-shadow:0 8px 24px #17203924;color:#051046}.sa-profile-menu-item{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border-radius:9px;font-size:13px;cursor:pointer;outline:none}.sa-profile-menu-item[data-highlighted]{background:#f4efff;color:#805bd5}
