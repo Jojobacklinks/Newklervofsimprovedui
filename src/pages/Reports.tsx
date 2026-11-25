@@ -5,13 +5,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { DateRangePicker } from '../components/DateRangePicker';
 
-// Technician profile images
-const technicianImages = {
-  michaelChen: 'https://images.unsplash.com/photo-1701463206030-fd8a77b61698?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBhc2lhbiUyMG1hbGUlMjBoZWFkc2hvdHxlbnwxfHx8fDE3NzE0NDU4NjF8MA&ixlib=rb-4.1.0&q=80&w=1080',
-  sarahJohnson: 'https://images.unsplash.com/photo-1569272059869-efe38db7e2a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBmZW1hbGUlMjBoZWFkc2hvdCUyMGJsb25kZXxlbnwxfHx8fDE3NzE0NDU4NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
-  davidMartinez: 'https://images.unsplash.com/photo-1563107197-df8cd4348c5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoaXNwYW5pYyUyMG1hbGUlMjBoZWFkc2hvdHxlbnwxfHx8fDE3NzE0NDU4NjF8MA&ixlib=rb-4.1.0&q=80&w=1080',
-  emmaWilliams: 'https://images.unsplash.com/photo-1573497491207-618cc224f243?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBhZnJpY2FuJTIwYW1lcmljYW4lMjBmZW1hbGUlMjBoZWFkc2hvdHxlbnwxfHx8fDE3NzE0NDU4NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080'
-};
+import { technicianImages, technicianKpis } from '../data/teamReportData';
 
 // Mock data for different payment types
 const creditCardPayments = [
@@ -209,7 +203,7 @@ export function Reports() {
                 <div className="rounded-t-lg cursor-pointer transition-opacity hover:opacity-90" style={{ height: '160px', backgroundColor: '#f16a6a' }}></div>
                 {/* Tooltip */}
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#051046] text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                  32 jobs
+                  {technicianKpis.michaelChen.jobs} jobs
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#051046]"></div>
                 </div>
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
@@ -231,7 +225,7 @@ export function Reports() {
                 <div className="rounded-t-lg cursor-pointer transition-opacity hover:opacity-90" style={{ height: '80px', backgroundColor: '#f0a041' }}></div>
                 {/* Tooltip */}
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#051046] text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                  16 jobs
+                  {technicianKpis.sarahJohnson.jobs} jobs
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#051046]"></div>
                 </div>
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
@@ -253,7 +247,7 @@ export function Reports() {
                 <div className="rounded-t-lg cursor-pointer transition-opacity hover:opacity-90" style={{ height: '155px', backgroundColor: '#f16a6a' }}></div>
                 {/* Tooltip */}
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#051046] text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                  31 jobs
+                  {technicianKpis.davidMartinez.jobs} jobs
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#051046]"></div>
                 </div>
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
@@ -275,7 +269,7 @@ export function Reports() {
                 <div className="rounded-t-lg cursor-pointer transition-opacity hover:opacity-90" style={{ height: '18px', backgroundColor: '#b9df10' }}></div>
                 {/* Tooltip */}
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#051046] text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                  4 jobs
+                  {technicianKpis.emmaWilliams.jobs} jobs
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#051046]"></div>
                 </div>
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
@@ -409,7 +403,7 @@ export function Reports() {
                 <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b9df10' }}>
                   <Smile className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-sm font-medium text-[#051046]">90%</span>
+                <span className="text-sm font-medium text-[#051046]">{technicianKpis.michaelChen.satisfaction}%</span>
               </div>
             </div>
             
@@ -420,7 +414,7 @@ export function Reports() {
                 <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b9df10' }}>
                   <Smile className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-sm font-medium text-[#051046]">84%</span>
+                <span className="text-sm font-medium text-[#051046]">{technicianKpis.sarahJohnson.satisfaction}%</span>
               </div>
             </div>
             
@@ -431,7 +425,7 @@ export function Reports() {
                 <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b9df10' }}>
                   <Smile className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-sm font-medium text-[#051046]">95%</span>
+                <span className="text-sm font-medium text-[#051046]">{technicianKpis.davidMartinez.satisfaction}%</span>
               </div>
             </div>
             
@@ -442,7 +436,7 @@ export function Reports() {
                 <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f16a6a' }}>
                   <Meh className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-sm font-medium text-[#051046]">0%</span>
+                <span className="text-sm font-medium text-[#051046]">{technicianKpis.emmaWilliams.satisfaction}%</span>
               </div>
             </div>
           </div>
@@ -567,9 +561,9 @@ export function Reports() {
             </div>
             <div className="flex-1 flex items-center gap-2">
               <div className="flex-1 bg-gray-100 h-8 overflow-hidden" style={{ borderRadius: '8px' }}>
-                <div className="bg-gray-300 h-full" style={{ width: '0%', borderRadius: '8px' }}></div>
+                <div className="bg-gray-300 h-full" style={{ width: technicianKpis.emmaWilliams.lateArrival + '%', borderRadius: '8px' }}></div>
               </div>
-              <span className="text-sm font-medium text-[#051046] w-12 text-right">0%</span>
+              <span className="text-sm font-medium text-[#051046] w-12 text-right">{technicianKpis.emmaWilliams.lateArrival}%</span>
             </div>
           </div>
 
@@ -587,9 +581,9 @@ export function Reports() {
             </div>
             <div className="flex-1 flex items-center gap-2">
               <div className="flex-1 bg-gray-100 h-8 overflow-hidden" style={{ borderRadius: '8px' }}>
-                <div className="h-full" style={{ width: '50%', backgroundColor: '#f16a6a', borderRadius: '8px' }}></div>
+                <div className="h-full" style={{ width: technicianKpis.davidMartinez.lateArrival + '%', backgroundColor: '#f16a6a', borderRadius: '8px' }}></div>
               </div>
-              <span className="text-sm font-medium text-[#051046] w-12 text-right">50%</span>
+              <span className="text-sm font-medium text-[#051046] w-12 text-right">{technicianKpis.davidMartinez.lateArrival}%</span>
             </div>
           </div>
 
@@ -607,9 +601,9 @@ export function Reports() {
             </div>
             <div className="flex-1 flex items-center gap-2">
               <div className="flex-1 bg-gray-100 h-8 overflow-hidden" style={{ borderRadius: '8px' }}>
-                <div className="h-full" style={{ width: '35%', backgroundColor: '#f16a6a', borderRadius: '8px' }}></div>
+                <div className="h-full" style={{ width: technicianKpis.sarahJohnson.lateArrival + '%', backgroundColor: '#f16a6a', borderRadius: '8px' }}></div>
               </div>
-              <span className="text-sm font-medium text-[#051046] w-12 text-right">35%</span>
+              <span className="text-sm font-medium text-[#051046] w-12 text-right">{technicianKpis.sarahJohnson.lateArrival}%</span>
             </div>
           </div>
 
@@ -627,9 +621,9 @@ export function Reports() {
             </div>
             <div className="flex-1 flex items-center gap-2">
               <div className="flex-1 bg-gray-100 h-8 overflow-hidden" style={{ borderRadius: '8px' }}>
-                <div className="h-full" style={{ width: '25%', backgroundColor: '#f16a6a', borderRadius: '8px' }}></div>
+                <div className="h-full" style={{ width: technicianKpis.michaelChen.lateArrival + '%', backgroundColor: '#f16a6a', borderRadius: '8px' }}></div>
               </div>
-              <span className="text-sm font-medium text-[#051046] w-12 text-right">25%</span>
+              <span className="text-sm font-medium text-[#051046] w-12 text-right">{technicianKpis.michaelChen.lateArrival}%</span>
             </div>
           </div>
         </div>

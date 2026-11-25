@@ -14,6 +14,7 @@ import { ReportPage } from "./pages/ReportPage";
 import { Reports } from "./pages/Reports";
 import { InventoryPage } from "./pages/InventoryPage";
 import { TeamPage } from "./pages/TeamPage";
+import { TopTeamListPage } from "./pages/TopTeamListPage";
 import { TeamProfilePage } from "./pages/TeamProfilePage";
 import { KlervoAIPage } from "./pages/KlervoAIPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -40,6 +41,7 @@ function NotFoundPage() {
 
 export const router = createHashRouter([
   { path: "/staff-app", Component: StaffAppPage },
+  { path: "/admin/team/top-team-list", Component: TopTeamListPage },
   { path: "/work-schedule", loader: () => redirect("/admin/settings?tab=customization&section=work-schedule") },
   {
     path: "/",

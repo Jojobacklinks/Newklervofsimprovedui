@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Search, Edit2, Trash2, Plus, X, Info, User } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { Search, Edit2, Trash2, Plus, X, Info, User, ArrowDown, ArrowDownUp, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 
 interface TeamMember {
   id: string;
@@ -23,10 +23,19 @@ interface TeamMember {
   };
 }
 
+type SortColumn = 'fullName' | 'joinDate' | 'birthday';
+const sortLabels: Record<SortColumn, string> = {
+  fullName: 'Full Name',
+  joinDate: 'Join Date',
+  birthday: 'Birthday',
+};
+
 export function TeamPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState('no-sorting');
+  const [sort, setSort] = useState<{ column: SortColumn; ascending: boolean } | null>(null);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showEditMemberModal, setShowEditMemberModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -40,6 +49,7 @@ export function TeamPage() {
     const today = new Date();
     const [month, day, year] = birthday.split('/').map(Number);
     const birthDate = new Date(year, month - 1, day);
+    if (birthDate.getFullYear() !== year || birthDate.getMonth() !== month - 1 || birthDate.getDate() !== day) return null;
     const nextBirthday = new Date(today.getFullYear(), month - 1, day);
     
     // If birthday already passed this year, use next year
@@ -133,163 +143,141 @@ export function TeamPage() {
 
   const selectedMember = teamMembers.find(m => m.id === selectedMemberId);
 
+  const query = searchTerm.trim().toLowerCase();
+  const filteredMembers = teamMembers.filter(member =>
+    member.fullName.toLowerCase().includes(query) || member.email.toLowerCase().includes(query)
+  );
+  if (sort) {
+    filteredMembers.sort((first, second) => {
+      if (sort.column === 'fullName') {
+        return first.fullName.localeCompare(second.fullName) * (sort.ascending ? 1 : -1);
+      }
+      const firstDate = Date.parse(first[sort.column] ?? '');
+      const secondDate = Date.parse(second[sort.column] ?? '');
+      if (Number.isNaN(firstDate)) return Number.isNaN(secondDate) ? 0 : 1;
+      if (Number.isNaN(secondDate)) return -1;
+      return (firstDate - secondDate) * (sort.ascending ? 1 : -1);
+    });
+  }
+  const pageCount = Math.max(1, Math.ceil(filteredMembers.length / rowsPerPage));
+  const currentPage = Math.min(page, pageCount);
+  const firstIndex = (currentPage - 1) * rowsPerPage;
+  const visibleMembers = filteredMembers.slice(firstIndex, firstIndex + rowsPerPage);
+  const headingClass = 'whitespace-nowrap px-4 py-4 text-left text-xs font-semibold uppercase text-[#051046]';
+  const cellClass = 'h-[76px] whitespace-nowrap px-4 py-3 text-sm text-[#051046]';
+  const cardClass = 'rounded-[20px] border border-[#dde5f1] bg-white shadow-[0_4px_20px_rgba(5,16,70,0.04)]';
+
+  function sortHeading(column: SortColumn) {
+    const direction = sort?.column === column ? sort.ascending ? 'ascending' : 'descending' : 'none';
+    const Icon = direction === 'ascending' ? ArrowUp : direction === 'descending' ? ArrowDown : ArrowDownUp;
+    return (
+      <th scope="col" className={headingClass} aria-sort={direction}>
+        <button type="button" className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase hover:text-[#6242c5]"
+          onClick={() => {
+            setSort({ column, ascending: sort?.column !== column || !sort.ascending });
+            setPage(1);
+          }}>
+          {sortLabels[column]}<Icon className="size-3 text-gray-400" aria-hidden="true" />
+        </button>
+      </th>
+    );
+  }
+
   return (
-    <div className="p-4 md:p-8">
-      <div className="bg-white rounded-[20px] border border-[#e2e8f0] p-4 md:p-6" style={{ boxShadow: 'rgba(226, 232, 240, 0.5) 0px 2px 16px 2px' }}>
-        {/* Search and Filter Bar */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          {/* Search Input */}
-          <div className="relative w-full md:w-[180px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] transition-colors"
-              style={{ color: '#051046' }}
-            />
-          </div>
-
-          {/* Sort Dropdown */}
-          <div className="w-full md:w-48">
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#e8e8e8] rounded-[15px] focus:outline-none focus:border-[#9473ff] transition-colors"
-              style={{ color: '#051046' }}
-            >
-              <option value="no-sorting">No sorting</option>
-              <option value="name-asc">Name (A-Z)</option>
-              <option value="name-desc">Name (Z-A)</option>
-              <option value="date-newest">Newest First</option>
-              <option value="date-oldest">Oldest First</option>
-            </select>
-          </div>
-
-          {/* Add Member Button */}
-          <button
-            onClick={() => setShowAddMemberModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-[32px] transition-all whitespace-nowrap font-medium hover:shadow-lg md:ml-auto"
-            style={{ backgroundColor: '#9473ff' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-[#e5e8f8] text-[#e6e9f9] text-[#eaedfb] text-[#eef0fe] text-[#f9faff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff] text-[#ffffff]">Add member</span>
-          </button>
+    <div className="min-w-0 space-y-6 bg-[#f6f9fa] p-[18px]">
+      <div className={cardClass + ' flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-6'}>
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+          <input
+            type="search"
+            aria-label="Search team members"
+            placeholder="Search team members..."
+            value={searchTerm}
+            onChange={event => { setSearchTerm(event.target.value); setPage(1); }}
+            className="h-11 w-full rounded-[15px] border border-[#e5e5e5] pl-9 pr-4 text-sm text-[#051046] placeholder:text-gray-400 focus:border-[#9473ff] focus:outline-none"
+          />
         </div>
+        <Link to="/admin/team/top-team-list" className="shrink-0 self-start whitespace-nowrap text-sm font-semibold text-[#9473ff] hover:underline sm:self-auto">
+          Top Team List
+        </Link>
+        <span className="whitespace-nowrap text-sm text-slate-500">{teamMembers.length} of 5 users</span>
+        <button
+          type="button"
+          onClick={() => setShowAddMemberModal(true)}
+          className="inline-flex h-11 shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-[#9473ff] px-6 text-sm font-semibold text-white hover:bg-[#7f5fd9]"
+        >
+          <Plus className="size-4" aria-hidden="true" /> Add member
+        </button>
+      </div>
 
-        {/* Desktop Table View */}
-        <div className="hidden lg:block overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">Full Name</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">Email</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">Join Date</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">Birthday</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">User Type</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">Register Status</th>
-                <th className="text-right py-3 px-4 text-xs font-medium text-[#6a7282] uppercase tracking-wider">Actions</th>
+      <div className={cardClass + ' overflow-hidden'}>
+        <div className="hidden overflow-x-auto lg:block">
+          <table className="w-full min-w-[960px]">
+            <colgroup>
+              <col className="w-[15.5%]" />
+              <col className="w-[23%]" />
+              <col className="w-[11%]" />
+              <col className="w-[15.5%]" />
+              <col className="w-[9%]" />
+              <col />
+              <col />
+            </colgroup>
+            <thead className="border-b border-[#d6dfed]">
+              <tr>
+                {sortHeading('fullName')}
+                <th scope="col" className={headingClass}>Email</th>
+                {sortHeading('joinDate')}
+                {sortHeading('birthday')}
+                <th scope="col" className={headingClass}>User Type</th>
+                <th scope="col" className={headingClass}>Register Status</th>
+                <th scope="col" className={headingClass + ' text-right'}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {teamMembers.map((member) => {
-                const birthdayInfo = getBirthdayInfo(member.birthday);
-                return (
-                <tr 
-                  key={member.id} 
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => handleViewDetails(member.id)}
-                >
-                  <td className="py-4 px-4" style={{ color: '#051046' }}>{member.fullName}</td>
-                  <td className="py-4 px-4" style={{ color: '#051046' }}>{member.email}</td>
-                  <td className="py-4 px-4" style={{ color: '#051046' }}>{member.joinDate}</td>
-                  <td className="py-4 px-4" style={{ color: '#051046' }}>
-                    {birthdayInfo ? (
-                      <div className="text-sm">
-                        <div className="font-medium">{birthdayInfo.birthdayDisplay}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">Going to be {birthdayInfo.age} in {birthdayInfo.daysUntil} days</div>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">—</span>
-                    )}
+              {visibleMembers.map(member => (
+                <tr key={member.id} className="cursor-pointer border-b border-[#dde5f1] last:border-b-0 hover:bg-slate-50" onClick={() => handleViewDetails(member.id)}>
+                  <td className={cellClass + ' font-medium'}>
+                    <button type="button" className="text-left font-medium hover:underline" onClick={event => { event.stopPropagation(); handleViewDetails(member.id); }}>
+                      {member.fullName}
+                    </button>
                   </td>
-                  <td className="py-4 px-4" style={{ color: '#051046' }}>{member.userType}</td>
-                  <td className="py-4 px-4">
+                  <td className={cellClass}>{member.email}</td>
+                  <td className={cellClass}>{member.joinDate}</td>
+                  <td className={cellClass + ' font-medium'}>{getBirthdayInfo(member.birthday)?.birthdayDisplay ?? '—'}</td>
+                  <td className={cellClass}>{member.userType}</td>
+                  <td className={cellClass}>
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: member.isRegistered ? '#10b981' : '#ef4444' }}
-                      />
-                      <span style={{ color: '#051046' }}>
-                        {member.isRegistered ? 'Registered' : 'Not registered'}
-                      </span>
+                      <span aria-hidden="true" className={'size-2 rounded-full ' + (member.isRegistered ? 'bg-[#b9df10]' : 'bg-red-400')} />
+                      {member.isRegistered ? 'Registered' : 'Not registered'}
                     </div>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center justify-end gap-3" onClick={(e) => e.stopPropagation()}>
+                  <td className={cellClass} onClick={event => event.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-2">
                       {!member.isRegistered && (
-                        <div className="relative inline-block">
-                          <button
-                            onClick={() => handleResendEmail(member.id)}
-                            className="text-sm font-medium px-4 py-1.5 border rounded-[32px] transition-all flex items-center gap-2 group"
-                            style={{ 
-                              borderColor: '#e2e8f0', 
-                              color: '#051046',
-                              backgroundColor: '#ffffff'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = '#ffffff';
-                            }}
-                          >
-                            <div className="relative">
-                              <Info className="w-3.5 h-3.5 text-gray-500" />
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                                Resend invitation email to this team member
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            </div>
-                            <span>Resend Email</span>
-                          </button>
-                        </div>
+                        <button type="button" className="rounded-full border border-[#dde5f1] px-2 py-1 text-xs hover:bg-slate-50" onClick={() => handleResendEmail(member.id)}>
+                          Resend Email
+                        </button>
                       )}
-                      <button
-                        onClick={() => navigate(`/admin/team/${member.id}`)}
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
-                        title="View Profile"
-                      >
-                        <User className="w-4 h-4" style={{ color: '#8a8a8a' }} />
+                      <button type="button" onClick={() => navigate(`/admin/team/${member.id}`)} className="rounded-md p-1.5 text-gray-400 hover:bg-slate-100" aria-label={`View profile for ${member.fullName}`}>
+                        <User className="size-4" aria-hidden="true" />
                       </button>
-                      <button
-                        onClick={() => handleEditMember(member.id)}
-                        className="text-[#9473ff] hover:text-[#7f5fd9] transition-colors"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-4 h-4" />
+                      <button type="button" onClick={() => handleEditMember(member.id)} className="rounded-md p-1.5 text-[#9473ff] hover:bg-purple-50" aria-label={`Edit ${member.fullName}`}>
+                        <Edit2 className="size-4" aria-hidden="true" />
                       </button>
-                      <button
-                        onClick={() => handleDeleteClick(member.id)}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
+                      <button type="button" onClick={() => handleDeleteClick(member.id)} className="rounded-md p-1.5 text-red-500 hover:bg-red-50" aria-label={`Delete ${member.fullName}`}>
+                        <Trash2 className="size-4" aria-hidden="true" />
                       </button>
                     </div>
                   </td>
                 </tr>
-              )})}
+              ))}
             </tbody>
           </table>
         </div>
 
         {/* Mobile/Tablet Card View */}
-        <div className="lg:hidden space-y-4">
-          {teamMembers.map((member) => {
+        <div className="space-y-4 p-4 lg:hidden empty:hidden">
+          {visibleMembers.map((member) => {
             const birthdayInfo = getBirthdayInfo(member.birthday);
             return (
             <div
@@ -391,21 +379,29 @@ export function TeamPage() {
           )})}
         </div>
 
-        {/* Pagination */}
-        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-600">
-            Showing 1 to {teamMembers.length} of {teamMembers.length} entries
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="w-8 h-8 flex items-center justify-center rounded-[10px] text-white transition-colors"
-              style={{ backgroundColor: '#9473ff' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7f5fd9'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9473ff'}
-            >
-              1
-            </button>
+        {visibleMembers.length === 0 && <p role="status" className="px-6 py-8 text-center text-sm text-slate-500">No team members found.</p>}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#dde5f1] px-4 py-4 sm:px-6">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <span aria-live="polite">{visibleMembers.length ? firstIndex + 1 : 0}–{firstIndex + visibleMembers.length} / {filteredMembers.length}</span>
+            <label className="flex items-center gap-2">
+              Rows per page
+              <select value={rowsPerPage} onChange={event => { setRowsPerPage(Number(event.target.value)); setPage(1); }}
+                className="h-9 rounded-full border border-[#e5e5e5] bg-white px-3 text-sm">
+                {[5, 10, 25, 50].map(size => <option key={size} value={size}>{size}</option>)}
+              </select>
+            </label>
           </div>
+          <nav aria-label="Team member pages" className="flex items-center gap-2">
+            <button type="button" aria-label="Previous page" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}
+              className="grid size-8 place-items-center rounded-full border border-[#dde5f1] text-slate-500 hover:bg-slate-50 disabled:opacity-50">
+              <ChevronLeft className="size-4" aria-hidden="true" />
+            </button>
+            <span aria-current="page" aria-label={'Page ' + currentPage} className="grid size-8 place-items-center rounded-full bg-[#9473ff] text-sm text-white">{currentPage}</span>
+            <button type="button" aria-label="Next page" disabled={currentPage >= pageCount} onClick={() => setPage(currentPage + 1)}
+              className="grid size-8 place-items-center rounded-full border border-[#dde5f1] text-slate-500 hover:bg-slate-50 disabled:opacity-50">
+              <ChevronRight className="size-4" aria-hidden="true" />
+            </button>
+          </nav>
         </div>
       </div>
 
@@ -415,7 +411,7 @@ export function TeamPage() {
           onClose={() => setShowAddMemberModal(false)} 
           onSave={(newMember) => {
             const member: TeamMember = {
-              id: String(teamMembers.length + 1),
+              id: crypto.randomUUID(),
               fullName: `${newMember.firstName} ${newMember.lastName}`,
               firstName: newMember.firstName,
               lastName: newMember.lastName,
