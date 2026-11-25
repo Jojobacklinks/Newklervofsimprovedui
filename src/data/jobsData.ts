@@ -13,6 +13,7 @@ export interface Job {
   scheduledStart: string;
   scheduledEnd: string;
   tech: string;
+  additionalTechnicians?: string[];
   address: string;
   jobDescription: string;
   jobSource: string;

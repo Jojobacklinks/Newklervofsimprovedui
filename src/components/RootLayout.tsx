@@ -1,6 +1,7 @@
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Bell, MessageCircle, Settings, LogOut, Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { TutorialVideoButton } from './TutorialVideoButton';
 import { useState, useRef, useEffect } from 'react';
 
 export function RootLayout() {
@@ -106,7 +107,10 @@ export function RootLayout() {
             
             <div>
               <p className="text-sm text-purple-600 mb-1">Hello, John Tom</p>
-              <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">{getPageTitle()}</h1>
+              <div className="flex flex-wrap items-center gap-x-1">
+                <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">{getPageTitle()}</h1>
+                <TutorialVideoButton key={location.pathname} pageTitle={getPageTitle()} />
+              </div>
               <p className="text-sm text-gray-600 mt-1 hidden sm:block">{getPageDescription()}</p>
             </div>
           </div>

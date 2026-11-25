@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { UserCircle, Users, User, LogIn, LayoutGrid, Smartphone } from "lucide-react";
+import { UserCircle, Users, User, LogIn, LayoutGrid, Smartphone, CalendarDays } from "lucide-react";
 
 export function UserRoleViewsPage() {
   const navigate = useNavigate();
@@ -154,7 +154,7 @@ export function UserRoleViewsPage() {
         </div>
 
         {/* Signup/Login and UI Kit Buttons */}
-        <div className="mt-8 flex justify-center gap-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
           <button
             onClick={() => navigate('/signup-login')}
             className="group flex items-center gap-3 bg-white px-8 py-4 rounded-[20px] border border-[#e2e8f0] hover:border-[#9473ff] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(148,115,255,0.25)] transform hover:scale-105"
@@ -179,6 +179,13 @@ export function UserRoleViewsPage() {
             >
               UI Kit
             </span>
+          </button>
+          <button
+            onClick={() => navigate('/admin/settings?tab=customization&section=work-schedule')}
+            className="group flex items-center gap-3 bg-white px-8 py-4 rounded-[20px] border border-[#e2e8f0] hover:border-[#9473ff] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(148,115,255,0.25)] transform hover:scale-105"
+          >
+            <CalendarDays className="w-5 h-5 text-[#9473ff]" />
+            <span className="text-lg font-semibold text-[#9473ff]">Work Schedule</span>
           </button>
         </div>
 

@@ -1,4 +1,4 @@
-import { createHashRouter } from "react-router";
+import { createHashRouter, redirect } from "react-router";
 import { RootLayout } from "./components/RootLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SchedulePage } from "./pages/SchedulePage";
@@ -40,6 +40,7 @@ function NotFoundPage() {
 
 export const router = createHashRouter([
   { path: "/staff-app", Component: StaffAppPage },
+  { path: "/work-schedule", loader: () => redirect("/admin/settings?tab=customization&section=work-schedule") },
   {
     path: "/",
     Component: UserRoleViewsPage,
@@ -81,7 +82,13 @@ export const router = createHashRouter([
       { path: "report", Component: ReportPage },
       { path: "reports", Component: Reports },
       { path: "inventory", Component: InventoryPage },
-      { path: "team", Component: TeamPage },
+      {
+        path: "team",
+        loader: ({ request }) => new URL(request.url).searchParams.get('tab') === 'schedule'
+          ? redirect("/admin/settings?tab=customization&section=work-schedule")
+          : null,
+        Component: TeamPage,
+      },
       { path: "team/:memberId", Component: TeamProfilePage },
       { path: "klervo-ai", Component: KlervoAIPage },
       { path: "settings", Component: SettingsPage },

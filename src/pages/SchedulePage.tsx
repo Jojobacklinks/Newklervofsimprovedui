@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, X, Search, Trash2, ChevronDown } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AddClientModal } from '../components/AddClientModal';
@@ -11,19 +11,13 @@ import { EditAppointmentModal } from '../components/EditAppointmentModal';
 import { DraggableEvent } from '../components/DraggableEvent';
 import { DroppableCalendarCell } from '../components/DroppableCalendarCell';
 import { useJobs } from '../contexts/JobsContext';
+import { readWorkSchedule, technicians, workScheduleStatus } from '../data/workSchedule';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import technicianImage from 'figma:asset/cbddeef0da9c22ff2803da61ea33cfc86cdc2274.png';
 import technicianImage2 from 'figma:asset/050db89ac7a52d74f82346621f599d4978faea46.png';
 
 // Available tags for jobs
 const availableTags = ['Urgent', 'New', 'Quick'];
-
-// Team member busy status colors
-const teamMemberBusyStatus: { [key: string]: string } = {
-  'Mike Bailey': '#b9df10',      // Available (green)
-  'John Tom': '#f0a041',         // Moderate (orange)
-  'Sarah Wilson': '#f16a6a',     // Busy (red)
-  'David Chen': '#f16a6a',       // Busy (red)
-};
 
 // Mock client database for autocomplete
 const mockClientDatabase = [
@@ -76,6 +70,8 @@ interface CalendarEvent {
 
 export function SchedulePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin/');
   const { addJob, jobs, updateJob } = useJobs();
   const [selectedView, setSelectedView] = useState<ViewMode>('month');
   const [popupType, setPopupType] = useState<PopupType>(null);
@@ -88,8 +84,10 @@ export function SchedulePage() {
   const [currentDay, setCurrentDay] = useState(15); // Feb 15, 2026
   
   // Month navigation
-  const [currentMonth, setCurrentMonth] = useState(1); // February 2026 (0-indexed: 0=Jan, 1=Feb, etc.)
+  const [currentMonth, setCurrentMonth] = useState(1);
   const [currentYear, setCurrentYear] = useState(2026);
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(currentYear);
   
   // Add Job Modal state
   const [isAddJobModalOpen, setIsAddJobModalOpen] = useState(false);
@@ -169,6 +167,9 @@ export function SchedulePage() {
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('');
   const [addressInput, setAddressInput] = useState('');
+  const jobStart = `${startDate}T${startTime}`;
+  const jobEnd = `${endDate || startDate}T${endTime}`;
+  const workSchedule = isAddJobModalOpen && isTeamMemberDropdownOpen ? readWorkSchedule() : null;
 
   // Filter inventory based on search
   const filteredInventory = inventoryDatabase.filter(item =>
@@ -206,8 +207,8 @@ export function SchedulePage() {
       { id: '3', type: 'task' as const, title: 'Follow up call', date: 7, time: '2:00pm' },
     ];
     
-    // Convert all jobs to calendar events
-    const jobEvents = jobs.map(job => {
+    const visibleMonth = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-`;
+    const jobEvents = jobs.filter(job => job.scheduledStart.startsWith(visibleMonth)).map(job => {
       const { day, timeStr: startTimeStr } = parseDateTimeLocal(job.scheduledStart);
       const { timeStr: endTimeStr } = parseDateTimeLocal(job.scheduledEnd);
       
@@ -234,7 +235,7 @@ export function SchedulePage() {
     });
     
     return [...staticEvents, ...jobEvents];
-  }, [jobs]);
+  }, [jobs, currentMonth, currentYear]);
 
   // Hover card state for jobs
   const [hoveredJob, setHoveredJob] = useState<CalendarEvent | null>(null);
@@ -797,7 +798,57 @@ export function SchedulePage() {
           </div>
         </div>
 
-        <h3 className="text-base md:text-lg font-medium text-gray-900 w-full sm:w-auto text-center">{getDisplayTitle()}</h3>
+        <div className="w-full sm:w-auto flex justify-center">
+          <Popover open={isMonthPickerOpen} onOpenChange={(open) => {
+            if (open) setPickerYear(currentYear);
+            setIsMonthPickerOpen(open);
+          }}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Choose month and year, currently ${getDisplayTitle()}`}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-base md:text-lg font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9473ff]"
+              >
+                {getDisplayTitle()}
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent aria-label="Choose month and year" className="w-72 rounded-xl bg-white p-3" sideOffset={8}>
+              <div className="flex items-center justify-between mb-3">
+                <button type="button" aria-label="Previous year" onClick={() => setPickerYear(year => year - 1)} className="p-2 rounded-md hover:bg-gray-100">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span aria-live="polite" className="font-medium text-gray-900">{pickerYear}</span>
+                <button type="button" aria-label="Next year" onClick={() => setPickerYear(year => year + 1)} className="p-2 rounded-md hover:bg-gray-100">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {Array.from({ length: 12 }, (_, month) => {
+                  const isSelected = month === currentMonth && pickerYear === currentYear;
+                  return (
+                    <button
+                      key={month}
+                      type="button"
+                      aria-label={`${getMonthName(month)} ${pickerYear}`}
+                      aria-pressed={isSelected}
+                      onClick={() => {
+                        setCurrentMonth(month);
+                        setCurrentYear(pickerYear);
+                        setCurrentDay(1);
+                        setCurrentWeekStart(1);
+                        setIsMonthPickerOpen(false);
+                      }}
+                      className={`rounded-lg px-2 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9473ff] ${isSelected ? 'bg-[#9473ff] text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                      {getMonthName(month).substring(0, 3)}
+                    </button>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
 
         <div className="flex items-center gap-3 md:gap-4 w-full sm:w-auto justify-between sm:justify-end">
           <div className="flex bg-white border border-gray-300 rounded overflow-hidden">
@@ -1864,61 +1915,13 @@ export function SchedulePage() {
                           onChange={(e) => setStartDate(e.target.value)}
                           className="px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                         />
-                        <select
+                        <input
+                          type="time"
+                          aria-label="Job start time"
                           value={startTime}
                           onChange={(e) => setStartTime(e.target.value)}
                           className="px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
-                        >
-                          <option value="">Select time...</option>
-                          <option value="12:00 AM">12:00 AM</option>
-                          <option value="12:30 AM">12:30 AM</option>
-                          <option value="1:00 AM">1:00 AM</option>
-                          <option value="1:30 AM">1:30 AM</option>
-                          <option value="2:00 AM">2:00 AM</option>
-                          <option value="2:30 AM">2:30 AM</option>
-                          <option value="3:00 AM">3:00 AM</option>
-                          <option value="3:30 AM">3:30 AM</option>
-                          <option value="4:00 AM">4:00 AM</option>
-                          <option value="4:30 AM">4:30 AM</option>
-                          <option value="5:00 AM">5:00 AM</option>
-                          <option value="5:30 AM">5:30 AM</option>
-                          <option value="6:00 AM">6:00 AM</option>
-                          <option value="6:30 AM">6:30 AM</option>
-                          <option value="7:00 AM">7:00 AM</option>
-                          <option value="7:30 AM">7:30 AM</option>
-                          <option value="8:00 AM">8:00 AM</option>
-                          <option value="8:30 AM">8:30 AM</option>
-                          <option value="9:00 AM">9:00 AM</option>
-                          <option value="9:30 AM">9:30 AM</option>
-                          <option value="10:00 AM">10:00 AM</option>
-                          <option value="10:30 AM">10:30 AM</option>
-                          <option value="11:00 AM">11:00 AM</option>
-                          <option value="11:30 AM">11:30 AM</option>
-                          <option value="12:00 PM">12:00 PM</option>
-                          <option value="12:30 PM">12:30 PM</option>
-                          <option value="1:00 PM">1:00 PM</option>
-                          <option value="1:30 PM">1:30 PM</option>
-                          <option value="2:00 PM">2:00 PM</option>
-                          <option value="2:30 PM">2:30 PM</option>
-                          <option value="3:00 PM">3:00 PM</option>
-                          <option value="3:30 PM">3:30 PM</option>
-                          <option value="4:00 PM">4:00 PM</option>
-                          <option value="4:30 PM">4:30 PM</option>
-                          <option value="5:00 PM">5:00 PM</option>
-                          <option value="5:30 PM">5:30 PM</option>
-                          <option value="6:00 PM">6:00 PM</option>
-                          <option value="6:30 PM">6:30 PM</option>
-                          <option value="7:00 PM">7:00 PM</option>
-                          <option value="7:30 PM">7:30 PM</option>
-                          <option value="8:00 PM">8:00 PM</option>
-                          <option value="8:30 PM">8:30 PM</option>
-                          <option value="9:00 PM">9:00 PM</option>
-                          <option value="9:30 PM">9:30 PM</option>
-                          <option value="10:00 PM">10:00 PM</option>
-                          <option value="10:30 PM">10:30 PM</option>
-                          <option value="11:00 PM">11:00 PM</option>
-                          <option value="11:30 PM">11:30 PM</option>
-                        </select>
+                        />
                       </div>
                     </div>
                     <div>
@@ -1931,61 +1934,13 @@ export function SchedulePage() {
                           onChange={(e) => setEndDate(e.target.value)}
                           className="px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
                         />
-                        <select
+                        <input
+                          type="time"
+                          aria-label="Job end time"
                           value={endTime}
                           onChange={(e) => setEndTime(e.target.value)}
                           className="px-4 py-2 border border-[#e8e8e8] rounded-[15px] text-sm text-[#051046] focus:outline-none focus:ring-2 focus:ring-purple-600"
-                        >
-                          <option value="">Select time...</option>
-                          <option value="12:00 AM">12:00 AM</option>
-                          <option value="12:30 AM">12:30 AM</option>
-                          <option value="1:00 AM">1:00 AM</option>
-                          <option value="1:30 AM">1:30 AM</option>
-                          <option value="2:00 AM">2:00 AM</option>
-                          <option value="2:30 AM">2:30 AM</option>
-                          <option value="3:00 AM">3:00 AM</option>
-                          <option value="3:30 AM">3:30 AM</option>
-                          <option value="4:00 AM">4:00 AM</option>
-                          <option value="4:30 AM">4:30 AM</option>
-                          <option value="5:00 AM">5:00 AM</option>
-                          <option value="5:30 AM">5:30 AM</option>
-                          <option value="6:00 AM">6:00 AM</option>
-                          <option value="6:30 AM">6:30 AM</option>
-                          <option value="7:00 AM">7:00 AM</option>
-                          <option value="7:30 AM">7:30 AM</option>
-                          <option value="8:00 AM">8:00 AM</option>
-                          <option value="8:30 AM">8:30 AM</option>
-                          <option value="9:00 AM">9:00 AM</option>
-                          <option value="9:30 AM">9:30 AM</option>
-                          <option value="10:00 AM">10:00 AM</option>
-                          <option value="10:30 AM">10:30 AM</option>
-                          <option value="11:00 AM">11:00 AM</option>
-                          <option value="11:30 AM">11:30 AM</option>
-                          <option value="12:00 PM">12:00 PM</option>
-                          <option value="12:30 PM">12:30 PM</option>
-                          <option value="1:00 PM">1:00 PM</option>
-                          <option value="1:30 PM">1:30 PM</option>
-                          <option value="2:00 PM">2:00 PM</option>
-                          <option value="2:30 PM">2:30 PM</option>
-                          <option value="3:00 PM">3:00 PM</option>
-                          <option value="3:30 PM">3:30 PM</option>
-                          <option value="4:00 PM">4:00 PM</option>
-                          <option value="4:30 PM">4:30 PM</option>
-                          <option value="5:00 PM">5:00 PM</option>
-                          <option value="5:30 PM">5:30 PM</option>
-                          <option value="6:00 PM">6:00 PM</option>
-                          <option value="6:30 PM">6:30 PM</option>
-                          <option value="7:00 PM">7:00 PM</option>
-                          <option value="7:30 PM">7:30 PM</option>
-                          <option value="8:00 PM">8:00 PM</option>
-                          <option value="8:30 PM">8:30 PM</option>
-                          <option value="9:00 PM">9:00 PM</option>
-                          <option value="9:30 PM">9:30 PM</option>
-                          <option value="10:00 PM">10:00 PM</option>
-                          <option value="10:30 PM">10:30 PM</option>
-                          <option value="11:00 PM">11:00 PM</option>
-                          <option value="11:30 PM">11:30 PM</option>
-                        </select>
+                        />
                       </div>
                     </div>
                     <p className="text-xs text-red-500">
@@ -1996,7 +1951,10 @@ export function SchedulePage() {
 
                 {/* Assign Team Members */}
                 <div>
-                  <label className="block text-sm font-semibold text-[#051046] mb-2">Assign Team Members</label>
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <label className="text-sm font-semibold text-[#051046]">Assign Team Members</label>
+                    {isAdmin && <Link to="/admin/settings?tab=customization&section=work-schedule" className="text-sm font-medium text-[#6242c5]">Work Schedule</Link>}
+                  </div>
                   <div className="relative">
                     <div 
                       onClick={() => setIsTeamMemberDropdownOpen(!isTeamMemberDropdownOpen)}
@@ -2021,34 +1979,27 @@ export function SchedulePage() {
                     </div>
                     {isTeamMemberDropdownOpen && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e8e8e8] rounded-[15px] shadow-lg z-10 max-h-60 overflow-y-auto">
-                        {['Mike Bailey', 'John Tom', 'Sarah Wilson', 'David Chen']
+                        {technicians
                           .filter(member => !selectedTeamMembers.includes(member))
-                          .map((member, index) => {
-                            // Mock distance data (in real app, this would be calculated from tech's current location)
-                            const distanceInfo: { [key: string]: string } = {
-                              'Mike Bailey': '5 min away',
-                              'John Tom': '24 min away',
-                              'Sarah Wilson': '12 min away',
-                              'David Chen': 'Double Booked'
-                            };
-                            
+                          .map(member => {
+                            const status = workSchedule && workScheduleStatus(workSchedule, member, jobStart, jobEnd);
                             return (
                               <button
-                                key={index}
+                                key={member}
                                 onClick={() => {
                                   setSelectedTeamMembers([...selectedTeamMembers, member]);
                                   setIsTeamMemberDropdownOpen(false);
                                 }}
                                 className="w-full text-left px-4 py-2.5 text-sm text-[#051046] hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center gap-3"
                               >
-                                <span className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: teamMemberBusyStatus[member] }}></span>
                                 <span className="flex items-center gap-2 flex-1">
-                                  {member} - {distanceInfo[member]}
+                                  {member}
+                                  <span className={status === 'Outside work schedule' ? 'text-amber-800' : 'text-slate-600'}>{status}</span>
                                 </span>
                               </button>
                             );
                           })}
-                        {selectedTeamMembers.length === 4 && (
+                        {selectedTeamMembers.length === technicians.length && (
                           <div className="px-4 py-2.5 text-sm text-gray-400 text-center">
                             All team members selected
                           </div>
@@ -2147,29 +2098,10 @@ export function SchedulePage() {
                       return;
                     }
                     
-                    // Helper: convert "9:00 AM" / "1:30 PM" → "09:00" / "13:30" for valid ISO strings
-                    const parseTimeToISO = (timeStr: string): string => {
-                      if (!timeStr) return '00:00';
-                      const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-                      if (!match) return '00:00';
-                      let hours = parseInt(match[1], 10);
-                      const minutes = match[2];
-                      const period = match[3].toUpperCase();
-                      if (period === 'PM' && hours !== 12) hours += 12;
-                      if (period === 'AM' && hours === 12) hours = 0;
-                      return `${hours.toString().padStart(2, '0')}:${minutes}`;
-                    };
 
-                    // Build valid ISO datetime strings (e.g. "2026-02-15T09:00")
-                    const startISO = `${startDate}T${parseTimeToISO(startTime)}`;
-                    const endISO = endDate
-                      ? `${endDate}T${parseTimeToISO(endTime || startTime)}`
-                      : `${startDate}T${parseTimeToISO(endTime || startTime)}`;
+                    const startISO = `${startDate}T${startTime || '00:00'}`;
+                    const endISO = `${endDate || startDate}T${endTime || startTime || '00:00'}`;
 
-                    // Parse day directly from date string to avoid UTC offset issues
-                    const [, , dayStr] = startDate.split('-');
-                    const day = parseInt(dayStr, 10);
-                    
                     // Generate unique job ID
                     const jobId = `job-${Date.now()}`;
                     
@@ -2189,10 +2121,11 @@ export function SchedulePage() {
                       jobType: jobType || 'Service',
                       jobStatus: 'Scheduled' as const,
                       duration: duration,
-                      scheduled: `${startDate} ${startTime || '12:00 AM'}`,
+                      scheduled: `${startDate} ${startTime || '00:00'}`,
                       scheduledStart: startISO,
                       scheduledEnd: endISO,
                       tech: selectedTeamMembers.length > 0 ? selectedTeamMembers[0] : 'Unassigned',
+                      additionalTechnicians: selectedTeamMembers.slice(1),
                       address: jobAddress,
                       jobDescription: jobDescription || 'No description',
                       jobSource: jobSource || 'Schedule',

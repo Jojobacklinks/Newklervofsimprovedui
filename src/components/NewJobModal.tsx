@@ -1,17 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, X, Trash2 } from 'lucide-react';
 import { AddPartOrServiceModal } from './AddPartOrServiceModal';
+import { readWorkSchedule, technicians, workScheduleStatus } from '../data/workSchedule';
+
+const parseTimeToISO = (timeStr: string): string => {
+  if (!timeStr) return '00:00';
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return '00:00';
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const period = match[3].toUpperCase();
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+};
 
 // Available tags
 const availableTags = ['Urgent', 'New', 'Quick'];
-
-// Team member busy status colors
-const teamMemberBusyStatus: { [key: string]: string } = {
-  'Mike Bailey': '#b9df10',      // Available (green)
-  'John Tom': '#f0a041',         // Moderate (orange)
-  'Sarah Wilson': '#f16a6a',     // Busy (red)
-  'David Chen': '#f16a6a',       // Busy (red)
-};
 
 // Mock client database for autocomplete
 const mockClientDatabase = [
@@ -296,19 +301,6 @@ export function NewJobModal({
       return;
     }
 
-    // Helper: convert "9:00 AM" / "1:30 PM" → "09:00" / "13:30" for valid ISO strings
-    const parseTimeToISO = (timeStr: string): string => {
-      if (!timeStr) return '00:00';
-      const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-      if (!match) return '00:00';
-      let hours = parseInt(match[1], 10);
-      const minutes = match[2];
-      const period = match[3].toUpperCase();
-      if (period === 'PM' && hours !== 12) hours += 12;
-      if (period === 'AM' && hours === 12) hours = 0;
-      return `${hours.toString().padStart(2, '0')}:${minutes}`;
-    };
-
     // Build valid ISO datetime strings (e.g. "2026-02-15T09:00")
     const startISO = `${startDate}T${parseTimeToISO(startTime)}`;
     const endISO = endDate
@@ -359,6 +351,10 @@ export function NewJobModal({
   };
 
   if (!isOpen) return null;
+
+  const workSchedule = isTeamMemberDropdownOpen ? readWorkSchedule() : null;
+  const jobStart = startDate + 'T' + (startTime ? parseTimeToISO(startTime) : '');
+  const jobEnd = (endDate || startDate) + 'T' + (endTime ? parseTimeToISO(endTime) : '');
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -910,34 +906,27 @@ export function NewJobModal({
                 </div>
                 {isTeamMemberDropdownOpen && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e8e8e8] rounded-[15px] shadow-lg z-10 max-h-60 overflow-y-auto">
-                    {['Mike Bailey', 'John Tom', 'Sarah Wilson', 'David Chen']
+                    {technicians
                       .filter(member => !selectedTeamMembers.includes(member))
-                      .map((member, index) => {
-                        // Mock distance data (in real app, this would be calculated from tech's current location)
-                        const distanceInfo: { [key: string]: string } = {
-                          'Mike Bailey': '5 min away',
-                          'John Tom': '24 min away',
-                          'Sarah Wilson': '12 min away',
-                          'David Chen': 'Double Booked'
-                        };
-                        
+                      .map(member => {
+                        const status = workSchedule ? workScheduleStatus(workSchedule, member, jobStart, jobEnd) : '';
                         return (
                           <button
-                            key={index}
+                            key={member}
                             onClick={() => {
                               setSelectedTeamMembers([...selectedTeamMembers, member]);
                               setIsTeamMemberDropdownOpen(false);
                             }}
                             className="w-full text-left px-4 py-2.5 text-sm text-[#051046] hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center gap-3"
                           >
-                            <span className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: teamMemberBusyStatus[member] }}></span>
                             <span className="flex items-center gap-2 flex-1">
-                              {member} - {distanceInfo[member]}
+                              {member}
+                              <span className={status === 'Outside work schedule' ? 'text-amber-800' : 'text-slate-600'}>{status}</span>
                             </span>
                           </button>
                         );
                       })}
-                    {selectedTeamMembers.length === 4 && (
+                    {selectedTeamMembers.length === technicians.length && (
                       <div className="px-4 py-2.5 text-sm text-gray-400 text-center">
                         All team members selected
                       </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { StatusLabel, getStatusVariant } from '../components/StatusLabel';
-import { Search, Plus, X, Check, AlertCircle, Info, Calendar, User, Mail, Phone, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Search, Plus, X, Check, AlertCircle, Info, Calendar, User, Mail, Phone, CheckCircle, ArrowLeft, CirclePlay } from 'lucide-react';
 
 export function UIKitPage() {
   const navigate = useNavigate();
@@ -592,6 +592,10 @@ export function UIKitPage() {
             <div className="flex flex-col items-center gap-2 p-4 border border-[#e2e8f0] rounded-[15px]">
               <Calendar className="w-6 h-6 text-[#051046]" />
               <span className="text-xs text-gray-600">Calendar</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 p-4 border border-[#e2e8f0] rounded-[15px]">
+              <CirclePlay size={28.8} className="text-[#9473ff]" aria-hidden="true" />
+              <span className="text-xs text-gray-600">Tutorial</span>
             </div>
             <div className="flex flex-col items-center gap-2 p-4 border border-[#e2e8f0] rounded-[15px]">
               <Mail className="w-6 h-6 text-[#051046]" />

@@ -18,10 +18,6 @@ const sanitizeJobs = (jobs: Job[]): Job[] => {
 const getInitialJobs = (): Job[] => {
   if (typeof window === 'undefined') return sanitizeJobs(mockJobs);
   try {
-    // Clear localStorage to ensure we always use the latest mockJobs
-    // This prevents old cached job data from persisting
-    localStorage.removeItem('customJobs');
-    
     const storedJobs = localStorage.getItem('customJobs');
     const customJobs = storedJobs ? JSON.parse(storedJobs) : [];
     return sanitizeJobs([...mockJobs, ...customJobs]);

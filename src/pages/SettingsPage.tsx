@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import { Settings, CreditCard, Palette, Plug, Upload, Eye, EyeOff, Edit2, Trash2, Plus, Info, Settings2, Tag, Copy, Check } from 'lucide-react';
-import { useLocation } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
+import { WorkSchedulePanel } from '../components/WorkSchedulePanel';
 import userAvatar from 'figma:asset/f42899e907ff2d454cb3bd2c065e1b8acf0167d3.png';
 import companyLogo from 'figma:asset/aca027096500e73cd5bed4fe884cd790206b222e.png';
 import { usePromotions } from '../contexts/PromotionsContext';
@@ -9,7 +10,22 @@ import { usePromotions } from '../contexts/PromotionsContext';
 export function SettingsPage() {
   const location = useLocation();
   const isStaffView = location.pathname.startsWith('/staff');
-  const [activeTab, setActiveTab] = useState(() => !isStaffView && new URLSearchParams(location.search).get('tab') === 'customization' ? 'customization' : 'settings');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab');
+  const activeTab = !isStaffView && (tab === 'customization' || tab === 'integrations') ? tab : 'settings';
+  const scheduleSection = useRef<HTMLDivElement>(null);
+  const showSchedule = activeTab === 'customization' && searchParams.get('section') === 'work-schedule';
+  useEffect(() => {
+    if (showSchedule) scheduleSection.current?.scrollIntoView({ block: 'start' });
+  }, [showSchedule, location.key]);
+
+  function setActiveTab(nextTab: string) {
+    const next = new URLSearchParams(searchParams);
+    next.delete('section');
+    if (nextTab === 'settings') next.delete('tab');
+    else next.set('tab', nextTab);
+    setSearchParams(next);
+  }
   const { promotions, setPromotions } = usePromotions();
   
   // Settings Tab States
@@ -1790,6 +1806,9 @@ export function SettingsPage() {
                   </div>
                 </div>
               </div>
+            </div>
+            <div ref={scheduleSection} className="min-w-0 scroll-mt-4">
+              <WorkSchedulePanel />
             </div>
           </div>
         )}
